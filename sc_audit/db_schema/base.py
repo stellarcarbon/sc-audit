@@ -1,6 +1,6 @@
 from typing import Annotated, Any
 
-from sqlalchemy import Dialect
+from sqlalchemy import Dialect, String
 import sqlalchemy.types as types
 from sqlalchemy.orm import mapped_column
 from sqlalchemy.orm import DeclarativeBase, MappedAsDataclass
@@ -22,6 +22,7 @@ class HexBinary(types.TypeDecorator):
 
 intpk = Annotated[int, mapped_column(primary_key=True)]
 hashpk = Annotated[bytes, mapped_column(HexBinary(length=32), primary_key=True)]
+strkey = Annotated[str, mapped_column(String(56))]
 
 
 class ScBase(MappedAsDataclass, DeclarativeBase):
