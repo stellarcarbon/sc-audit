@@ -1,7 +1,7 @@
 import enum
 
-from sqlalchemy import String
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy import Unicode
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from sc_audit.db_schema.base import ScBase, intpk
 
@@ -21,6 +21,8 @@ class VcsProject(ScBase):
     name: Mapped[str]
     category: Mapped[VcsCategory]
     protocol: Mapped[VcsProtocol]
-    additional_certifications: Mapped[str]
-    region: Mapped[str] = mapped_column(String(128))
-    country: Mapped[str] = mapped_column(String(128))
+    additional_certifications: Mapped[str | None]
+    region: Mapped[str] = mapped_column(Unicode(128))
+    country: Mapped[str] = mapped_column(Unicode(128))
+
+    minted_blocks: Mapped[list["MintedBlock"]] = relationship(back_populates="vcs_project") # type: ignore
