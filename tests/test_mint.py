@@ -22,7 +22,7 @@ class TestMint:
 
     def test_hashes_stored_as_bytes(self, session_with_block, connection, first_block_data):
         # get a cursor from the underlying sqlite3 connection
-        cursor = connection.connection.connection.cursor()
+        cursor = connection.connection.driver_connection.cursor()
         raw_row = cursor.execute(
             str(select(MintedBlock.serial_hash, MintedBlock.transaction_hash))
         ).fetchone()
