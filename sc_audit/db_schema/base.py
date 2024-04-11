@@ -21,7 +21,7 @@ class HexBinary(types.TypeDecorator):
 
 
 intpk = Annotated[int, mapped_column(primary_key=True)]
-hashpk = Annotated[bytes, mapped_column(HexBinary(length=32), primary_key=True)]
+hashpk = Annotated[str, mapped_column(HexBinary(length=32), primary_key=True)]
 strkey = Annotated[str, mapped_column(String(56))]
 
 

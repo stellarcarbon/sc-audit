@@ -18,7 +18,7 @@ class MintedBlock(ScBase):
     __tablename__ = "minted_blocks"
 
     serial_hash: Mapped[hashpk]
-    transaction_hash: Mapped[bytes] = mapped_column(HexBinary(length=32))
+    transaction_hash: Mapped[str] = mapped_column(HexBinary(length=32))
     created_at: Mapped[dt.datetime]
     vcs_project_id: Mapped[int] = mapped_column(ForeignKey("vcs_projects.id"))
     vcs_project: Mapped[VcsProject] = relationship(init=False, back_populates="minted_blocks")
