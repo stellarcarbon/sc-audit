@@ -1,5 +1,5 @@
 import datetime as dt
-import enum
+import typing
 
 from sqlalchemy import ForeignKey, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
@@ -8,9 +8,10 @@ from sc_audit.db_schema.base import HexBinary, ScBase, hashpk
 from sc_audit.db_schema.impact_project import VcsProject
 
 
-class VerraSubAccount(enum.Enum):
-    CPOOL = "CARBON Pool | stellarcarbon.io"
-    CSINK = "CARBON Sink | stellarcarbon.io"
+VerraSubAccount = typing.Literal[
+    "CARBON Pool | stellarcarbon.io", 
+    "CARBON Sink | stellarcarbon.io"
+]
 
 
 class MintedBlock(ScBase):

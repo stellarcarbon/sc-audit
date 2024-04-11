@@ -1,6 +1,6 @@
 import datetime as dt
 from  decimal import Decimal
-import enum
+import typing
 
 from sqlalchemy import ForeignKey, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
@@ -9,9 +9,7 @@ from sc_audit.db_schema.base import ScBase, hashpk, strkey
 from sc_audit.db_schema.impact_project import VcsProject
 
 
-class MemoType(enum.Enum):
-    TEXT = 'text'
-    HASH = 'hash'
+MemoType = typing.Literal['text', 'hash']
 
 
 class SinkingTx(ScBase):

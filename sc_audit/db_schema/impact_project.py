@@ -1,4 +1,4 @@
-import enum
+import typing
 
 from sqlalchemy import Unicode
 from sqlalchemy.orm import Mapped, mapped_column, relationship
@@ -6,12 +6,8 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sc_audit.db_schema.base import ScBase, intpk
 
 
-class VcsCategory(enum.Enum):
-    AFOLU = "Agriculture Forestry and Other Land Use"
-
-
-class VcsProtocol(enum.Enum):
-    VM0015 = "VM0015"
+VcsCategory = typing.Literal["Agriculture Forestry and Other Land Use"]
+VcsProtocol = typing.Literal["VM0015"]
 
 
 class VcsProject(ScBase):
@@ -25,4 +21,4 @@ class VcsProject(ScBase):
     region: Mapped[str] = mapped_column(Unicode(128))
     country: Mapped[str] = mapped_column(Unicode(128))
 
-    minted_blocks: Mapped[list["MintedBlock"]] = relationship(back_populates="vcs_project") # type: ignore
+    minted_blocks: Mapped[list['MintedBlock']] = relationship(back_populates="vcs_project") # type: ignore

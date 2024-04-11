@@ -1,5 +1,5 @@
 import datetime as dt
-import enum
+import typing
 
 from sqlalchemy import ForeignKey, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
@@ -8,8 +8,7 @@ from sc_audit.db_schema.base import ScBase, intpk, strkey
 from sc_audit.db_schema.impact_project import VcsProject
 
 
-class InstrumentType(enum.Enum):
-    VCU = 'VCU'
+InstrumentType = typing.Literal['VCU']
 
 
 class Retirement(ScBase):
