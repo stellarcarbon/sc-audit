@@ -27,6 +27,6 @@ class SinkingTx(ScBase):
     dest_asset_issuer: Mapped[strkey]
     dest_asset_amount: Mapped[Decimal]
     vcs_project_id: Mapped[int] = mapped_column(ForeignKey("vcs_projects.id"))
-    vcs_project: Mapped[VcsProject] = relationship()
+    vcs_project: Mapped[VcsProject] = relationship(init=False)
     memo_type: Mapped[MemoType]
     memo_value: Mapped[str] = mapped_column(String(64))
