@@ -1,3 +1,8 @@
+"""
+Declare carbon sinking DB models.
+
+Author: Alex Olieman <https://keybase.io/alioli>
+"""
 import datetime as dt
 from  decimal import Decimal
 import typing

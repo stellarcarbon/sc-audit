@@ -1,3 +1,8 @@
+"""
+Declare credit retirement DB models.
+
+Author: Alex Olieman <https://keybase.io/alioli>
+"""
 import datetime as dt
 import typing
 

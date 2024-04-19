@@ -1,3 +1,8 @@
+"""
+Declare impact project DB models.
+
+Author: Alex Olieman <https://keybase.io/alioli>
+"""
 import typing
 
 from sqlalchemy import Unicode

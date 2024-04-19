@@ -1,3 +1,8 @@
+"""
+SQLAlchemy Declarative Dataclass setup.
+
+Author: Alex Olieman <https://keybase.io/alioli>
+"""
 from typing import Annotated, Any
 
 from sqlalchemy import Dialect, String

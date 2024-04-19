@@ -1,3 +1,8 @@
+"""
+Declare CARBON issuance DB models.
+
+Author: Alex Olieman <https://keybase.io/alioli>
+"""
 import datetime as dt
 import typing
 
