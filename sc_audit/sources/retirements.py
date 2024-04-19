@@ -6,7 +6,7 @@ Author: Alex Olieman <https://keybase.io/alioli>
 import httpx
 from parsel import Selector
 
-from constants import VERRA_ASSET_SEARCH_URL, VERRA_ASSET_SEARCH_TIMEOUT, VERRA_REPORT_URL
+from sc_audit.constants import VERRA_ASSET_SEARCH_URL, VERRA_ASSET_SEARCH_TIMEOUT
 
 
 default_headers = {

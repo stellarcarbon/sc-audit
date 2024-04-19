@@ -8,10 +8,10 @@ Follow along with our progress:
 
     Database schema and filling from Horizon and the Verra Registry
 
-- [ ] set up a local database
+- [x] set up a local database
 - [ ] load minting transactions from Horizon
 - [ ] load sinking transactions from Horizon
-- [ ] load retirements from Verra
+- [x] load retirements from Verra
 - [ ] test coverage
 
 [Deliverable 2]

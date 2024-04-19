@@ -1,7 +1,7 @@
 import os
 from pathlib import Path
 
-def get_default_db_path(db_name="sc-audit.db") -> Path:
+def get_default_db_path(db_name="sc-audit.sqlite3") -> Path:
     """
     Return the default location of the SQLite DB, as determined by:
 
@@ -21,8 +21,7 @@ def get_default_db_path(db_name="sc-audit.db") -> Path:
         return db_dir / db_name
 
 
-DBAPI_URL: str = os.environ.get('SC_DBAPI_URL', f"sqlite+pysqlite://{get_default_db_path()}")
+DBAPI_URL: str = os.environ.get('SC_DBAPI_URL', f"sqlite+pysqlite:///{get_default_db_path()}")
 
 VERRA_ASSET_SEARCH_URL = "https://registry.verra.org/uiapi/asset/asset/search"
-VERRA_REPORT_URL = "https://registry.verra.org/mymodule/rpt/myRpt.asp"
 VERRA_ASSET_SEARCH_TIMEOUT = 8  # seconds
