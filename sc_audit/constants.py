@@ -1,6 +1,8 @@
 import os
 from pathlib import Path
 
+from stellar_sdk import Asset
+
 def get_default_db_path(db_name="sc-audit.sqlite3") -> Path:
     """
     Return the default location of the SQLite DB, as determined by:
@@ -25,3 +27,8 @@ DBAPI_URL: str = os.environ.get('SC_DBAPI_URL', f"sqlite+pysqlite:///{get_defaul
 
 VERRA_ASSET_SEARCH_URL = "https://registry.verra.org/uiapi/asset/asset/search"
 VERRA_ASSET_SEARCH_TIMEOUT = 8  # seconds
+
+HORIZON_URL: str = os.environ.get('SC_HORIZON_URL',"https://horizon.stellar.org")
+SINK_ISSUER_PUB = "GC7CDWMCWNCY7JYUW5UBEOLNBSTNDKKZSFTHKGZNPPSOXLFYFX3CSINK"
+SINK_ASSET = Asset("CarbonSINK", SINK_ISSUER_PUB)
+FIRST_SINK_CURSOR = 164821723627237376
