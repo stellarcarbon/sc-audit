@@ -3,12 +3,11 @@ Load finalized retirements into the DB.
 
 Author: Alex Olieman <https://keybase.io/alioli>
 """
-
-import datetime
-from typing import Sequence
 from sqlalchemy import select
+
 from sc_audit.db_schema.impact_project import VcsProject
 from sc_audit.db_schema.retirement import Retirement
+from sc_audit.loader.utils import parse_iso_date
 from sc_audit.session_manager import Session
 from sc_audit.sources.retirements import get_retirements_list
 
@@ -60,6 +59,3 @@ def load_retirements(beneficiary_filter: str | None = None):
                         total_vintage_quantity=retirement_item['total_vintage_quantity'],
                     )
                 )
-
-def parse_iso_date(iso_date: str) -> datetime.date:
-    return datetime.datetime.strptime(iso_date, "%Y-%m-%d").date()

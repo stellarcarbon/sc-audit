@@ -27,3 +27,8 @@ class VcsProject(ScBase):
     country: Mapped[str] = mapped_column(Unicode(128))
 
     minted_blocks: Mapped[list['MintedBlock']] = relationship(init=False, back_populates="vcs_project") # type: ignore
+
+
+class UnknownVcsProject(Exception):
+    def __init__(self, msg, vcs_id: int):
+        super().__init__(msg, vcs_id)
