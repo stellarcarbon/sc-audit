@@ -3,6 +3,8 @@ Load finalized retirements into the DB.
 
 Author: Alex Olieman <https://keybase.io/alioli>
 """
+import datetime as dt
+
 from sqlalchemy import select
 
 from sc_audit.db_schema.impact_project import VcsProject
@@ -12,13 +14,13 @@ from sc_audit.session_manager import Session
 from sc_audit.sources.retirements import get_retirements_list
 
 
-def load_retirements(beneficiary_filter: str | None = None):
+def load_retirements(from_date: dt.date | None = None):
     """
     Load all retirements from Verra into the DB.
   
     TODO: add pagination (to support more than 2000 results)
     """
-    retirement_data = get_retirements_list(beneficiary_filter)
+    retirement_data = get_retirements_list(from_date)
 
     with Session.begin() as session:
         existing_ids: set[int] = set(session.scalars(select(Retirement.certificate_id)).all())

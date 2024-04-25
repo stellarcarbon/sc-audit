@@ -3,6 +3,8 @@ Fetch Stellarcarbon retirements from the Verra Registry.
 
 Author: Alex Olieman <https://keybase.io/alioli>
 """
+import datetime as dt
+
 import httpx
 from parsel import Selector
 
@@ -12,18 +14,23 @@ from sc_audit.constants import VERRA_ASSET_SEARCH_URL, VERRA_ASSET_SEARCH_TIMEOU
 default_headers = {
     "accept-encoding": "gzip, deflate, br",
     "accept-language": "en-US,en;q=0.5",
-    "user-agent": "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:121.0) Gecko/20100101 Firefox/121.0",
+    "user-agent": "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:123.0) Gecko/20100101 Firefox/123.0",
 }
 
-def get_retirements_list(address: str | None = None):
+def get_retirements_list(from_date: dt.date | None = None):
     with httpx.Client(headers=default_headers) as client:
+        query_filter = "startswith(retirementDetails,'stellarcarbon')"
+        if from_date:
+            iso_date = dt.datetime(from_date.year, from_date.month, from_date.day).isoformat()
+            query_filter = f"({query_filter} and retireOrCancelDate ge {iso_date}.000Z)"
+
         headers = {
             "accept": "application/json",
             "referer": "https://registry.verra.org/app/search/VCS",
         }
         query_params = {
             "maxResults": 2000,
-            "$filter": "startswith(retirementDetails,'stellarcarbon')",
+            "$filter": query_filter,
             "$count": True,
             "$orderby": "",
             "$skip": 0,
@@ -46,12 +53,6 @@ def get_retirements_list(address: str | None = None):
         rtm['vcu_amount'] 
         for rtm in retirements_data['retirements']
     )
-    if address:
-        retirements_data['retirements'] = [
-            retirement_item
-            for retirement_item in retirements_data['retirements']
-            if retirement_item['retirement_beneficiary'].startswith(address)
-        ]
 
     return {'total_amount_retired': total_amount_retired, **retirements_data}
 
