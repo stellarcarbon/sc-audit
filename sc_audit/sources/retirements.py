@@ -9,16 +9,11 @@ import httpx
 from parsel import Selector
 
 from sc_audit.constants import VERRA_ASSET_SEARCH_URL, VERRA_ASSET_SEARCH_TIMEOUT
+from sc_audit.sources.common import verra_default_headers
 
-
-default_headers = {
-    "accept-encoding": "gzip, deflate, br",
-    "accept-language": "en-US,en;q=0.5",
-    "user-agent": "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:123.0) Gecko/20100101 Firefox/123.0",
-}
 
 def get_retirements_list(from_date: dt.date | None = None):
-    with httpx.Client(headers=default_headers) as client:
+    with httpx.Client(headers=verra_default_headers) as client:
         query_filter = "startswith(retirementDetails,'stellarcarbon')"
         if from_date:
             iso_date = dt.datetime(from_date.year, from_date.month, from_date.day).isoformat()
