@@ -3,6 +3,7 @@ Load sinking transactions into the DB.
 
 Author: Alex Olieman <https://keybase.io/alioli>
 """
+import base64
 from decimal import Decimal
 from typing import Any, Literal
 from sqlalchemy import select
@@ -36,6 +37,11 @@ def load_sinking_txs(cursor: int=FIRST_SINK_CURSOR):
             
             tx_operations = get_tx_operations(sink_tx['transaction_hash'])
             payment_data = get_payment_data(tx_operations)
+            memo_type = sink_tx['transaction']['memo_type']
+            memo_value=sink_tx['transaction'].get('memo')
+            if memo_type == 'hash':
+                memo_value = base64.b64decode(memo_value).decode('utf8')
+                
             session.add(
                 SinkingTx(
                     hash=sink_tx['transaction_hash'],
@@ -50,8 +56,8 @@ def load_sinking_txs(cursor: int=FIRST_SINK_CURSOR):
                     dest_asset_issuer=payment_data['dest_asset_issuer'],
                     dest_asset_amount=Decimal(payment_data['dest_asset_amount']),
                     vcs_project_id=vcs_project_id,
-                    memo_type=sink_tx['transaction']['memo_type'],
-                    memo_value=sink_tx['transaction'].get('memo'),
+                    memo_type=memo_type,
+                    memo_value=memo_value,
                     paging_token=sink_tx['paging_token'],
                 )
             )

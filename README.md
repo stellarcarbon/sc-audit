@@ -12,7 +12,7 @@ Follow along with our progress:
 
 - [x] set up a local database
 - [ ] load minting transactions from Horizon
-- [ ] load sinking transactions from Horizon
+- [x] load sinking transactions from Horizon
 - [x] load retirements from Verra
 - [ ] test coverage
 
