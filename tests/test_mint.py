@@ -6,6 +6,8 @@ from sqlalchemy import select
 import sqlalchemy.orm.exc as orm_exc
 
 from sc_audit.db_schema import *
+from sc_audit.db_schema.mint import verra_carbon_pool
+from sc_audit.loader.utils import VcsSerialNumber
 from tests.db_fixtures import connection, new_session, vcs_project
 
 
@@ -37,22 +39,26 @@ def first_block_data():
         'txhash': "61efb636bd2fb32efbd9a6379cd3ba55a96fb200ef3c523568168374d0aa0980",
         'serial_number': "8040-449402275-449402275-VCU-042-MER-PE-14-1360-01072013-30062014-1",
         'mint_timestamp': dt.datetime(2021, 11, 20, 13, 6, 51, tzinfo=dt.timezone.utc),
+        'paging_token': 164806777139924993
     }
 
 
 @pytest.fixture
 def first_block(vcs_project: VcsProject, first_block_data) -> MintedBlock:
+    serial_number = VcsSerialNumber.from_str(first_block_data['serial_number'])
     return MintedBlock(
         serial_hash=first_block_data['shash'], 
         transaction_hash=first_block_data['txhash'], 
         created_at=first_block_data['mint_timestamp'], 
         vcs_project_id=vcs_project.id,
-        serial_number=first_block_data['serial_number'], 
-        block_size=1, 
-        sub_account_id=11273,
-        sub_account_name="CARBON Pool | stellarcarbon.io", 
-        vintage_start=dt.date(2011, 1, 1), 
-        vintage_end=dt.date(2014, 1, 1)
+        serial_number=serial_number.to_str(),
+        block_start=serial_number.block_start,
+        block_end=serial_number.block_end,
+        sub_account_id=verra_carbon_pool.id,
+        sub_account_name=verra_carbon_pool.name, 
+        vintage_start=serial_number.vintage_start_date, 
+        vintage_end=serial_number.vintage_end_date,
+        paging_token=first_block_data['paging_token']
     )
 
 @pytest.fixture

@@ -3,7 +3,6 @@ Load sinking transactions into the DB.
 
 Author: Alex Olieman <https://keybase.io/alioli>
 """
-import base64
 from decimal import Decimal
 from typing import Any, Literal
 from sqlalchemy import select
@@ -11,7 +10,7 @@ from sqlalchemy import select
 from sc_audit.constants import FIRST_SINK_CURSOR
 from sc_audit.db_schema.impact_project import UnknownVcsProject, VcsProject
 from sc_audit.db_schema.sink import SinkingTx
-from sc_audit.loader.utils import parse_iso_datetime
+from sc_audit.loader.utils import decode_hash_memo, parse_iso_datetime
 from sc_audit.session_manager import Session
 from sc_audit.sources.sinking_txs import get_sinking_transactions, get_tx_operations
 
@@ -40,8 +39,8 @@ def load_sinking_txs(cursor: int=FIRST_SINK_CURSOR):
             memo_type = sink_tx['transaction']['memo_type']
             memo_value=sink_tx['transaction'].get('memo')
             if memo_type == 'hash':
-                memo_value = base64.b64decode(memo_value).decode('utf8')
-                
+                memo_value = decode_hash_memo(memo_value)
+
             session.add(
                 SinkingTx(
                     hash=sink_tx['transaction_hash'],
