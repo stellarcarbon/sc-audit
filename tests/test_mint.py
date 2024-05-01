@@ -7,6 +7,7 @@ import sqlalchemy.orm.exc as orm_exc
 
 from sc_audit.db_schema import *
 from sc_audit.db_schema.mint import verra_carbon_pool
+from sc_audit.loader.minted_blocks import serial_matches_hash
 from sc_audit.loader.utils import VcsSerialNumber
 from tests.db_fixtures import connection, new_session, vcs_project
 
@@ -30,6 +31,29 @@ class TestMint:
         ).fetchone()
         assert isinstance(raw_row[0], bytes)
         assert isinstance(raw_row[1], bytes)
+
+    def test_vcs_serial_number_12(self, first_block_data):
+        serial_number = VcsSerialNumber.from_str(first_block_data['serial_number'])
+        assert serial_number.to_str() == first_block_data['serial_number']
+        assert serial_number.project_id == 1360
+        assert serial_number.additional_certification is True
+
+    def test_vcs_serial_number_13(self):
+        serial_number_str = "9660-115597313-115618057-VCS-VCU-261-VER-US-14-1060-01012019-31122019-0"
+        serial_number = VcsSerialNumber.from_str(serial_number_str)
+        assert serial_number.to_str() == serial_number_str
+        assert serial_number.project_id == 1060
+        assert serial_number.additional_certification is False
+
+    def test_serial_matches_hash_true(self, first_block_data):
+        serial_number = VcsSerialNumber.from_str(first_block_data['serial_number'])
+        test_result = serial_matches_hash(serial_number, first_block_data['shash'])
+        assert test_result is True
+
+    def test_serial_matches_hash_false(self, first_block_data):
+        serial_number = VcsSerialNumber.from_str(first_block_data['serial_number'])
+        test_result = serial_matches_hash(serial_number, first_block_data['txhash'])
+        assert test_result is False
 
 
 @pytest.fixture
