@@ -11,9 +11,11 @@ from sc_audit.db_schema.mint import verra_carbon_pool
 from sc_audit.loader import minted_blocks
 from sc_audit.loader.minted_blocks import index_carbon_pool, load_minted_blocks, reconstruct_blocks, serial_matches_hash
 from sc_audit.loader.utils import VcsSerialNumber, decode_hash_memo
+from sc_audit.sources.minting_txs import filter_minting_txs
 from tests.db_fixtures import connection, new_session, vcs_project
 from tests.data_fixtures.carbon_pool import carbon_pool as carbon_pool_fix
 from tests.data_fixtures.minting_transactions import minting_transactions as mint_tx_fix
+from tests.data_fixtures.minting_transactions import payment_records as payments_fix
 from tests.data_fixtures.retirements import retirements as retirements_fix
 
 
@@ -78,6 +80,13 @@ class TestMintUtils:
             carbon_pool["1e47dd9c1c536e78cfe46b78f80b8b91a475c13986abb4f8b6d79005edef77be"] 
             == carbon_pool_fix['credit_batches'][0]
         )
+
+
+class TestMintSources:
+    def test_filter_mint_txs(self):
+        assert len(payments_fix) == 3
+        mint_txs = list(filter_minting_txs(payments_fix))
+        assert len(mint_txs) == 1
 
 
 class TestMintLoader:
