@@ -6,13 +6,18 @@ from sqlalchemy import select
 import sqlalchemy.orm.exc as orm_exc
 
 from sc_audit.db_schema import *
+from sc_audit.db_schema.impact_project import UnknownVcsProject
 from sc_audit.db_schema.mint import verra_carbon_pool
-from sc_audit.loader.minted_blocks import serial_matches_hash
-from sc_audit.loader.utils import VcsSerialNumber
+from sc_audit.loader import minted_blocks
+from sc_audit.loader.minted_blocks import index_carbon_pool, load_minted_blocks, reconstruct_blocks, serial_matches_hash
+from sc_audit.loader.utils import VcsSerialNumber, decode_hash_memo
 from tests.db_fixtures import connection, new_session, vcs_project
+from tests.data_fixtures.carbon_pool import carbon_pool as carbon_pool_fix
+from tests.data_fixtures.minting_transactions import minting_transactions as mint_tx_fix
+from tests.data_fixtures.retirements import retirements as retirements_fix
 
 
-class TestMint:
+class TestMintDb:
     def test_insert_block(self, session_with_block, first_block: MintedBlock):
         # after commit, the objects are no longer bound to the session
         with pytest.raises(orm_exc.DetachedInstanceError):
@@ -32,6 +37,8 @@ class TestMint:
         assert isinstance(raw_row[0], bytes)
         assert isinstance(raw_row[1], bytes)
 
+
+class TestMintUtils:
     def test_vcs_serial_number_12(self, first_block_data):
         serial_number = VcsSerialNumber.from_str(first_block_data['serial_number'])
         assert serial_number.to_str() == first_block_data['serial_number']
@@ -54,6 +61,82 @@ class TestMint:
         serial_number = VcsSerialNumber.from_str(first_block_data['serial_number'])
         test_result = serial_matches_hash(serial_number, first_block_data['txhash'])
         assert test_result is False
+
+    def test_index_carbon_pool(self, monkeypatch):
+        # mock carbon pool state
+        def mock_carbon_pool():
+            return carbon_pool_fix
+        
+        monkeypatch.setattr(minted_blocks, 'get_carbon_pool_state', mock_carbon_pool)
+
+        carbon_pool = index_carbon_pool()
+        assert (
+            carbon_pool["a6df717999268d8c021f75830e3a9c3bafe3f3df435879f08968e6b8de069451"] 
+            == carbon_pool_fix['credit_batches'][-1]
+        )
+        assert (
+            carbon_pool["1e47dd9c1c536e78cfe46b78f80b8b91a475c13986abb4f8b6d79005edef77be"] 
+            == carbon_pool_fix['credit_batches'][0]
+        )
+
+
+class TestMintLoader:
+    def test_reconstructed_from_retirement(self):
+        blocks = reconstruct_blocks(
+            mint_txs=mint_tx_fix[:3], latest_block=None, retirements=retirements_fix[:1]
+        )
+        assert len(blocks) == 3
+        assert blocks[0].serial_hash == decode_hash_memo(mint_tx_fix[0]['transaction']['memo'])
+        assert blocks[1].serial_hash == decode_hash_memo(mint_tx_fix[1]['transaction']['memo'])
+        assert blocks[2].serial_hash == decode_hash_memo(mint_tx_fix[2]['transaction']['memo'])
+
+    def test_reconstructed_from_latest(self, first_block):
+        blocks = reconstruct_blocks(
+            mint_txs=mint_tx_fix[1:3], latest_block=first_block, retirements=[]
+        )
+        assert len(blocks) == 2
+        assert blocks[0].serial_hash == decode_hash_memo(mint_tx_fix[1]['transaction']['memo'])
+        assert blocks[1].serial_hash == decode_hash_memo(mint_tx_fix[2]['transaction']['memo'])
+
+    def test_load_minted_blocks(self, monkeypatch, new_session, vcs_project):
+        # mock db and http callers
+        def mock_carbon_pool():
+            return carbon_pool_fix
+        
+        def mock_mint_txs(cursor):
+            return mint_tx_fix
+        
+        monkeypatch.setattr(minted_blocks, 'Session', new_session, vcs_project)
+        monkeypatch.setattr(minted_blocks, 'get_carbon_pool_state', mock_carbon_pool)
+        monkeypatch.setattr(minted_blocks, 'get_minting_transactions', mock_mint_txs)
+
+        # try but fail without VCS project
+        with pytest.raises(UnknownVcsProject):
+            load_minted_blocks()
+
+        # try but fail without retirements
+        with new_session.begin() as session:
+            session.add(vcs_project)
+
+        with pytest.raises(ValueError):
+            load_minted_blocks()
+
+        # load and verify the expected blocks
+        with new_session.begin() as session:
+            session.add_all(retirements_fix)
+
+        load_minted_blocks()
+
+        with new_session.begin() as session:
+            loaded_blocks = session.scalars(
+                select(MintedBlock).order_by(MintedBlock.paging_token.desc())
+            ).all()
+            assert len(loaded_blocks) == 9
+            for block in loaded_blocks:
+                serial_number = VcsSerialNumber.from_str(block.serial_number)
+                assert serial_matches_hash(serial_number, block.serial_hash)
+
+
 
 
 @pytest.fixture
