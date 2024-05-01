@@ -26,7 +26,7 @@ class Retirement(ScBase):
     retirement_beneficiary: Mapped[strkey]
     retirement_details: Mapped[str]
     vcs_project_id: Mapped[int] = mapped_column(ForeignKey("vcs_projects.id"))
-    vcs_project: Mapped[VcsProject] = relationship(init=False)
+    vcs_project: Mapped[VcsProject] = relationship(init=False, repr=False)
     issuance_date: Mapped[dt.date]
     instrument_type: Mapped[InstrumentType]
     vintage_start: Mapped[dt.date]

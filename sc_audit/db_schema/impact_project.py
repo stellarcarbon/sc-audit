@@ -26,7 +26,7 @@ class VcsProject(ScBase):
     region: Mapped[str] = mapped_column(Unicode(128))
     country: Mapped[str] = mapped_column(Unicode(128))
 
-    minted_blocks: Mapped[list['MintedBlock']] = relationship(init=False, back_populates="vcs_project") # type: ignore
+    minted_blocks: Mapped[list['MintedBlock']] = relationship(init=False, repr=False, back_populates="vcs_project") # type: ignore
 
 
 class UnknownVcsProject(Exception):
