@@ -20,7 +20,7 @@ from tests.db_fixtures import connection, new_session, vcs_project
 from tests.data_fixtures.carbon_pool import carbon_pool as carbon_pool_fix
 from tests.data_fixtures.minting_transactions import minting_transactions as mint_tx_fix
 from tests.data_fixtures.minting_transactions import payment_records as payments_fix
-from tests.data_fixtures.retirements import retirements as retirements_fix
+from tests.data_fixtures.retirements import get_retirements
 
 
 class TestMintDb:
@@ -113,7 +113,7 @@ def mock_http(monkeypatch):
 class TestMintLoader:
     def test_reconstructed_from_retirement(self):
         blocks = reconstruct_blocks(
-            mint_txs=mint_tx_fix[:3], latest_block=None, retirements=retirements_fix[:1]
+            mint_txs=mint_tx_fix[:3], latest_block=None, retirements=get_retirements()[:1]
         )
         assert len(blocks) == 3
         assert blocks[0].serial_hash == decode_hash_memo(mint_tx_fix[0]['transaction']['memo'])
@@ -142,13 +142,13 @@ class TestMintLoader:
     def test_load_minted_blocks_verify(self, mock_session, mock_http, vcs_project):
         with mock_session.begin() as session:
             session.add(vcs_project)
-            session.add_all(retirements_fix)
+            session.add_all(get_retirements())
 
         load_minted_blocks()
 
         with mock_session.begin() as session:
             loaded_blocks = session.scalars(
-                select(MintedBlock).order_by(MintedBlock.paging_token.desc())
+                select(MintedBlock).order_by(MintedBlock.paging_token.asc())
             ).all()
             assert len(loaded_blocks) == 9
             for block in loaded_blocks:
