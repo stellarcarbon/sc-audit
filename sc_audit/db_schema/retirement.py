@@ -3,6 +3,7 @@ Declare credit retirement DB models.
 
 Author: Alex Olieman <https://keybase.io/alioli>
 """
+from __future__ import annotations
 import datetime as dt
 import typing
 
@@ -11,6 +12,9 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from sc_audit.db_schema.base import ScBase, intpk, strkey
 from sc_audit.db_schema.impact_project import VcsProject
+
+if typing.TYPE_CHECKING:
+    from sc_audit.db_schema import RetirementFromBlock
 
 
 InstrumentType = typing.Literal['VCU']
@@ -32,3 +36,8 @@ class Retirement(ScBase):
     vintage_start: Mapped[dt.date]
     vintage_end: Mapped[dt.date]
     total_vintage_quantity: Mapped[int]
+
+    retired_from: Mapped[list[RetirementFromBlock]] = relationship(
+        init=False, repr=False, 
+        back_populates='retirement',
+    )

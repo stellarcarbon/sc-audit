@@ -3,6 +3,7 @@ Declare CARBON issuance DB models.
 
 Author: Alex Olieman <https://keybase.io/alioli>
 """
+from __future__ import annotations
 from dataclasses import dataclass
 import datetime as dt
 import typing
@@ -12,6 +13,9 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from sc_audit.db_schema.base import HexBinary, ScBase, hashpk
 from sc_audit.db_schema.impact_project import VcsProject
+
+if typing.TYPE_CHECKING:
+    from sc_audit.db_schema import RetirementFromBlock
 
 
 VerraSubAccountName = typing.Literal[
@@ -34,8 +38,8 @@ class MintedBlock(ScBase):
     serial_hash: Mapped[hashpk]
     transaction_hash: Mapped[str] = mapped_column(HexBinary(length=32))
     created_at: Mapped[dt.datetime]
-    vcs_project_id: Mapped[int] = mapped_column(ForeignKey("vcs_projects.id"))
-    vcs_project: Mapped[VcsProject] = relationship(init=False, repr=False, back_populates="minted_blocks")
+    vcs_project_id: Mapped[int] = mapped_column(ForeignKey('vcs_projects.id'))
+    vcs_project: Mapped[VcsProject] = relationship(init=False, repr=False, back_populates='minted_blocks')
     serial_number: Mapped[str] = mapped_column(String(128))
     block_start: Mapped[int]
     block_end: Mapped[int]
@@ -44,3 +48,9 @@ class MintedBlock(ScBase):
     vintage_start: Mapped[dt.date]
     vintage_end: Mapped[dt.date]
     paging_token: Mapped[int]
+
+    consumed_by: Mapped[list[RetirementFromBlock]] = relationship(
+        init=False, repr=False, 
+        back_populates='block',
+        order_by="asc(RetirementFromBlock.retirement_id)"
+    )
