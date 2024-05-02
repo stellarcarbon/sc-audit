@@ -1,5 +1,4 @@
 import datetime as dt
-from sqlite3 import connect
 
 import pytest
 from sqlalchemy import select
@@ -9,7 +8,12 @@ from sc_audit.db_schema import *
 from sc_audit.db_schema.impact_project import UnknownVcsProject
 from sc_audit.db_schema.mint import verra_carbon_pool
 from sc_audit.loader import minted_blocks
-from sc_audit.loader.minted_blocks import index_carbon_pool, load_minted_blocks, reconstruct_blocks, serial_matches_hash
+from sc_audit.loader.minted_blocks import (
+    index_carbon_pool, 
+    load_minted_blocks, 
+    reconstruct_blocks, 
+    serial_matches_hash,
+)
 from sc_audit.loader.utils import VcsSerialNumber, decode_hash_memo
 from sc_audit.sources.minting_txs import filter_minting_txs
 from tests.db_fixtures import connection, new_session, vcs_project
