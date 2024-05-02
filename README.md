@@ -14,7 +14,7 @@ Follow along with our progress:
 - [x] load minting transactions from Horizon
 - [x] load sinking transactions from Horizon
 - [x] load retirements from Verra
-- [ ] test coverage
+- [x] test coverage
 
 [Deliverable 2]
 
