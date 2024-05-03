@@ -22,6 +22,10 @@ class HexBinary(types.TypeDecorator):
         return bytes.fromhex(value)
     
     def process_result_value(self, value: bytes, dialect: Dialect) -> str:
+        if value is None:
+            # this can happen during joins or eager loading
+            return ""
+        
         return value.hex()
 
 
