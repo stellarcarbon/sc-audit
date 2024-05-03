@@ -14,7 +14,7 @@ from sc_audit.db_schema.base import ScBase, intpk, strkey
 from sc_audit.db_schema.impact_project import VcsProject
 
 if typing.TYPE_CHECKING:
-    from sc_audit.db_schema import RetirementFromBlock
+    from sc_audit.db_schema import RetirementFromBlock, SinkStatus
 
 
 InstrumentType = typing.Literal['VCU']
@@ -38,6 +38,10 @@ class Retirement(ScBase):
     total_vintage_quantity: Mapped[int]
 
     retired_from: Mapped[list[RetirementFromBlock]] = relationship(
+        init=False, repr=False, 
+        back_populates='retirement',
+    )
+    sink_statuses: Mapped[list[SinkStatus]] = relationship(
         init=False, repr=False, 
         back_populates='retirement',
     )
