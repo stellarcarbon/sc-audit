@@ -1,3 +1,4 @@
+from __future__ import annotations
 import base64
 import datetime
 
@@ -29,7 +30,7 @@ class VcsSerialNumber(BaseModel):
     additional_certification: bool
 
     @classmethod
-    def from_str(cls, vcs_serial_number: str) -> "VcsSerialNumber":
+    def from_str(cls, vcs_serial_number: str) -> VcsSerialNumber:
         split_serial = vcs_serial_number.split('-')
         if len(split_serial) == 12:
             split_serial = [*split_serial[:3], None, *split_serial[3:]]
