@@ -9,6 +9,7 @@ import datetime as dt
 import typing
 
 from sqlalchemy import ForeignKey, String
+from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from sc_audit.db_schema.base import HexBinary, ScBase, hashpk
@@ -52,5 +53,15 @@ class MintedBlock(ScBase):
     consumed_by: Mapped[list[RetirementFromBlock]] = relationship(
         init=False, repr=False, 
         back_populates='block',
+        lazy='selectin',
         order_by="asc(RetirementFromBlock.retirement_id)"
     )
+
+    @hybrid_property
+    def size(self) -> int:
+        return 1 + self.block_end - self.block_start
+    
+    @hybrid_property
+    def credits_remaining(self) -> int:
+        credits_consumed = sum(rfb.vcu_amount for rfb in self.consumed_by)
+        return self.size - credits_consumed

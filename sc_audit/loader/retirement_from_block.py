@@ -60,10 +60,10 @@ def cover_retirement(session, retirement: Retirement) -> list[RetirementFromBloc
             block_hash=block.serial_hash,
             vcu_amount=overlap_size(serial_number, block)
         )
-        # TODO: assert that the block isn't over-spent
+        raise_if_overspent(block, rfb)
         retirement_from_blocks.append(rfb)
 
-    # TODO: assert that the retirement is completely covered
+    raise_if_uncovered(retirement, retirement_from_blocks)
     return retirement_from_blocks
 
 def overlap_size(serial_number: VcsSerialNumber, block: MintedBlock) -> int:
@@ -73,3 +73,31 @@ def overlap_size(serial_number: VcsSerialNumber, block: MintedBlock) -> int:
             - max(serial_number.block_start, block.block_start)
         )
     )
+
+
+class BlockOverspent(Exception):
+    def __init__(self, msg, block_hash: str, certificate_id: int):
+        super().__init__(msg, block_hash, certificate_id)
+
+def raise_if_overspent(block: MintedBlock, retirement_from_block: RetirementFromBlock):
+    if retirement_from_block.vcu_amount > block.credits_remaining:
+        raise BlockOverspent(
+            f"Retiring {retirement_from_block.retirement_id} from block {block.serial_hash}"
+            " would cause it to be overspent.",
+            block_hash=block.serial_hash,
+            certificate_id=retirement_from_block.retirement_id
+        )
+    
+
+class CoveringBlockMissing(Exception):
+    def __init__(self, msg, retirement: Retirement, new_blocks: list[RetirementFromBlock]):
+        super().__init__(msg, retirement, new_blocks)
+
+def raise_if_uncovered(retirement: Retirement, new_blocks: list[RetirementFromBlock]):
+    new_coverage: int = sum(rfb.vcu_amount for rfb in new_blocks)
+    if retirement.vcu_amount > new_coverage:
+        raise CoveringBlockMissing(
+            f"Retirement {retirement.certificate_id} is not fully covered by known blocks.",
+            retirement=retirement,
+            new_blocks=new_blocks
+        )
