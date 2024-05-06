@@ -45,3 +45,9 @@ class Retirement(ScBase):
         init=False, repr=False, 
         back_populates='retirement',
     )
+
+    @property
+    def tx_hashes_from_details(self) -> list[str]:
+        tag, *tx_hashes = self.retirement_details.split()
+        assert tag.startswith("stellarcarbon")
+        return tx_hashes

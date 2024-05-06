@@ -9,6 +9,7 @@ from  decimal import Decimal
 import typing
 
 from sqlalchemy import ForeignKey, String
+from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from sc_audit.db_schema.base import ScBase, hashpk, strkey
@@ -44,5 +45,13 @@ class SinkingTx(ScBase):
     statuses: Mapped[list[SinkStatus]] = relationship(
         init=False, repr=False, 
         back_populates='sinking_transaction',
+        lazy='selectin',
         order_by="asc(SinkStatus.certificate_id)"
     )
+
+    @hybrid_property
+    def total_filled(self) -> Decimal:
+        return sum(
+            (ss.amount_filled for ss in self.statuses),
+            start=Decimal()
+        )

@@ -10,7 +10,6 @@ Author: Alex Olieman <https://keybase.io/alioli>
 """
 
 from sqlalchemy import func, select
-from sqlalchemy.orm import contains_eager
 
 from sc_audit.db_schema.association import RetirementFromBlock
 from sc_audit.db_schema.mint import MintedBlock
@@ -32,7 +31,6 @@ def load_retirement_from_block():
             .outerjoin(Retirement.retired_from)
             .group_by(Retirement.certificate_id)
             .having(func.total(RetirementFromBlock.vcu_amount) < Retirement.vcu_amount)
-            .options(contains_eager(Retirement.retired_from))
         )
         uncovered_retirements = session.scalars(query).unique().all()
         for retirement in uncovered_retirements:
