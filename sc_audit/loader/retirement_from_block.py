@@ -9,7 +9,7 @@ numbers, storing the explicit relationships.
 Author: Alex Olieman <https://keybase.io/alioli>
 """
 
-from sqlalchemy import func, select
+from sqlalchemy import and_, func, or_, select
 
 from sc_audit.db_schema.association import RetirementFromBlock
 from sc_audit.db_schema.mint import MintedBlock
@@ -42,13 +42,26 @@ def load_retirement_from_block():
 def cover_retirement(session, retirement: Retirement) -> list[RetirementFromBlock]:
     serial_number = VcsSerialNumber.from_str(retirement.serial_number)
     q_matching_blocks = (
-        select(MintedBlock)
-        # MintedBlock.block_start <= serial_number.block_start <= MintedBlock.block_end
-        .where(MintedBlock.block_start <= serial_number.block_start)
-        .where(serial_number.block_start <= MintedBlock.block_end)
-        # MintedBlock.block_start <= serial_number.block_end <= MintedBlock.block_end
-        .where(MintedBlock.block_start <= serial_number.block_end)
-        .where(serial_number.block_end <= MintedBlock.block_end)
+        select(MintedBlock).where(
+            or_(
+                # MintedBlock.block_start <= serial_number.block_start <= MintedBlock.block_end
+                and_(
+                    MintedBlock.block_start <= serial_number.block_start,
+                    serial_number.block_start <= MintedBlock.block_end
+                ),
+                # MintedBlock.block_start <= serial_number.block_end <= MintedBlock.block_end
+                and_(
+                    MintedBlock.block_start <= serial_number.block_end,
+                    serial_number.block_end <= MintedBlock.block_end
+                ),
+                # serial_number.block_start <= MintedBlock.block_start <= serial_number.block_end
+                # serial_number.block_start <= MintedBlock.block_end <= serial_number.block_end
+                and_(
+                    MintedBlock.block_start.between(serial_number.block_start, serial_number.block_end),
+                    MintedBlock.block_end.between(serial_number.block_start, serial_number.block_end)
+                )
+            )
+        )
     )
     matching_blocks = session.scalars(q_matching_blocks).all()
     retirement_from_blocks = []
