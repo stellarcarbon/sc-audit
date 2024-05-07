@@ -37,6 +37,10 @@ def load_sink_statuses():
 
 
 def create_sink_statuses(session, for_retirement: Retirement) -> list[SinkStatus]:
+    """
+    For the given retirement, find which tx hashes do not yet have corresponding sink statuses.
+    Keep track of the carbon amount remaining on the retirement while new statuses are created.
+    """
     retirement = for_retirement
     existing_status_txs = {ss.sinking_tx_hash for ss in retirement.sink_statuses}
     existing_status_amount: Decimal = sum(
@@ -45,11 +49,13 @@ def create_sink_statuses(session, for_retirement: Retirement) -> list[SinkStatus
     new_sink_statuses: list[SinkStatus] = []
     for tx_hash in retirement.tx_hashes_from_details:
         if tx_hash in existing_status_txs:
+            # only create new sink statuses
             continue
 
         sink_tx = session.get_one(SinkingTx, tx_hash)
         retirement_remaining = retirement.vcu_amount - existing_status_amount
         sink_remaining = sink_tx.carbon_amount - sink_tx.total_filled
+        # status amount is the sink amount up to the remaining retirement amount
         amount_filled = min(sink_remaining, retirement_remaining)
         sink_status = SinkStatus(
             sinking_tx_hash=sink_tx.hash,
@@ -57,13 +63,9 @@ def create_sink_statuses(session, for_retirement: Retirement) -> list[SinkStatus
             amount_filled=amount_filled,
             finalized=((sink_tx.total_filled + amount_filled) == sink_tx.carbon_amount)
         )
+        # indirect update of retirement_remaining and sink_tx.total_filled
         existing_status_amount += amount_filled
         sink_tx.statuses.append(sink_status)
         new_sink_statuses.append(sink_status)
 
     return new_sink_statuses
-
-
-
-if __name__ == "__main__":
-    load_sink_statuses()
