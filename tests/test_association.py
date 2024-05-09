@@ -1,6 +1,8 @@
 
 import pytest
+from sqlalchemy import select
 
+from sc_audit.db_schema.association import RetirementFromBlock
 from sc_audit.loader import minted_blocks, retirement_from_block
 from sc_audit.loader.utils import VcsSerialNumber
 from tests.data_fixtures.retirements import get_retirements
@@ -121,7 +123,6 @@ class TestRetirementFromBlock:
             with pytest.raises(retirement_from_block.BlockOverspent):
                 retirement_from_block.cover_retirement(session, retirements[1])
 
-
     def test_cover_retirement_uncovered(self, mock_session_with_blocks):
         # craft a retirement that extends beyond a known block range
         retirement = get_retirements()[0]
@@ -134,6 +135,26 @@ class TestRetirementFromBlock:
         with mock_session_with_blocks.begin() as session:
             with pytest.raises(retirement_from_block.CoveringBlockMissing):
                 retirement_from_block.cover_retirement(session, retirement)
+
+    def test_load_retirement_from_block(self, mock_session_with_blocks):
+        with mock_session_with_blocks.begin() as session:
+            retirement_from_block.load_retirement_from_block()
+
+        with mock_session_with_blocks.begin() as session:
+            rfbs = session.scalars(select(RetirementFromBlock)).all()
+            assert len(rfbs) == 11
+            rfb_total_amount = sum(rfb.vcu_amount for rfb in rfbs)
+            retirement_total_amount = sum(ret.vcu_amount for ret in get_retirements())
+            assert rfb_total_amount == retirement_total_amount
+
+    def test_load_rfb_overspent(self, mock_session_with_blocks):
+        duplicate_retirement = get_retirements()[0]
+        duplicate_retirement.certificate_id = 0
+        with mock_session_with_blocks.begin() as session:
+            session.add(duplicate_retirement)
+        
+        with pytest.raises(retirement_from_block.BlockOverspent):
+            retirement_from_block.load_retirement_from_block()
 
 
 @pytest.fixture

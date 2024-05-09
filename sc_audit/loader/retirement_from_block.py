@@ -23,7 +23,6 @@ def load_retirement_from_block():
     Load the retirement—block associations to ensure that all retirements are explicitly covered
     by their originating blocks.
     """
-    retirement_from_blocks = []
     with Session.begin() as session:
         # select the retirements that are not fully related to minted blocks
         query = (
@@ -35,9 +34,7 @@ def load_retirement_from_block():
         uncovered_retirements = session.scalars(query).unique().all()
         for retirement in uncovered_retirements:
             from_blocks = cover_retirement(session, retirement)
-            retirement_from_blocks += from_blocks
-
-        session.add_all(retirement_from_blocks)
+            session.add_all(from_blocks)
 
 def cover_retirement(session, retirement: Retirement) -> list[RetirementFromBlock]:
     serial_number = VcsSerialNumber.from_str(retirement.serial_number)
