@@ -113,12 +113,27 @@ class TestRetirementFromBlock:
             assert rfb_three.block.block_start < serial_number.block_end < rfb_three.block.block_end
 
     def test_cover_retirement_overspent(self, mock_session_with_blocks):
-        # TODO
-        pass
+        retirements = get_retirements()
+        with mock_session_with_blocks.begin() as session:
+            session.add_all(retirement_from_block.cover_retirement(session, retirements[0]))
+            session.add_all(retirement_from_block.cover_retirement(session, retirements[1]))
+
+            with pytest.raises(retirement_from_block.BlockOverspent):
+                retirement_from_block.cover_retirement(session, retirements[1])
+
 
     def test_cover_retirement_uncovered(self, mock_session_with_blocks):
-        # TODO
-        pass
+        # craft a retirement that extends beyond a known block range
+        retirement = get_retirements()[0]
+        serial_number = VcsSerialNumber.from_str(retirement.serial_number)
+        retirement.vcu_amount = 7
+        serial_number.block_start = 449402320
+        serial_number.block_end = 449402326
+        retirement.serial_number = serial_number.to_str()
+
+        with mock_session_with_blocks.begin() as session:
+            with pytest.raises(retirement_from_block.CoveringBlockMissing):
+                retirement_from_block.cover_retirement(session, retirement)
 
 
 @pytest.fixture
