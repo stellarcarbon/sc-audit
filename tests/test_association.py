@@ -1,13 +1,17 @@
+from decimal import Decimal
 
 import pytest
-from sqlalchemy import select
+from sqlalchemy import func, select
 
-from sc_audit.db_schema.association import RetirementFromBlock
-from sc_audit.loader import minted_blocks, retirement_from_block
+from sc_audit.db_schema.association import RetirementFromBlock, SinkStatus
+from sc_audit.db_schema.sink import SinkingTx
+from sc_audit.loader import minted_blocks, retirement_from_block, sink_status
+from sc_audit.loader import sinking_txs as sink_loader
 from sc_audit.loader.utils import VcsSerialNumber
 from tests.data_fixtures.retirements import get_retirements
 from tests.db_fixtures import new_session, vcs_project
-from tests.test_mint import mock_http
+from tests.test_mint import mock_http as mock_mint_http
+from tests.test_sink import mock_http as mock_sink_http
 
 
 class TestRetirementFromBlock:
@@ -137,8 +141,7 @@ class TestRetirementFromBlock:
                 retirement_from_block.cover_retirement(session, retirement)
 
     def test_load_retirement_from_block(self, mock_session_with_blocks):
-        with mock_session_with_blocks.begin() as session:
-            retirement_from_block.load_retirement_from_block()
+        retirement_from_block.load_retirement_from_block()
 
         with mock_session_with_blocks.begin() as session:
             rfbs = session.scalars(select(RetirementFromBlock)).all()
@@ -157,17 +160,105 @@ class TestRetirementFromBlock:
             retirement_from_block.load_retirement_from_block()
 
 
+class TestSinkStatus:
+    def test_create_sink_status_one(self, mock_session_with_sink_txs):
+        retirement = get_retirements()[0]
+        with mock_session_with_sink_txs.begin() as session:
+            sink_statuses = sink_status.create_sink_statuses(session, retirement)
+            assert len(sink_statuses) == 1
+            status = sink_statuses[0]
+            assert status.sinking_tx_hash == retirement.tx_hashes_from_details[0]
+            assert status.certificate_id == retirement.certificate_id
+            assert status.amount_filled == retirement.vcu_amount
+            assert status.finalized is True
+
+    def test_create_sink_status_two(self, mock_session_with_sink_txs):
+        retirement = get_retirements()[10]
+        with mock_session_with_sink_txs.begin() as session:
+            sink_statuses = sink_status.create_sink_statuses(session, retirement)
+            assert len(sink_statuses) == 2
+            status_one, status_two = sink_statuses
+            for i, status in enumerate([status_one, status_two]):
+                assert status.sinking_tx_hash == retirement.tx_hashes_from_details[i]
+                assert status.certificate_id == retirement.certificate_id
+                assert status.amount_filled == status.sinking_transaction.carbon_amount
+                assert status.finalized is True
+
+    def test_create_sink_status_more(self, mock_session_with_sink_txs):
+        retirement = get_retirements()[8]
+        with mock_session_with_sink_txs.begin() as session:
+            sink_statuses = sink_status.create_sink_statuses(session, retirement)
+            assert len(sink_statuses) == 7
+            for i, status in enumerate(sink_statuses):
+                assert status.sinking_tx_hash == retirement.tx_hashes_from_details[i]
+                assert status.certificate_id == retirement.certificate_id
+                assert status.amount_filled == status.sinking_transaction.carbon_amount
+                assert status.finalized is True
+
+    def test_create_sink_status_pending(self, mock_session_with_sink_txs):
+        # construct a retirement that partially fills a sink tx (filling in minimal fields)
+        retirement = get_retirements()[0]
+        retirement.retirement_details = "stellarcarbon.io 20dbafdc604fc1a48eafc4ce0df2b6151dfa5a5241c307f811a99ce4ddf2fb7f"
+        retirement.vcu_amount = 3
+        with mock_session_with_sink_txs.begin() as session:
+            sink_statuses = sink_status.create_sink_statuses(session, retirement)
+            assert len(sink_statuses) == 1
+            status = sink_statuses[0]
+            assert status.sinking_tx_hash == retirement.tx_hashes_from_details[0]
+            assert status.certificate_id == retirement.certificate_id
+            assert status.amount_filled == retirement.vcu_amount
+            assert status.finalized is False
+
+            # check sink tx amount filled and amount remaining
+            sink_tx = status.sinking_transaction
+            assert sink_tx.total_filled == retirement.vcu_amount
+            assert sink_tx.carbon_amount - sink_tx.total_filled == Decimal("0.015")
+
+    def test_load_sink_statuses(self, mock_session_with_sink_txs):
+        sink_status.load_sink_statuses()
+        with mock_session_with_sink_txs.begin() as session:
+            sss = session.scalars(select(SinkStatus)).all()
+            assert len(sss) == 18
+            ss_total_amount = sum(ss.amount_filled for ss in sss)
+            retirement_total_amount = sum(ret.vcu_amount for ret in get_retirements())
+            assert ss_total_amount == retirement_total_amount
+
+            q_finalized_txs = (
+                select(func.sum(SinkingTx.carbon_amount))
+                .join(SinkStatus)
+                .where(SinkStatus.finalized == True)
+            )
+            finalized_tx_total_carbon = session.scalar(q_finalized_txs)
+            assert finalized_tx_total_carbon == ss_total_amount
+
+    def test_load_sink_statuses_idempotent(self, mock_session_with_sink_txs):
+        sink_status.load_sink_statuses()
+        sink_status.load_sink_statuses()
+        with mock_session_with_sink_txs.begin() as session:
+            sss = session.scalars(select(SinkStatus)).all()
+            assert len(sss) == 18
+            ss_total_amount = sum(ss.amount_filled for ss in sss)
+            assert ss_total_amount == Decimal("23")
+
+
 @pytest.fixture
 def mock_session(monkeypatch, new_session):
     monkeypatch.setattr(minted_blocks, 'Session', new_session)
     monkeypatch.setattr(retirement_from_block, 'Session', new_session)
+    monkeypatch.setattr(sink_loader, 'Session', new_session)
+    monkeypatch.setattr(sink_status, 'Session', new_session)
     return new_session
 
 @pytest.fixture
-def mock_session_with_blocks(mock_http, mock_session, vcs_project):
+def mock_session_with_blocks(mock_mint_http, mock_session, vcs_project):
     with mock_session.begin() as session:
         session.add(vcs_project)
         session.add_all(get_retirements())
 
     minted_blocks.load_minted_blocks()
     return mock_session
+
+@pytest.fixture
+def mock_session_with_sink_txs(mock_sink_http, mock_session_with_blocks):
+    sink_loader.load_sinking_txs(cursor=999)
+    return mock_session_with_blocks
