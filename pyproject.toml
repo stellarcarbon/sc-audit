@@ -14,6 +14,7 @@ SQLAlchemy = "^2.0.29"
 httpx = "^0.27.0"
 parsel = "^1.9.1"
 stellar-sdk = "^9.3.0"
+pandas = "^2.2.2"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^8.1.1"
