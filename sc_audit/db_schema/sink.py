@@ -55,3 +55,11 @@ class SinkingTx(ScBase):
             (ss.amount_filled for ss in self.statuses),
             start=Decimal()
         )
+    
+    def as_dict(self):
+        data = {
+            col: getattr(self, col)
+            for col in self.__table__.columns.keys()
+        }
+        data['statuses'] = [status.as_dict() for status in self.statuses]
+        return data

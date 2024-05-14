@@ -8,6 +8,7 @@ from typing import Any, Literal
 from sqlalchemy import select
 
 from sc_audit.constants import FIRST_SINK_CURSOR
+from sc_audit.db_schema.base import intpk
 from sc_audit.db_schema.impact_project import UnknownVcsProject, VcsProject
 from sc_audit.db_schema.sink import SinkingTx
 from sc_audit.loader.utils import decode_hash_memo, parse_iso_datetime
@@ -23,7 +24,7 @@ def load_sinking_txs(cursor: int=FIRST_SINK_CURSOR):
     token of the latest record present in the DB.
     """
     with Session.begin() as session:
-        existing_vcs_projects: set[int] = set(session.scalars(select(VcsProject.id)).all())
+        existing_vcs_projects: set[intpk] = set(session.scalars(select(VcsProject.id)).all())
         for sink_tx in get_sinking_transactions(cursor):
             # ensure that the related VCS Project exists
             vcs_project_id = get_vcs_project_id(sink_tx)

@@ -44,3 +44,9 @@ class SinkStatus(ScBase):
         init=False, repr=False,
         back_populates='sink_statuses'
     )
+
+    def as_dict(self):
+        return {
+            col: getattr(self, col)
+            for col in self.__table__.columns.keys()
+        }
