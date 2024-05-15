@@ -2,7 +2,7 @@ from __future__ import annotations
 from decimal import Decimal
 import typing
 
-from sqlalchemy import ForeignKey
+from sqlalchemy import ForeignKey, Index
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from sc_audit.db_schema.base import ScBase, intpk, hashpk
@@ -50,3 +50,6 @@ class SinkStatus(ScBase):
             col: getattr(self, col)
             for col in self.__table__.columns.keys()
         }
+    
+
+idx_finalized = Index("idx_finalized", SinkStatus.finalized)

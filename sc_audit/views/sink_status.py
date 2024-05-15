@@ -23,7 +23,6 @@ def view_sinking_txs(
         before_date: dt.date | None = None,
         finalized: bool | None = None,
 ) -> pd.DataFrame:
-    # TODO: add SQL indexes to aid in filtering
     stx_query = construct_stx_query(for_funder, for_recipient, from_date, before_date, finalized)
     with Session.begin() as session:
         stx_records = session.scalars(stx_query).unique().all()

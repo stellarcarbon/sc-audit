@@ -8,7 +8,7 @@ import datetime as dt
 from  decimal import Decimal
 import typing
 
-from sqlalchemy import ForeignKey, String
+from sqlalchemy import ForeignKey, Index, String
 from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -63,3 +63,8 @@ class SinkingTx(ScBase):
         }
         data['statuses'] = [status.as_dict() for status in self.statuses]
         return data
+    
+
+idx_created_at = Index("idx_created_at", SinkingTx.created_at.desc())
+idx_funder = Index("idx_funder", SinkingTx.funder)
+idx_recipient = Index("idx_recipient", SinkingTx.recipient)
