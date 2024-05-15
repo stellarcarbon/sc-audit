@@ -9,7 +9,7 @@ import datetime as dt
 import typing
 
 from sqlalchemy import ForeignKey, SQLColumnExpression, String, func, select
-from sqlalchemy.ext.hybrid import hybrid_property
+from sqlalchemy.ext.hybrid import hybrid_method, hybrid_property
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from sc_audit.db_schema.base import HexBinary, ScBase, hashpk
@@ -74,4 +74,25 @@ class MintedBlock(ScBase):
             select(cls.size - func.coalesce(func.sum(RetirementFromBlock.vcu_amount), 0))
             .where(RetirementFromBlock.block_hash == cls.serial_hash)
             .label("credits_remaining")
+        )
+    
+    @hybrid_method
+    def credits_remaining_on_date(self, on_date: dt.date) -> int:
+        credits_consumed = sum(
+            rfb.vcu_amount
+            for rfb in self.consumed_by
+            if rfb.retirement.retirement_date <= on_date
+        )
+        return self.size - credits_consumed
+    
+    @credits_remaining_on_date.inplace.expression
+    @classmethod
+    def _credits_remaining_on_date_expression(cls, on_date: dt.date) -> SQLColumnExpression[int]:
+        from sc_audit.db_schema import Retirement, RetirementFromBlock
+        return (
+            select(cls.size - func.coalesce(func.sum(RetirementFromBlock.vcu_amount), 0))
+            .where(RetirementFromBlock.block_hash == cls.serial_hash)
+            .where(RetirementFromBlock.retirement_id == Retirement.certificate_id)
+            .where(Retirement.retirement_date <= on_date)
+            .label("credits_remaining_on_date")
         )

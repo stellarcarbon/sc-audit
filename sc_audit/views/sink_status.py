@@ -8,7 +8,7 @@ Author: Alex Olieman <https://keybase.io/alioli>
 import datetime as dt
 
 import pandas as pd
-from sqlalchemy import Date, Select, cast, or_, select
+from sqlalchemy import Select, or_, select
 from sqlalchemy.orm import contains_eager
 
 from sc_audit.db_schema.association import SinkStatus
