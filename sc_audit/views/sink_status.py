@@ -44,12 +44,13 @@ def construct_stx_query(
     if for_recipient:
         q_txs = q_txs.where(SinkingTx.recipient == for_recipient)
 
-    created_at_date = cast(SinkingTx.created_at, Date)
     if from_date:
-        q_txs = q_txs.where(created_at_date >= from_date)
+        from_dt = dt.datetime(from_date.year, from_date.month, from_date.day)
+        q_txs = q_txs.where(SinkingTx.created_at >= from_dt)
 
     if before_date:
-        q_txs = q_txs.where(created_at_date < before_date)
+        before_dt = dt.datetime(before_date.year, before_date.month, before_date.day)
+        q_txs = q_txs.where(SinkingTx.created_at < before_dt)
 
     if finalized is False:
         # not_ and in_ do not work here because NULL and false are treated differently
