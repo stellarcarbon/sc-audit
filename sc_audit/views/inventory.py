@@ -2,7 +2,8 @@
 View Stellarcarbon's current or historical inventory of eco-credits.
 
 The inventory is calculated as: all blocks of credits that have been minted, minus the retirements
-that have been taken from these blocks.
+that have been taken from these blocks. Historical views reconstruct the inventory on the given
+date (end-of-day) by filtering both the blocks and the retirements used in the calculation.
 
 Author: Alex Olieman <https://keybase.io/alioli>
 """
@@ -10,7 +11,6 @@ import datetime as dt
 
 import pandas as pd
 from sqlalchemy import select
-from sqlalchemy.orm import InstrumentedAttribute, QueryableAttribute
 
 from sc_audit.db_schema.impact_project import VcsProject
 from sc_audit.db_schema.mint import MintedBlock
