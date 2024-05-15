@@ -8,7 +8,7 @@ Author: Alex Olieman <https://keybase.io/alioli>
 import datetime as dt
 
 import pandas as pd
-from sqlalchemy import Select, or_, select
+from sqlalchemy import Date, Select, cast, or_, select
 from sqlalchemy.orm import contains_eager
 
 from sc_audit.db_schema.association import SinkStatus
@@ -44,11 +44,12 @@ def construct_stx_query(
     if for_recipient:
         q_txs = q_txs.where(SinkingTx.recipient == for_recipient)
 
+    created_at_date = cast(SinkingTx.created_at, Date)
     if from_date:
-        q_txs = q_txs.where(SinkingTx.created_at >= from_date)
+        q_txs = q_txs.where(created_at_date >= from_date)
 
     if before_date:
-        q_txs = q_txs.where(SinkingTx.created_at < before_date)
+        q_txs = q_txs.where(created_at_date < before_date)
 
     if finalized is False:
         # not_ and in_ do not work here because NULL and false are treated differently
