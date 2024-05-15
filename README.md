@@ -21,8 +21,8 @@ Follow along with our progress:
     Database logic to compute inventory and pending retirements views
 
 - [x] fill m2m tables
-- [ ] view the status of sinking transactions
-- [ ] view the current inventory
+- [x] view the status of sinking transactions
+- [x] view the current inventory
 - [ ] test coverage
 
 [Deliverable 3]
