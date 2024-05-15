@@ -18,8 +18,15 @@ from sc_audit.session_manager import Session
 
 
 def view_inventory(omit_empty: bool = False, until_date: dt.date | None = None) -> pd.DataFrame:
-    columns = (
+    # TODO: add SQL indexes
+    credits_remaining_col = MintedBlock.credits_remaining
+    if until_date:
+        credits_remaining_col = MintedBlock.credits_remaining_on_date(until_date)
+
+    block_columns = [
         MintedBlock.serial_hash,
+        MintedBlock.size,
+        credits_remaining_col,
         MintedBlock.transaction_hash,
         MintedBlock.created_at,
         MintedBlock.serial_number,
@@ -27,24 +34,24 @@ def view_inventory(omit_empty: bool = False, until_date: dt.date | None = None) 
         MintedBlock.sub_account_name,
         MintedBlock.vintage_start,
         MintedBlock.vintage_end,
+    ]
+    vcs_project_columns = [
         MintedBlock.vcs_project_id,
         VcsProject.name,
         VcsProject.category,
-        MintedBlock.size,
-        MintedBlock.credits_remaining,
-    )
-    # TODO: implement until_date
-    # TODO: add SQL indexes
+    ]    
+    columns = block_columns + vcs_project_columns
     q_blocks = select(*columns).join(MintedBlock.vcs_project).order_by(MintedBlock.created_at)
     if omit_empty:
-        q_blocks = q_blocks.where(MintedBlock.credits_remaining > 0)
+        q_blocks = q_blocks.where(credits_remaining_col > 0)
+
+    if until_date:
+        until_dt = dt.datetime(until_date.year, until_date.month, until_date.day, 23, 59, 59, 999999)
+        q_blocks = q_blocks.where(MintedBlock.created_at <= until_dt)
 
     with Session.begin() as session:
         mb_rows = session.execute(q_blocks).all()
+
         mbdf = pd.DataFrame.from_records(mb_rows, columns=(c.key for c in columns))
 
     return mbdf
-
-
-if __name__ == "__main__":
-    view_inventory()
