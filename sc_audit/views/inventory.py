@@ -33,8 +33,12 @@ def view_inventory(omit_empty: bool = False, until_date: dt.date | None = None) 
         MintedBlock.size,
         MintedBlock.credits_remaining,
     )
-    # TODO: implement filters
+    # TODO: implement until_date
+    # TODO: add SQL indexes
     q_blocks = select(*columns).join(MintedBlock.vcs_project).order_by(MintedBlock.created_at)
+    if omit_empty:
+        q_blocks = q_blocks.where(MintedBlock.credits_remaining > 0)
+
     with Session.begin() as session:
         mb_rows = session.execute(q_blocks).all()
         mbdf = pd.DataFrame.from_records(mb_rows, columns=(c.key for c in columns))
