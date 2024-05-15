@@ -8,7 +8,7 @@ from dataclasses import dataclass
 import datetime as dt
 import typing
 
-from sqlalchemy import ForeignKey, String
+from sqlalchemy import ForeignKey, SQLColumnExpression, String, func, select
 from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -65,3 +65,13 @@ class MintedBlock(ScBase):
     def credits_remaining(self) -> int:
         credits_consumed = sum(rfb.vcu_amount for rfb in self.consumed_by)
         return self.size - credits_consumed
+    
+    @credits_remaining.inplace.expression
+    @classmethod
+    def _credits_remaining_expression(cls) -> SQLColumnExpression[int]:
+        from sc_audit.db_schema import RetirementFromBlock
+        return (
+            select(cls.size - func.coalesce(func.sum(RetirementFromBlock.vcu_amount), 0))
+            .where(RetirementFromBlock.block_hash == cls.serial_hash)
+            .label("credits_remaining")
+        )
