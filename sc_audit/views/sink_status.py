@@ -43,7 +43,7 @@ def construct_stx_query(
         q_txs = q_txs.where(SinkingTx.funder == for_funder)
 
     if for_recipient:
-        q_txs = q_txs.where(SinkingTx.funder == for_recipient)
+        q_txs = q_txs.where(SinkingTx.recipient == for_recipient)
 
     if from_date:
         q_txs = q_txs.where(SinkingTx.created_at >= from_date)
