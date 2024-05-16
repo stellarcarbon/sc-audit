@@ -65,6 +65,6 @@ class SinkingTx(ScBase):
         return data
     
 
-idx_created_at = Index("idx_created_at", SinkingTx.created_at.desc())
-idx_funder = Index("idx_funder", SinkingTx.funder)
-idx_recipient = Index("idx_recipient", SinkingTx.recipient)
+idx_created_at = Index("idx_stx_created_at", SinkingTx.created_at.desc())
+idx_funder = Index("idx_stx_funder", SinkingTx.funder)
+idx_recipient = Index("idx_stx_recipient", SinkingTx.recipient)

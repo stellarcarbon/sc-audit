@@ -7,7 +7,7 @@ from __future__ import annotations
 import datetime as dt
 import typing
 
-from sqlalchemy import ForeignKey, String
+from sqlalchemy import ForeignKey, Index, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from sc_audit.db_schema.base import ScBase, intpk, strkey
@@ -51,3 +51,7 @@ class Retirement(ScBase):
         tag, *tx_hashes = self.retirement_details.split()
         assert tag.startswith("stellarcarbon")
         return tx_hashes
+
+
+idx_retirement_date = Index("idx_retirement_date", Retirement.retirement_date.desc())
+idx_retirement_beneficiary = Index("idx_retirement_beneficiary", Retirement.retirement_beneficiary)

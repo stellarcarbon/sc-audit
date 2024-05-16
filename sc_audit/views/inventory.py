@@ -18,7 +18,6 @@ from sc_audit.session_manager import Session
 
 
 def view_inventory(omit_empty: bool = False, until_date: dt.date | None = None) -> pd.DataFrame:
-    # TODO: add SQL indexes
     credits_remaining_col = MintedBlock.credits_remaining
     if until_date:
         credits_remaining_col = MintedBlock.credits_remaining_on_date(until_date)

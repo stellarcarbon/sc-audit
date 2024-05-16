@@ -8,7 +8,7 @@ from dataclasses import dataclass
 import datetime as dt
 import typing
 
-from sqlalchemy import ForeignKey, SQLColumnExpression, String, func, select
+from sqlalchemy import ForeignKey, Index, SQLColumnExpression, String, func, select
 from sqlalchemy.ext.hybrid import hybrid_method, hybrid_property
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -96,3 +96,6 @@ class MintedBlock(ScBase):
             .where(Retirement.retirement_date <= on_date)
             .label("credits_remaining_on_date")
         )
+
+
+idx_created_at = Index("idx_block_created_at", MintedBlock.created_at)
