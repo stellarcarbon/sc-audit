@@ -50,7 +50,6 @@ def view_inventory(omit_empty: bool = False, until_date: dt.date | None = None) 
 
     with Session.begin() as session:
         mb_rows = session.execute(q_blocks).all()
-
         mbdf = pd.DataFrame.from_records(mb_rows, columns=(c.key for c in columns))
 
     return mbdf
