@@ -1,4 +1,5 @@
 import datetime as dt
+from typing import final
 
 from pandas import Timestamp
 import pytest
@@ -51,6 +52,81 @@ class TestInventoryView:
         assert mbdf['credits_remaining_on_date'].sum() == 179
         assert mbdf['created_at'].min() == Timestamp('2021-11-21 00:04:23')
         assert mbdf['created_at'].max() == Timestamp('2022-02-01 00:08:19')
+
+
+class TestSinkStatusView:
+    def test_construct_query_unfiltered(self):
+        stxq = sink_status_view.construct_stx_query(
+            for_funder=None,
+            for_recipient=None,
+            from_date=None,
+            before_date=None,
+            finalized=None
+        )
+        assert (
+            "FROM sinking_txs LEFT OUTER JOIN sink_status ON sinking_txs.hash = sink_status.sinking_tx_hash"
+            in str(stxq)
+        )
+        assert "WHERE" not in str(stxq)
+
+    def test_construct_query_for_funder(self):
+        stxq = sink_status_view.construct_stx_query(
+            for_funder="funder-address",
+            for_recipient=None,
+            from_date=None,
+            before_date=None,
+            finalized=None
+        )
+        assert "WHERE sinking_txs.funder" in str(stxq)
+
+    def test_construct_query_for_recipient(self):
+        stxq = sink_status_view.construct_stx_query(
+            for_funder=None,
+            for_recipient="recipient-address",
+            from_date=None,
+            before_date=None,
+            finalized=None
+        )
+        assert "WHERE sinking_txs.recipient" in str(stxq)
+
+    def test_construct_query_from_date(self):
+        stxq = sink_status_view.construct_stx_query(
+            for_funder=None,
+            for_recipient=None,
+            from_date=dt.date(2023, 1, 1),
+            before_date=None,
+            finalized=None
+        )
+        assert "WHERE sinking_txs.created_at >=" in str(stxq)
+
+    def test_construct_query_before_date(self):
+        stxq = sink_status_view.construct_stx_query(
+            for_funder=None,
+            for_recipient=None,
+            from_date=None,
+            before_date=dt.date(2023, 1, 1),
+            finalized=None
+        )
+        assert "WHERE sinking_txs.created_at <" in str(stxq)
+
+    def test_construct_query_finalized(self):
+        stxq = sink_status_view.construct_stx_query(
+            for_funder=None,
+            for_recipient=None,
+            from_date=None,
+            before_date=None,
+            finalized=True
+        )
+        assert "WHERE sink_status.finalized = true" in str(stxq)
+
+        stxq = sink_status_view.construct_stx_query(
+            for_funder=None,
+            for_recipient=None,
+            from_date=None,
+            before_date=None,
+            finalized=False
+        )
+        assert "WHERE sink_status.finalized IS NULL OR sink_status.finalized = false" in str(stxq)
 
 
 @pytest.fixture
