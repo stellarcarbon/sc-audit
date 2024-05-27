@@ -1,5 +1,5 @@
 import datetime as dt
-from typing import final
+from decimal import Decimal
 
 from pandas import Timestamp
 import pytest
@@ -54,7 +54,7 @@ class TestInventoryView:
         assert mbdf['created_at'].max() == Timestamp('2022-02-01 00:08:19')
 
 
-class TestSinkStatusView:
+class TestConstructStxQuery:
     def test_construct_query_unfiltered(self):
         stxq = sink_status_view.construct_stx_query(
             for_funder=None,
@@ -127,6 +127,54 @@ class TestSinkStatusView:
             finalized=False
         )
         assert "WHERE sink_status.finalized IS NULL OR sink_status.finalized = false" in str(stxq)
+
+
+class TestSinkStatusView:
+    def test_sink_status_full(self, mock_session_with_associations):
+        txdf = sink_status_view.view_sinking_txs()
+        assert len(txdf) == 20
+        assert txdf.carbon_amount.sum() == Decimal('26.298')
+        assert txdf.vcs_project_id.min() == 1360
+        assert txdf.vcs_project_id.max() == 1360
+
+    def test_sink_status_for_recipient(self, mock_session_with_associations):
+        txdf = sink_status_view.view_sinking_txs(
+            for_recipient="GBIH7Z3SMZUX62JPLLDTHA3QEVMRCGUCUQVCFFRJTEGCKB4MV4NGU7BE"
+        )
+        assert len(txdf) == 2
+        assert txdf.carbon_amount.sum() == 2
+        assert (
+            list(txdf.hash.unique()) == [
+                'c2f0ed42774091e1249f11af93d56be53af1aa24bc397d36f2fcbb0907475fb4', 
+                '2827d90abd658986345f4c20cb68f1f29af128bccaa0d8743ce0248732a2b4fc'
+            ]
+        )
+
+    def test_sink_status_from_date(self, mock_session_with_associations):
+        txdf = sink_status_view.view_sinking_txs(
+            for_recipient="GC53JCXZHW3SVNRE4CT6XFP46WX4ACFQU32P4PR3CU43OB7AKKMFXZ6Y",
+            from_date=dt.date(2023, 5, 7)
+        )
+        assert len(txdf) == 4
+        assert txdf.carbon_amount.sum() == Decimal('3.028')
+
+    def test_sink_status_before_date(self, mock_session_with_associations):
+        txdf = sink_status_view.view_sinking_txs(
+            for_recipient="GC53JCXZHW3SVNRE4CT6XFP46WX4ACFQU32P4PR3CU43OB7AKKMFXZ6Y",
+            before_date=dt.date(2023, 5, 7)
+        )
+        assert len(txdf) == 4
+        assert txdf.carbon_amount.sum() == Decimal('6.972')
+
+    def test_sink_status_finalized_true(self, mock_session_with_associations):
+        txdf = sink_status_view.view_sinking_txs(finalized=True)
+        assert len(txdf) == 18
+        assert txdf.carbon_amount.sum() == 23
+
+    def test_sink_status_finalized_false(self, mock_session_with_associations):
+        txdf = sink_status_view.view_sinking_txs(finalized=False)
+        assert len(txdf) == 2
+        assert txdf.carbon_amount.sum() == Decimal('3.298')
 
 
 @pytest.fixture

@@ -23,7 +23,7 @@ Follow along with our progress:
 - [x] fill m2m tables
 - [x] view the status of sinking transactions
 - [x] view the current inventory
-- [ ] test coverage
+- [x] test coverage
 
 [Deliverable 3]
 
