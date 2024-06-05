@@ -40,7 +40,7 @@ def render_item(type_, obj, autogen_context) -> str | Literal[False]:
 
 
 def my_compare_type(context, inspected_column,
-            metadata_column, inspected_type, metadata_type):
+            metadata_column, inspected_type, metadata_type) -> None | bool:
     """
     Return False if the metadata_type is the same as the inspected_type or None to allow the 
     default implementation to compare these types. A return value of True means the two types do 
