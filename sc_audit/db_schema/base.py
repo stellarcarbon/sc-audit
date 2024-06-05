@@ -3,7 +3,7 @@ SQLAlchemy Declarative Dataclass setup.
 
 Author: Alex Olieman <https://keybase.io/alioli>
 """
-from typing import Annotated, Any
+from typing import Annotated
 
 from sqlalchemy import Dialect, String
 import sqlalchemy.types as types

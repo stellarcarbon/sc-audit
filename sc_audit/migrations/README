@@ -1,0 +1,13 @@
+# Database Migrations
+
+We use alembic for database migrations.
+
+For the time being, run alembic commands from the ./sc_audit directory. This will not be a good solution for package users. An interface will needed to be provided at a package level.
+
+To migrate your local DB to the latest schema, do:
+
+```bash
+alembic upgrade head
+```
+
+This command also works when you don't have a local DB yet. It will create the sqlite file for you.
