@@ -83,7 +83,7 @@ def load_minted_blocks(cursor: int=FIRST_MINT_CURSOR) -> int:
 
         session.add_all(pristine_blocks)
 
-    return len(reconstructed_blocks) + len(pristine_blocks)
+    return len(retired_blocks) + len(pristine_blocks)
             
             
 def get_vcs_project_id(sinking_tx) -> Literal[1360]:
@@ -155,6 +155,7 @@ def reconstruct_blocks(
         latest_block = block
         reconstructed_blocks.append(block)
 
+    assert len(reconstructed_blocks) == len(mint_txs)
     return reconstructed_blocks
 
 def serial_matches_hash(reconstructed_serial: VcsSerialNumber, serial_hash: str) -> bool:

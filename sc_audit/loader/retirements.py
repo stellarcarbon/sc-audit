@@ -4,6 +4,7 @@ Load finalized retirements into the DB.
 Author: Alex Olieman <https://keybase.io/alioli>
 """
 import datetime as dt
+from functools import partial
 
 from sqlalchemy import select
 
@@ -62,7 +63,6 @@ def load_retirements(from_date: dt.date | None = None) -> int:
                         total_vintage_quantity=retirement_item['total_vintage_quantity'],
                     )
                 )
-
-        number_loaded = len(session.new)
+                number_loaded += 1
 
     return number_loaded

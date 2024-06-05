@@ -37,8 +37,7 @@ def load_retirement_from_block() -> int:
         for retirement in uncovered_retirements:
             from_blocks = cover_retirement(session, retirement)
             session.add_all(from_blocks)
-
-        number_loaded = len(session.new)
+            number_loaded += len(from_blocks)
 
     return number_loaded
 

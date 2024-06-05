@@ -36,8 +36,7 @@ def load_sink_statuses() -> int:
         for retirement in open_retirements:
             sink_statuses = create_sink_statuses(session, for_retirement=retirement)
             session.add_all(sink_statuses)
-
-        number_loaded = len(session.new)
+            number_loaded += len(sink_statuses)
 
     return number_loaded
 
