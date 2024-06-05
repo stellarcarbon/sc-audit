@@ -18,11 +18,13 @@ from sc_audit.loader.utils import VcsSerialNumber
 from sc_audit.session_manager import Session
 
 
-def load_retirement_from_block():
+def load_retirement_from_block() -> int:
     """
     Load the retirement—block associations to ensure that all retirements are explicitly covered
     by their originating blocks.
     """
+    number_loaded = 0
+
     with Session.begin() as session:
         # select the retirements that are not fully related to minted blocks
         query = (
@@ -35,6 +37,10 @@ def load_retirement_from_block():
         for retirement in uncovered_retirements:
             from_blocks = cover_retirement(session, retirement)
             session.add_all(from_blocks)
+
+        number_loaded = len(session.new)
+
+    return number_loaded
 
 def cover_retirement(session, retirement: Retirement) -> list[RetirementFromBlock]:
     serial_number = VcsSerialNumber.from_str(retirement.serial_number)

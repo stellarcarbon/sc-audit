@@ -25,7 +25,7 @@ from sc_audit.sources.carbon_pool import get_carbon_pool_state
 from sc_audit.sources.minting_txs import get_minting_transactions
 
 
-def load_minted_blocks(cursor: int=FIRST_MINT_CURSOR):
+def load_minted_blocks(cursor: int=FIRST_MINT_CURSOR) -> int:
     """
     Load (all) minting transactions from Horizon into the DB.
 
@@ -80,6 +80,8 @@ def load_minted_blocks(cursor: int=FIRST_MINT_CURSOR):
             session.add_all(reconstructed_blocks)
 
         session.add_all(pristine_blocks)
+
+    return len(reconstructed_blocks) + len(pristine_blocks)
             
             
 def get_vcs_project_id(sinking_tx) -> Literal[1360]:

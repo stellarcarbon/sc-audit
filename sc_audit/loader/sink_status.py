@@ -17,11 +17,13 @@ from sc_audit.db_schema.sink import SinkingTx
 from sc_audit.session_manager import Session
 
 
-def load_sink_statuses():
+def load_sink_statuses() -> int:
     """
     Load the retirement—sinking_tx associations to make the retirement status of sinking
     transactions explicit.
     """
+    number_loaded = 0
+
     with Session.begin() as session:
         # select the retirements that have filled less than their VCU amount
         query = (
@@ -34,6 +36,10 @@ def load_sink_statuses():
         for retirement in open_retirements:
             sink_statuses = create_sink_statuses(session, for_retirement=retirement)
             session.add_all(sink_statuses)
+
+        number_loaded = len(session.new)
+
+    return number_loaded
 
 
 def create_sink_statuses(session, for_retirement: Retirement) -> list[SinkStatus]:

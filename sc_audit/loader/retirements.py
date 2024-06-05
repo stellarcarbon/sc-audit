@@ -14,13 +14,14 @@ from sc_audit.session_manager import Session
 from sc_audit.sources.retirements import get_retirements_list
 
 
-def load_retirements(from_date: dt.date | None = None):
+def load_retirements(from_date: dt.date | None = None) -> int:
     """
     Load all retirements from Verra into the DB.
   
     TODO: add pagination (to support more than 2000 results)
     """
     retirement_data = get_retirements_list(from_date)
+    number_loaded = 0
 
     with Session.begin() as session:
         existing_ids: set[int] = set(session.scalars(select(Retirement.certificate_id)).all())
@@ -61,3 +62,7 @@ def load_retirements(from_date: dt.date | None = None):
                         total_vintage_quantity=retirement_item['total_vintage_quantity'],
                     )
                 )
+
+        number_loaded = len(session.new)
+
+    return number_loaded

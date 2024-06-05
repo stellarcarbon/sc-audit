@@ -16,13 +16,15 @@ from sc_audit.session_manager import Session
 from sc_audit.sources.sinking_txs import get_sinking_transactions, get_tx_operations
 
 
-def load_sinking_txs(cursor: int=FIRST_SINK_CURSOR):
+def load_sinking_txs(cursor: int=FIRST_SINK_CURSOR) -> int:
     """
     Load (all) sinking transactions from Horizon into the DB.
 
     To catch up with Horizon, specify the cursor parameter to be the incremented paging
     token of the latest record present in the DB.
     """
+    number_loaded = 0
+
     with Session.begin() as session:
         existing_vcs_projects: set[intpk] = set(session.scalars(select(VcsProject.id)).all())
         for sink_tx in get_sinking_transactions(cursor):
@@ -61,6 +63,10 @@ def load_sinking_txs(cursor: int=FIRST_SINK_CURSOR):
                     paging_token=sink_tx['paging_token'],
                 )
             )
+        
+        number_loaded = len(session.new)
+
+    return number_loaded
 
 
 def get_vcs_project_id(sinking_tx) -> Literal[1360]:
