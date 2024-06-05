@@ -72,8 +72,10 @@ def load_minted_blocks(cursor: int=FIRST_MINT_CURSOR) -> int:
             latest_loaded_block: MintedBlock | None = session.scalars(
                 select(MintedBlock).order_by(MintedBlock.paging_token.desc())
             ).first()
-            # TODO: select only retirements without retired_from_block relations
-            retirements: Sequence[Retirement] = session.scalars(select(Retirement)).all()
+            # select only retirements without retired_from_block relations
+            retirements: Sequence[Retirement] = session.scalars(
+                select(Retirement).where(~Retirement.retired_from.any())
+            ).all()
             reconstructed_blocks = reconstruct_blocks(
                 retired_blocks, latest_loaded_block, retirements
             )
