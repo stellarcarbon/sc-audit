@@ -7,6 +7,7 @@ Author: Alex Olieman <https://keybase.io/alioli>
 import click
 
 from sc_audit import migrations
+from sc_audit.loader.__main__ import catch_up_from_sources
 from sc_audit.loader.get_latest import get_latest_attr
 from sc_audit.loader.minted_blocks import load_minted_blocks
 from sc_audit.loader.retirement_from_block import load_retirement_from_block
@@ -19,6 +20,12 @@ from sc_audit.loader.sinking_txs import load_sinking_txs
 def cli():
     """CLI for Stellarcarbon Audit tool"""
     pass
+
+@cli.command(name="catch-up")
+def db_catch_up():
+    """Let the DB catch up with the data sources"""
+    # TODO: bootstrap by restoring DB dump
+    catch_up_from_sources()
 
 # LOADING
 
