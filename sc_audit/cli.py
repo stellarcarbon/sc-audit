@@ -3,6 +3,7 @@ SC Audit command line interface.
 
 Author: Alex Olieman <https://keybase.io/alioli>
 """
+import datetime as dt
 
 import click
 
@@ -14,9 +15,13 @@ from sc_audit.loader.retirement_from_block import load_retirement_from_block
 from sc_audit.loader.retirements import load_retirements
 from sc_audit.loader.sink_status import load_sink_statuses
 from sc_audit.loader.sinking_txs import load_sinking_txs
+from sc_audit.views.inventory import view_inventory
+from sc_audit.views.sink_status import view_sinking_txs
+from sc_audit.views.utils import format_df
 
 
 @click.group()
+@click.version_option(package_name="sc_audit")
 def cli():
     """CLI for Stellarcarbon Audit tool"""
     pass
@@ -26,6 +31,68 @@ def db_catch_up():
     """Let the DB catch up with the data sources"""
     # TODO: bootstrap by restoring DB dump
     catch_up_from_sources()
+
+# VIEWS
+
+@cli.group()
+def view():
+    """View the state of Stellarcarbon assets and transactions"""
+    pass
+
+view_format = click.Option(
+    ["-f", "--format"],
+    default="df",
+    type=click.Choice(['df', 'csv', 'json'], case_sensitive=False),
+    help="The output format for this view",
+    show_default=True,
+)
+
+@view.command(name="inventory", params=[view_format])
+@click.option("--omit-empty", is_flag=True, default=False, help="Don't show empty minted blocks")
+@click.option(
+    "--until-date", 
+    type=click.DateTime(formats=["%Y-%m-%d"]), 
+    help="Reconstruct the inventory on the given date"
+)
+def cli_view_inventory(omit_empty: bool, until_date: dt.datetime | None, format: str):
+    """View Stellarcarbon's current or historical inventory of eco-credits"""
+    until_dt_date = until_date.date() if until_date else None
+    mbdf = view_inventory(omit_empty=omit_empty, until_date=until_dt_date)
+    click.echo(format_df(mbdf, format=format))
+
+@view.command(name="sink", params=[view_format])
+@click.option("--funder", help="Only show transactions for the given funder address")
+@click.option("--recipient", help="Only show transactions for the given recipient address")
+@click.option(
+    "--from-date", 
+    type=click.DateTime(formats=["%Y-%m-%d"]), 
+    help="Filter transactions that happened on or after the given date"
+)
+@click.option(
+    "--before-date", 
+    type=click.DateTime(formats=["%Y-%m-%d"]), 
+    help="Filter transactions that happened before the given date"
+)
+@click.option("--finalized", type=bool, help="Filter by retirement status")
+def cli_view_sink_status(
+        funder: str | None,
+        recipient: str | None, 
+        from_date: dt.datetime | None,
+        before_date: dt.datetime | None,
+        finalized: bool | None,
+        format: str,
+    ):
+    """View sinking transactions and their retirement status"""
+    from_dt_date = from_date.date() if from_date else None
+    before_dt_date = before_date.date() if before_date else None
+    txdf = view_sinking_txs(
+        for_funder=funder,
+        for_recipient=recipient,
+        from_date=from_dt_date,
+        before_date=before_dt_date,
+        finalized=finalized,
+    )
+    click.echo(format_df(txdf, format=format))
 
 # LOADING
 
