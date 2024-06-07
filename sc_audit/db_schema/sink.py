@@ -12,7 +12,7 @@ from sqlalchemy import ForeignKey, Index, String
 from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from sc_audit.db_schema.base import ScBase, hashpk, strkey
+from sc_audit.db_schema.base import ScBase, hashpk, kgdecimal, strkey, stroopdecimal
 from sc_audit.db_schema.impact_project import VcsProject
 
 if typing.TYPE_CHECKING:
@@ -29,13 +29,13 @@ class SinkingTx(ScBase):
     created_at: Mapped[dt.datetime]
     funder: Mapped[strkey]
     recipient: Mapped[strkey]
-    carbon_amount: Mapped[Decimal]
+    carbon_amount: Mapped[kgdecimal]
     source_asset_code: Mapped[str] = mapped_column(String(12))
     source_asset_issuer: Mapped[strkey | None]
-    source_asset_amount: Mapped[Decimal]
+    source_asset_amount: Mapped[stroopdecimal]
     dest_asset_code: Mapped[str] = mapped_column(String(12))
     dest_asset_issuer: Mapped[strkey]
-    dest_asset_amount: Mapped[Decimal]
+    dest_asset_amount: Mapped[stroopdecimal]
     vcs_project_id: Mapped[int] = mapped_column(ForeignKey("vcs_projects.id"))
     vcs_project: Mapped[VcsProject] = relationship(init=False, repr=False)
     memo_type: Mapped[MemoType]

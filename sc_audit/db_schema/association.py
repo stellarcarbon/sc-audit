@@ -1,11 +1,10 @@
 from __future__ import annotations
-from decimal import Decimal
 import typing
 
 from sqlalchemy import ForeignKey, Index
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from sc_audit.db_schema.base import ScBase, intpk, hashpk
+from sc_audit.db_schema.base import ScBase, intpk, hashpk, kgdecimal
 
 if typing.TYPE_CHECKING:
     from sc_audit.db_schema import MintedBlock, Retirement, SinkingTx
@@ -33,7 +32,7 @@ class SinkStatus(ScBase):
 
     sinking_tx_hash: Mapped[hashpk] = mapped_column(ForeignKey('sinking_txs.hash'))
     certificate_id: Mapped[intpk] = mapped_column(ForeignKey('retirements.certificate_id'))
-    amount_filled: Mapped[Decimal]
+    amount_filled: Mapped[kgdecimal]
     finalized: Mapped[bool]
 
     sinking_transaction: Mapped[SinkingTx] = relationship(

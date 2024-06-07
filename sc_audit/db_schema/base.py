@@ -3,6 +3,7 @@ SQLAlchemy Declarative Dataclass setup.
 
 Author: Alex Olieman <https://keybase.io/alioli>
 """
+from decimal import Decimal
 from typing import Annotated
 
 from sqlalchemy import Dialect, String
@@ -32,6 +33,8 @@ class HexBinary(types.TypeDecorator):
 intpk = Annotated[int, mapped_column(primary_key=True)]
 hashpk = Annotated[str, mapped_column(HexBinary(length=32), primary_key=True)]
 strkey = Annotated[str, mapped_column(String(56))]
+kgdecimal = Annotated[Decimal, mapped_column(types.DECIMAL(precision=21, scale=3))]
+stroopdecimal = Annotated[Decimal, mapped_column(types.DECIMAL(precision=21, scale=7))]
 
 
 class ScBase(MappedAsDataclass, DeclarativeBase):
