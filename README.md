@@ -31,10 +31,10 @@ Follow along with our progress:
 
 - [ ] Python packaging
 - [ ] Dockerfile
-- [ ] command line interface
-  - [ ] fill the database
-  - [ ] table view inventory
-  - [ ] table view retirements
+- [x] command line interface
+  - [x] fill the database
+  - [x] table view inventory
+  - [x] table view retirements
 - [ ] documentation
 
 [Deliverable 4]
