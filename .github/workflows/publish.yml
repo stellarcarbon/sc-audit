@@ -1,0 +1,28 @@
+name: Build and publish as Python package
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: release
+    permissions:
+      id-token: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+
+      - name: Install Poetry
+        uses: snok/install-poetry@v1
+
+      - name: Build package
+        run: poetry build
+
+      - name: Publish package
+        uses: pypa/gh-action-pypi-publish@87b624f8716b1150d93f45fa364e49eceebf3ffd
