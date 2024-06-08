@@ -1,10 +1,12 @@
 [tool.poetry]
 name = "sc-audit"
-version = "0.0.1"
+version = "0.1.0"
 description = "Stellarcarbon database with monitoring and audit functionality"
 authors = ["Alex Olieman <https://keybase.io/alioli>"]
 license = "MIT"
 readme = "README.md"
+homepage = "https://www.stellarcarbon.io/"
+repository = "https://github.com/stellarcarbon/sc-audit"
 packages = [{include = "sc_audit"}]
 
 [tool.poetry.dependencies]
