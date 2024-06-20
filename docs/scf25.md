@@ -1,8 +1,4 @@
-# sc-audit
-
-Core database with monitoring and audit functionality
-
-## SCF#25
+# SCF#25
 
 Follow along with our progress:
 
