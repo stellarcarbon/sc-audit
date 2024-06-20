@@ -10,28 +10,32 @@ ENV PYTHONFAULTHANDLER=1 \
   POETRY_VIRTUALENVS_CREATE=false \
   POETRY_CACHE_DIR='/var/cache/pypoetry' \
   POETRY_HOME='/usr/local' \
-  POETRY_VERSION=1.8.0
+  POETRY_VERSION=1.8.0 \
+  SC_DBAPI_URL='sqlite+pysqlite:////opt/data/sc-audit.sqlite3'
 
 # Install Poetry:
 RUN apt-get update && apt-get install -y curl
 RUN curl -sSL https://install.python-poetry.org | python3 -
 
 # Install Python dependencies:
-WORKDIR /code
-COPY poetry.lock pyproject.toml /code/
+WORKDIR /opt/code
+COPY poetry.lock pyproject.toml /opt/code/
 RUN poetry install --only=main --no-root
 
 # Install sc-audit:
-COPY . /code
+COPY . /opt/code
 RUN poetry install --only=main
 
 # Initialize DB with schema
+RUN mkdir /opt/data
 RUN sc-audit schema upgrade
 
 # TODO: bootstrap/restore DB from dump
 
 # Do an initial DB catch-up
 RUN sc-audit catch-up
+
+VOLUME [ "/opt/data" ]
 
 LABEL org.opencontainers.image.source=https://github.com/stellarcarbon/sc-audit
 LABEL org.opencontainers.image.description="Stellarcarbon core database with monitoring and audit functionality"
