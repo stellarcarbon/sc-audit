@@ -29,13 +29,13 @@ Follow along with our progress:
 
     CLI, packaging, and containerization
 
-- [ ] Python packaging
-- [ ] Dockerfile
+- [x] Python packaging
+- [x] Dockerfile
 - [x] command line interface
   - [x] fill the database
   - [x] table view inventory
   - [x] table view retirements
-- [ ] documentation
+- [x] documentation
 
 [Deliverable 4]
 
