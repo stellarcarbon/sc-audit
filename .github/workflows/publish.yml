@@ -56,6 +56,8 @@ jobs:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
           tags: |
             type=pep440,pattern={{version}},value=${{ github.event.release.tag_name }}
+            type=pep440,pattern={{major}}.{{minor}},value=${{ github.event.release.tag_name }}
+            type=pep440,pattern={{major}},enable=${{ !startsWith(github.ref, 'refs/tags/v0.') }},value=${{ github.event.release.tag_name }}
 
       - name: Build and push Docker image
         id: push
