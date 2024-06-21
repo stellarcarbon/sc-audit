@@ -9,7 +9,6 @@ alembic_config = Config(package_root / "alembic.ini")
 
 
 def current(verbose=False):
-    print(package_root / "alembic.ini")
     command.current(alembic_config, verbose=verbose)
 
 
