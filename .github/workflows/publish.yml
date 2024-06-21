@@ -1,8 +1,10 @@
 name: Build and publish to PyPI and ghcr.io
 
 on:
-  release:
-    types: [published]
+  workflow_dispatch:
+  push:
+    tags:
+      - 'v*'
 
 env:
   REGISTRY: ghcr.io
