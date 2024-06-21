@@ -14,7 +14,7 @@ Start by pulling the latest published image from ghcr.io:
 docker pull ghcr.io/stellarcarbon/sc-audit
 ```
 
-This Docker image is intended for single-command usage. It will not keep running a process, and exits as soon as it is done. Mount its data volume locally to persist the database, and run the containers with `--rm` to avoid the litter of stopped containers.
+This Docker image is intended for single-command usage. It will not keep a process running, and exits as soon as it is done. Mount its data volume locally to persist the database, and run the containers with `--rm` to avoid the litter of stopped containers.
 
 You'll want to let the database catch up with its data sources at the start of each usage session:
 
@@ -195,7 +195,7 @@ There isn't much to configure in sc-audit. Two variables can be overriden by env
 
 | env variable     | description               |
 |------------------|---------------------------|
-| `SC_DBAPI_URL`   | default: `sqlite+pysqlite:/// { get_default_db_path () }`<br>The default value places an SQLite DB file in the working dir or in a subdir of the home dir. |
+| `SC_DBAPI_URL`   | default: `sqlite+pysqlite:///{get_default_db_path()}`<br>The default value places an SQLite DB file in the working dir or in a subdir of the home dir. |
 | `SC_HORIZON_URL` | default: `https://horizon.stellar.org`<br>Set this value to a Horizon instance with full history to be able to do a fresh load. |
 
 ## Development
