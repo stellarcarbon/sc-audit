@@ -102,10 +102,11 @@ Options:
   --help  Show this message and exit.
 
 Commands:
-  associations   Load associations into the DB
-  minted-blocks  Load minted blocks into the DB
-  retirements    Load retirements into the DB
-  sinking-txs    Load sinking transactions into the DB
+  associations      Load associations into the DB
+  distribution-txs  Load distribution outflows into the DB
+  minted-blocks     Load minted blocks into the DB
+  retirements       Load retirements into the DB
+  sinking-txs       Load sinking transactions into the DB
 ```
 
 The Python API for loading data is contained in the `sc_audit.loader` module. Take a look at the `sc_audit.loader.__main__.catch_up_from_sources` function for inspiration on how to load only new records into the DB.

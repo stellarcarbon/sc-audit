@@ -9,6 +9,7 @@ import click
 
 from sc_audit import migrations
 from sc_audit.loader.__main__ import catch_up_from_sources
+from sc_audit.loader.distribution_outflows import load_distribution_txs
 from sc_audit.loader.get_latest import get_latest_attr
 from sc_audit.loader.minted_blocks import load_minted_blocks
 from sc_audit.loader.retirement_from_block import load_retirement_from_block
@@ -107,6 +108,13 @@ def db_load_minted_blocks():
     mint_cursor = get_latest_attr('mint_tx')
     num_minting_txs = load_minted_blocks(cursor=mint_cursor) # type: ignore
     click.echo(f"Loaded {num_minting_txs} minted blocks")
+
+@load.command(name="distribution-txs")
+def db_load_distribution_outflows():
+    """Load distribution outflows into the DB"""
+    dist_cursor = get_latest_attr('dist_tx')
+    num_distribution_txs = load_distribution_txs(cursor=dist_cursor) # type: ignore
+    click.echo(f"Loaded {num_distribution_txs} distribution outflows")
 
 @load.command(name="sinking-txs")
 def db_load_sinking_txs():

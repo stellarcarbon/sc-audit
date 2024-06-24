@@ -14,6 +14,7 @@ Author: Alex Olieman <https://keybase.io/alioli>
 """
 import datetime as dt
 
+from sc_audit.loader.distribution_outflows import load_distribution_txs
 from sc_audit.loader.get_latest import get_latest_attr
 from sc_audit.loader.minted_blocks import load_minted_blocks
 from sc_audit.loader.retirement_from_block import load_retirement_from_block
@@ -30,13 +31,17 @@ def catch_up_from_sources():
     retirement_date: dt.date
     sink_cursor: int
     mint_cursor: int
-    retirement_date, sink_cursor, mint_cursor = get_latest_attr(
+    dist_cursor: int
+    retirement_date, sink_cursor, mint_cursor, dist_cursor = get_latest_attr(
         'retirement', 
         'sink_tx', 
-        'mint_tx'
+        'mint_tx',
+        'dist_tx'
     ) # type: ignore
 
     print("Started catch-up from data sources...")
+    num_distribution_txs = load_distribution_txs(cursor=dist_cursor)
+    print(f"Loaded {num_distribution_txs} distribution outflows")
     num_retirements = load_retirements(from_date=retirement_date)
     print(f"Loaded {num_retirements} retirements")
     num_sinking_txs = load_sinking_txs(cursor=sink_cursor)

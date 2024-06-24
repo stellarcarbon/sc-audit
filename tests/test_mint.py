@@ -1,13 +1,16 @@
 import datetime as dt
+from decimal import Decimal
 
 import pytest
 from sqlalchemy import select
 import sqlalchemy.orm.exc as orm_exc
 
 from sc_audit.db_schema import *
+from sc_audit.db_schema.distribution import DistributionTx
 from sc_audit.db_schema.impact_project import UnknownVcsProject
 from sc_audit.db_schema.mint import verra_carbon_pool
 from sc_audit.loader import minted_blocks
+from sc_audit.loader import distribution_outflows
 from sc_audit.loader.minted_blocks import (
     index_carbon_pool, 
     load_minted_blocks, 
@@ -15,9 +18,10 @@ from sc_audit.loader.minted_blocks import (
     serial_matches_hash,
 )
 from sc_audit.loader.utils import VcsSerialNumber, decode_hash_memo
-from sc_audit.sources.minting_txs import filter_minting_txs
+from sc_audit.sources.minting_txs import filter_distribution_txs, filter_minting_txs
 from tests.db_fixtures import connection, new_session, vcs_project
 from tests.data_fixtures.carbon_pool import carbon_pool as carbon_pool_fix
+from tests.data_fixtures.minting_transactions import distribution_records as outflows_fix
 from tests.data_fixtures.minting_transactions import minting_transactions as mint_tx_fix
 from tests.data_fixtures.minting_transactions import payment_records as payments_fix
 from tests.data_fixtures.retirements import get_retirements
@@ -92,10 +96,16 @@ class TestMintSources:
         mint_txs = list(filter_minting_txs(payments_fix))
         assert len(mint_txs) == 1
 
+    def test_filter_dist_txs(self):
+        assert len(outflows_fix) == 6
+        dist_payments = list(filter_distribution_txs(outflows_fix))
+        assert len(dist_payments) == 4
+
 
 @pytest.fixture
 def mock_session(monkeypatch, new_session):
     monkeypatch.setattr(minted_blocks, 'Session', new_session)
+    monkeypatch.setattr(distribution_outflows, 'Session', new_session)
     return new_session
 
 @pytest.fixture
@@ -106,8 +116,12 @@ def mock_http(monkeypatch):
     def mock_mint_txs(cursor):
         return mint_tx_fix
     
+    def mock_dist_txs(cursor):
+        return list(filter_distribution_txs(outflows_fix))
+    
     monkeypatch.setattr(minted_blocks, 'get_carbon_pool_state', mock_carbon_pool)
     monkeypatch.setattr(minted_blocks, 'get_minting_transactions', mock_mint_txs)
+    monkeypatch.setattr(distribution_outflows, 'get_carbon_outflows', mock_dist_txs)
 
 
 class TestMintLoader:
@@ -154,6 +168,23 @@ class TestMintLoader:
             for block in loaded_blocks:
                 serial_number = VcsSerialNumber.from_str(block.serial_number)
                 assert serial_matches_hash(serial_number, block.serial_hash)
+
+    def test_load_distribution_outflows(self, mock_session, mock_http):
+        distribution_outflows.load_distribution_txs()
+
+        with mock_session.begin() as session:
+            loaded_outflows = session.scalars(
+                select(DistributionTx).order_by(DistributionTx.paging_token.asc())
+            ).all()
+            assert len(loaded_outflows) == 4
+            total_outflow = sum(
+                (
+                    outflow.carbon_amount
+                    for outflow in loaded_outflows
+                ),
+                start=Decimal(),
+            )
+            assert total_outflow == Decimal("8.283")
 
 
 @pytest.fixture

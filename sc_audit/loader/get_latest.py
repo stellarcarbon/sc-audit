@@ -9,14 +9,15 @@ from typing import Literal, Union
 from sqlalchemy import select
 from stellar_sdk.sep.toid import TOID
 
-from sc_audit.constants import FIRST_MINT_CURSOR, FIRST_SINK_CURSOR
+from sc_audit.constants import FIRST_DIST_CURSOR, FIRST_MINT_CURSOR, FIRST_SINK_CURSOR
+from sc_audit.db_schema.distribution import DistributionTx
 from sc_audit.db_schema.mint import MintedBlock
 from sc_audit.db_schema.retirement import Retirement
 from sc_audit.db_schema.sink import SinkingTx
 from sc_audit.session_manager import Session
 
 
-CoreModelName = Literal['mint_tx', 'retirement', 'sink_tx']
+CoreModelName = Literal['dist_tx', 'mint_tx', 'retirement', 'sink_tx']
 LatestAttr = Union[dt.date, int, None]
 
 def get_latest_attr(*models: CoreModelName) -> LatestAttr | list[LatestAttr]:
@@ -38,6 +39,11 @@ def get_latest_attr(*models: CoreModelName) -> LatestAttr | list[LatestAttr]:
                     select(MintedBlock.paging_token).order_by(MintedBlock.created_at.desc())
                 )
                 latest_attrs[i] = increment_paging_token(latest_mint_tx_cursor) or FIRST_MINT_CURSOR
+            elif model == 'dist_tx':
+                latest_dist_tx_cursor = session.scalar(
+                    select(DistributionTx.paging_token).order_by(DistributionTx.created_at.desc())
+                )
+                latest_attrs[i] = increment_paging_token(latest_dist_tx_cursor) or FIRST_DIST_CURSOR
 
     if len(latest_attrs) == 1:
         return latest_attrs[0]
