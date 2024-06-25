@@ -4,10 +4,12 @@ SC Audit command line interface.
 Author: Alex Olieman <https://keybase.io/alioli>
 """
 import datetime as dt
+from pathlib import Path
 
 import click
 
 from sc_audit import migrations
+from sc_audit.backup.dump import dump_table, get_table_names
 from sc_audit.loader.__main__ import catch_up_from_sources
 from sc_audit.loader.distribution_outflows import load_distribution_txs
 from sc_audit.loader.get_latest import get_latest_attr
@@ -26,6 +28,7 @@ from sc_audit.views.utils import format_df
 def cli():
     """CLI for Stellarcarbon Audit tool"""
     pass
+
 
 @cli.command(name="catch-up")
 def db_catch_up():
@@ -60,6 +63,7 @@ def cli_view_inventory(omit_empty: bool, until_date: dt.datetime | None, format:
     until_dt_date = until_date.date() if until_date else None
     mbdf = view_inventory(omit_empty=omit_empty, until_date=until_dt_date)
     click.echo(format_df(mbdf, format=format))
+
 
 @view.command(name="sink", params=[view_format])
 @click.option("--funder", help="Only show transactions for the given funder address")
@@ -102,12 +106,14 @@ def load():
     """Load data from their original sources"""
     pass
 
+
 @load.command(name="minted-blocks")
 def db_load_minted_blocks():
     """Load minted blocks into the DB"""
     mint_cursor = get_latest_attr('mint_tx')
     num_minting_txs = load_minted_blocks(cursor=mint_cursor) # type: ignore
     click.echo(f"Loaded {num_minting_txs} minted blocks")
+
 
 @load.command(name="distribution-txs")
 def db_load_distribution_outflows():
@@ -116,6 +122,7 @@ def db_load_distribution_outflows():
     num_distribution_txs = load_distribution_txs(cursor=dist_cursor) # type: ignore
     click.echo(f"Loaded {num_distribution_txs} distribution outflows")
 
+
 @load.command(name="sinking-txs")
 def db_load_sinking_txs():
     """Load sinking transactions into the DB"""
@@ -123,12 +130,14 @@ def db_load_sinking_txs():
     num_sinking_txs = load_sinking_txs(cursor=sink_cursor) # type: ignore
     click.echo(f"Loaded {num_sinking_txs} sinking transactions")
 
+
 @load.command(name="retirements")
 def db_load_retirements():
     """Load retirements into the DB"""
     retirement_date = get_latest_attr('retirement')
     num_retirements = load_retirements(from_date=retirement_date) # type: ignore
     click.echo(f"Loaded {num_retirements} retirements")
+
 
 @load.command(name="associations")
 def db_load_associations():
@@ -164,3 +173,29 @@ def db_upgrade_schema(revision):
 def db_downgrade_schema(revision):
     """Revert to a previous database revision. Specify "base" to reset the DB schema."""
     migrations.downgrade(revision)
+
+# BACKUP
+
+@cli.group()
+def backup():
+    """Database dump and restore commands"""
+    pass
+
+
+@backup.command(name="dump")
+@click.argument("output_dir", type=click.Path(file_okay=False, dir_okay=True), required=True)
+@click.option("-t", "--table", required=False, multiple=True, type=click.Choice(get_table_names()))
+def db_dump_tables(output_dir, table: list[str]):
+    """Dump the selected tables to ndjson files (default: all tables)"""
+    tables = table  # ugly
+    if not tables:
+        tables = get_table_names()
+
+    output = Path(output_dir)
+    output.mkdir(exist_ok=True)
+    for table_name in tables:
+        file_path = output / f"{table_name}.ndjson"
+        dump_table(db_model=table_name, output_path=file_path)
+        click.echo(f"Wrote {table_name} to {file_path}")
+
+    

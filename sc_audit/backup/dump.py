@@ -21,7 +21,7 @@ def dump_table(db_model: type[ScBase] | str, output_path: Path | None = None) ->
         try:
             db_table = ScBase.metadata.tables[db_model]
         except KeyError:
-            table_names = list(ScBase.metadata.tables.keys())
+            table_names = get_table_names()
             raise KeyError(f"`db_model` must be one of {table_names}")
         
     ndjson_table = table_to_ndjson(db_table)
@@ -44,3 +44,7 @@ def table_to_ndjson(db_table: Table) -> str:
         date_format='iso',
         date_unit='s',
     )[1:-1].replace("],[", "]\n[")
+
+
+def get_table_names() -> list[str]:
+    return list(ScBase.metadata.tables.keys())
