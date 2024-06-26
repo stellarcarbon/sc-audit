@@ -10,6 +10,7 @@ import click
 
 from sc_audit import migrations
 from sc_audit.backup.dump import dump_table, get_table_names
+from sc_audit.backup.restore import TABLE_LOADING_ORDER, restore_all_tables, restore_table
 from sc_audit.loader.__main__ import catch_up_from_sources
 from sc_audit.loader.distribution_outflows import load_distribution_txs
 from sc_audit.loader.get_latest import get_latest_attr
@@ -197,5 +198,24 @@ def db_dump_tables(output_dir, table: list[str]):
         file_path = output / f"{table_name}.ndjson"
         dump_table(db_model=table_name, output_path=file_path)
         click.echo(f"Wrote {table_name} to {file_path}")
+
+
+@backup.command(name="restore")
+@click.argument("input_dir", type=click.Path(file_okay=False, dir_okay=True), required=True)
+@click.option("--replace", is_flag=True, help="Replace existing rows in tables with the backup")
+@click.option("-t", "--table", required=False, multiple=True, help="The table name, see `dump`")
+def db_restore_tables(input_dir, replace: bool, table: list[str]):
+    """Restore the selected tables to the database (default: all files)"""
+    selected_tables = table  # ugly
+    input_dir = Path(input_dir)
+
+    if selected_tables:
+        for db_model in TABLE_LOADING_ORDER:
+            table_name = db_model.__table__.name # type: ignore
+            if table_name in selected_tables:
+                dump_file = input_dir / f"{table_name}.ndjson"
+                restore_table(dump_file, replace=replace)
+    else:
+        restore_all_tables(input_dir, replace=replace)
 
     

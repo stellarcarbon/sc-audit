@@ -37,8 +37,8 @@ Follow along with our progress:
 
     Database dump and restore tool
 
-- [ ] dump core tables
-- [ ] restore dumps
+- [x] dump core tables
+- [x] restore dumps
 - [ ] catch up from live sources
 - [ ] fresh load
 - [ ] test coverage
