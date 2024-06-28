@@ -30,8 +30,6 @@ RUN poetry install --only=main
 RUN mkdir /opt/data
 RUN sc-audit schema upgrade
 
-# TODO: bootstrap/restore DB from dump
-
 # Do an initial DB catch-up
 RUN sc-audit catch-up
 

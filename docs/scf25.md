@@ -39,6 +39,6 @@ Follow along with our progress:
 
 - [x] dump core tables
 - [x] restore dumps
-- [ ] catch up from live sources
-- [ ] fresh load
+- [x] catch up from live sources
+- [x] fresh load
 - [ ] test coverage

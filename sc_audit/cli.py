@@ -5,12 +5,14 @@ Author: Alex Olieman <https://keybase.io/alioli>
 """
 import datetime as dt
 from pathlib import Path
+import shutil
 
 import click
 
 from sc_audit import migrations
+from sc_audit.backup.download import download_compatible_dumps
 from sc_audit.backup.dump import dump_table, get_table_names
-from sc_audit.backup.restore import TABLE_LOADING_ORDER, restore_all_tables, restore_table
+from sc_audit.backup.restore import TABLE_LOADING_ORDER, get_table_row_counts, restore_all_tables, restore_table
 from sc_audit.loader.__main__ import catch_up_from_sources
 from sc_audit.loader.distribution_outflows import load_distribution_txs
 from sc_audit.loader.get_latest import get_latest_attr
@@ -32,9 +34,15 @@ def cli():
 
 
 @cli.command(name="catch-up")
-def db_catch_up():
+@click.option("--fresh", is_flag=True, help="Don't bootstrap loading from a backup")
+def db_catch_up(fresh: bool):
     """Let the DB catch up with the data sources"""
-    # TODO: bootstrap by restoring DB dump
+    if not fresh and not all(get_table_row_counts().values()):
+        click.echo("Downloading database dumps...")
+        download_dir = download_compatible_dumps()
+        restore_all_tables(download_dir)
+        shutil.rmtree(download_dir)
+    
     catch_up_from_sources()
 
 # VIEWS
@@ -53,7 +61,7 @@ view_format = click.Option(
 )
 
 @view.command(name="inventory", params=[view_format])
-@click.option("--omit-empty", is_flag=True, default=False, help="Don't show empty minted blocks")
+@click.option("--omit-empty", is_flag=True, help="Don't show empty minted blocks")
 @click.option(
     "--until-date", 
     type=click.DateTime(formats=["%Y-%m-%d"]), 
