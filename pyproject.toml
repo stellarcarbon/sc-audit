@@ -19,6 +19,7 @@ stellar-sdk = "^9.3.0"
 pandas = "^2.2.2"
 alembic = "^1.13.1"
 click = "^8.1.7"
+pygithub = "^2.3.0"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^8.1.1"

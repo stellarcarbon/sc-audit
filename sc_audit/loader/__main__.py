@@ -6,9 +6,8 @@ Load all database records in the order:
   4. Retirement from Block
   5. Sink Statuses
 
-Bootstrap the loading process by restoring a DB dump before catching up from live sources.
-Do not restore a dump first if a fresh load is requested. This may fail if a Horizon instance
-with pruned history is selected. You may select another with the SC_HORIZON_URL env variable.
+Loading from scratch may fail if a Horizon instance with pruned history is selected.
+You may select another instance with the SC_HORIZON_URL env variable.
 
 Author: Alex Olieman <https://keybase.io/alioli>
 """

@@ -87,3 +87,13 @@ def df_from_ndjson(json_path: Path) -> pd.DataFrame:
             table_df[col_name] = pd.to_datetime(table_df[col_name], format='ISO8601')
 
     return table_df
+
+
+def get_table_row_counts() -> dict[str, int]:
+    row_counts: dict[str, int] = {}
+    with Session.begin() as session:
+        for table_name, table in ScBase.metadata.tables.items():
+            num_rows = session.scalar(select(func.count()).select_from(table))
+            row_counts[table_name] = num_rows or 0
+
+    return row_counts
