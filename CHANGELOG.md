@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.1](https://github.com/stellarcarbon/sc-audit/compare/v0.3.0...v0.3.1) (2024-07-04)
+
+
+### Dependencies
+
+* upgrade stellar-sdk version ([8a2e595](https://github.com/stellarcarbon/sc-audit/commit/8a2e595b92bcc3fa079adbb7e391f10958abe30e))
+
 ## [0.3.0](https://github.com/stellarcarbon/sc-audit/compare/v0.2.0...v0.3.0) (2024-06-28)
 
 
