@@ -1598,13 +1598,13 @@ sqlcipher = ["sqlcipher3_binary"]
 
 [[package]]
 name = "stellar-sdk"
-version = "9.4.0"
+version = "10.0.0"
 description = "The Python Stellar SDK library provides APIs to build transactions and connect to Horizon and Soroban-RPC server."
 optional = false
 python-versions = "<4.0,>=3.8"
 files = [
-    {file = "stellar_sdk-9.4.0-py3-none-any.whl", hash = "sha256:b5fed2b91a6082de678d88d4027744f30e6af586d7a91ece0f65fd8bcbad75b5"},
-    {file = "stellar_sdk-9.4.0.tar.gz", hash = "sha256:0014233f3f8e96f723042a37e0d7ff398a0a162b1671cd853c157cade662ff39"},
+    {file = "stellar_sdk-10.0.0-py3-none-any.whl", hash = "sha256:22b9e0f119850932c60f28c6c869b39966d24d4f633d50c55568b56193394226"},
+    {file = "stellar_sdk-10.0.0.tar.gz", hash = "sha256:e1ee4b27bb9230629f40fa106089cd05cddfcfe4586e687fa31e2c4b09d26e3a"},
 ]
 
 [package.dependencies]
@@ -1793,4 +1793,4 @@ files = [
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.12"
-content-hash = "7007d28942c920f2c3b0ca2d43e14be61a8c62b5cdf13a9c5cee462e5723e3db"
+content-hash = "ff179f81738c25651f2fb3cdd8072c623bc0092697b84305935a0a417f00a242"
