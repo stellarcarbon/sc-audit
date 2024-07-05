@@ -171,11 +171,13 @@ class TestSinkStatusView:
         txdf = sink_status_view.view_sinking_txs(finalized=True)
         assert len(txdf) == 18
         assert txdf.carbon_amount.sum() == 23
+        assert all(txdf.statuses.astype(bool))
 
     def test_sink_status_finalized_false(self, mock_session_with_associations):
         txdf = sink_status_view.view_sinking_txs(finalized=False)
         assert len(txdf) == 2
         assert txdf.carbon_amount.sum() == Decimal('3.298')
+        assert not any(txdf.statuses.astype(bool))
 
 
 @pytest.fixture

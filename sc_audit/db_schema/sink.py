@@ -61,7 +61,10 @@ class SinkingTx(ScBase):
             col: getattr(self, col)
             for col in self.__table__.columns.keys()
         }
-        data['statuses'] = [status.as_dict() for status in self.statuses]
+        data['statuses'] = [
+            status.as_dict() for status in self.statuses
+            if status.certificate_id
+        ]
         return data
     
 
