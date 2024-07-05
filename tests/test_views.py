@@ -139,7 +139,8 @@ class TestSinkStatusView:
 
     def test_sink_status_for_recipient(self, mock_session_with_associations):
         txdf = sink_status_view.view_sinking_txs(
-            for_recipient="GBIH7Z3SMZUX62JPLLDTHA3QEVMRCGUCUQVCFFRJTEGCKB4MV4NGU7BE"
+            for_recipient="GBIH7Z3SMZUX62JPLLDTHA3QEVMRCGUCUQVCFFRJTEGCKB4MV4NGU7BE",
+            order='asc',
         )
         assert len(txdf) == 2
         assert txdf.carbon_amount.sum() == 2

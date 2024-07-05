@@ -6,6 +6,7 @@ Transactions can be filtered by account, by date, and by their retirement status
 Author: Alex Olieman <https://keybase.io/alioli>
 """
 import datetime as dt
+from typing import Literal
 
 import pandas as pd
 from sqlalchemy import Select, or_, select
@@ -22,8 +23,12 @@ def view_sinking_txs(
         from_date: dt.date | None = None,
         before_date: dt.date | None = None,
         finalized: bool | None = None,
+        order: Literal['asc', 'desc'] = 'desc',
 ) -> pd.DataFrame:
     stx_query = construct_stx_query(for_funder, for_recipient, from_date, before_date, finalized)
+    if order == 'desc':
+        stx_query = stx_query.order_by(SinkingTx.created_at.desc())
+        
     with Session.begin() as session:
         stx_records = session.scalars(stx_query).unique().all()
         txdf = pd.DataFrame.from_records(stx.as_dict() for stx in stx_records)
