@@ -206,6 +206,14 @@ class TestSinkStatusView:
         assert len(combined_pages) == 20
 
 
+class TestGetByPk:
+    def test_get_sinking_tx(self, mock_session_with_associations):
+        stx = sink_status_view.get_sinking_tx(
+            "61d4ff5516b7098bbc2219d244e7f29a039c32735e1c16d1c05d66a0739727d9"
+        )
+        assert stx and stx['paging_token'] == 164821723627237383
+
+
 @pytest.fixture
 def mock_session(monkeypatch, new_session):
     monkeypatch.setattr(minted_blocks, 'Session', new_session)

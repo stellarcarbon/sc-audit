@@ -6,11 +6,11 @@ Transactions can be filtered by account, by date, and by their retirement status
 Author: Alex Olieman <https://keybase.io/alioli>
 """
 import datetime as dt
-from typing import Literal
+from typing import Any, Literal
 
 import pandas as pd
 from sqlalchemy import Select, or_, select
-from sqlalchemy.orm import contains_eager
+from sqlalchemy.orm import contains_eager, selectinload
 
 from sc_audit.db_schema.association import SinkStatus
 from sc_audit.db_schema.sink import SinkingTx
@@ -46,7 +46,8 @@ def view_sinking_txs(
         txdf = pd.DataFrame.from_records(stx.as_dict() for stx in stx_records)
 
     return txdf
-    
+
+
 def construct_stx_query(
         for_funder: str | None,
         for_recipient: str | None, 
@@ -76,3 +77,16 @@ def construct_stx_query(
         q_txs = q_txs.where(SinkStatus.finalized == True)
 
     return q_txs
+
+
+def get_sinking_tx(hash: str) -> dict[str, Any] | None:
+    stx_query = (
+        select(SinkingTx)
+        .options(selectinload(SinkingTx.statuses))
+        .where(SinkingTx.hash == hash)
+    )
+    with Session.begin() as session:
+        stx = session.scalar(stx_query)
+        stx_data = stx.as_dict() if stx else None
+
+    return stx_data
