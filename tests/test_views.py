@@ -1,7 +1,7 @@
 import datetime as dt
 from decimal import Decimal
 
-from pandas import Timestamp
+import pandas as pd
 import pytest
 
 from sc_audit.loader import minted_blocks, retirement_from_block
@@ -34,24 +34,24 @@ class TestInventoryView:
         assert len(mbdf) == 3
         assert mbdf['size'].sum() == 26
         assert mbdf['credits_remaining_on_date'].sum() == 25
-        assert mbdf['created_at'].min() == Timestamp('2021-11-20 13:06:51')
-        assert mbdf['created_at'].max() == Timestamp('2021-11-21 00:04:23')
+        assert mbdf['created_at'].min() == pd.Timestamp('2021-11-20 13:06:51')
+        assert mbdf['created_at'].max() == pd.Timestamp('2021-11-21 00:04:23')
 
     def test_inventory_until_2022_02_01(self, mock_session_with_associations):
         mbdf = inventory.view_inventory(until_date=dt.date(2022, 2, 1))
         assert len(mbdf) == 9
         assert mbdf['size'].sum() == 202
         assert mbdf['credits_remaining_on_date'].sum() == 201
-        assert mbdf['created_at'].min() == Timestamp('2021-11-20 13:06:51')
-        assert mbdf['created_at'].max() == Timestamp('2022-02-01 00:08:19')
+        assert mbdf['created_at'].min() == pd.Timestamp('2021-11-20 13:06:51')
+        assert mbdf['created_at'].max() == pd.Timestamp('2022-02-01 00:08:19')
 
     def test_inventory_until_2024_nonempty(self, mock_session_with_associations):
         mbdf = inventory.view_inventory(omit_empty=True, until_date=dt.date(2024, 1, 1))
         assert len(mbdf) == 7
         assert mbdf['size'].sum() == 200
         assert mbdf['credits_remaining_on_date'].sum() == 179
-        assert mbdf['created_at'].min() == Timestamp('2021-11-21 00:04:23')
-        assert mbdf['created_at'].max() == Timestamp('2022-02-01 00:08:19')
+        assert mbdf['created_at'].min() == pd.Timestamp('2021-11-21 00:04:23')
+        assert mbdf['created_at'].max() == pd.Timestamp('2022-02-01 00:08:19')
 
 
 class TestConstructStxQuery:
@@ -178,6 +178,32 @@ class TestSinkStatusView:
         assert len(txdf) == 2
         assert txdf.carbon_amount.sum() == Decimal('3.298')
         assert not any(txdf.statuses.astype(bool))
+
+    def test_sink_status_pagination_asc(self, mock_session_with_associations):
+        txdf = sink_status_view.view_sinking_txs(limit=2, order='asc')
+        assert len(txdf) == 2
+        pages = [txdf]
+        while len(txdf) == 2:
+            cursor = int(txdf.paging_token.iloc[-1])
+            txdf = sink_status_view.view_sinking_txs(cursor=cursor, limit=2, order='asc')
+            pages.append(txdf)
+
+        combined_pages = pd.concat(pages)
+        assert combined_pages.hash.is_unique
+        assert len(combined_pages) == 20
+
+    def test_sink_status_pagination_desc(self, mock_session_with_associations):
+        txdf = sink_status_view.view_sinking_txs(limit=3, order='desc')
+        assert len(txdf) == 3
+        pages = [txdf]
+        while len(txdf) == 3:
+            cursor = int(txdf.paging_token.iloc[-1])
+            txdf = sink_status_view.view_sinking_txs(cursor=cursor, limit=3, order='desc')
+            pages.append(txdf)
+
+        combined_pages = pd.concat(pages)
+        assert combined_pages.hash.is_unique
+        assert len(combined_pages) == 20
 
 
 @pytest.fixture

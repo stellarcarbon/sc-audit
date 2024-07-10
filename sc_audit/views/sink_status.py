@@ -23,12 +23,24 @@ def view_sinking_txs(
         from_date: dt.date | None = None,
         before_date: dt.date | None = None,
         finalized: bool | None = None,
+        cursor: int | None = None,
+        limit: int | None = None,
         order: Literal['asc', 'desc'] = 'desc',
 ) -> pd.DataFrame:
     stx_query = construct_stx_query(for_funder, for_recipient, from_date, before_date, finalized)
+
+    if order == 'asc':
+        stx_query = stx_query.order_by(SinkingTx.created_at.asc())
+        if cursor:
+            stx_query = stx_query.where(SinkingTx.paging_token > cursor)
     if order == 'desc':
         stx_query = stx_query.order_by(SinkingTx.created_at.desc())
-        
+        if cursor:
+            stx_query = stx_query.where(SinkingTx.paging_token < cursor)
+
+    if limit:
+        stx_query = stx_query.limit(limit)
+
     with Session.begin() as session:
         stx_records = session.scalars(stx_query).unique().all()
         txdf = pd.DataFrame.from_records(stx.as_dict() for stx in stx_records)
