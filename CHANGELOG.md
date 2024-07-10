@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.4.0](https://github.com/stellarcarbon/sc-audit/compare/v0.3.1...v0.4.0) (2024-07-10)
+
+
+### Features
+
+* add pagination parameters to sink view ([ab92983](https://github.com/stellarcarbon/sc-audit/commit/ab929833488a7da1fb68ea4173413210125c97dc))
+* add single sink tx getter ([bf5b6df](https://github.com/stellarcarbon/sc-audit/commit/bf5b6df8a4e91bcee28af420d8db315401343052))
+
+
+### Bug Fixes
+
+* default to desc order in sink view ([ed0bd79](https://github.com/stellarcarbon/sc-audit/commit/ed0bd797b264705231a9d7ed73f8ef90bfa390d0))
+* omit empty statuses from outerjoin ([ca94ce8](https://github.com/stellarcarbon/sc-audit/commit/ca94ce839e1e0e9b69f7bf280d65ea474d2e923e))
+
 ## [0.3.1](https://github.com/stellarcarbon/sc-audit/compare/v0.3.0...v0.3.1) (2024-07-04)
 
 
