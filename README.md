@@ -187,6 +187,42 @@ def view_sinking_txs(
         from_date: dt.date | None = None,
         before_date: dt.date | None = None,
         finalized: bool | None = None,
+        cursor: int | None = None,
+        limit: int | None = None,
+        order: Literal['asc', 'desc'] = 'desc',
+) -> pd.DataFrame
+```
+
+The `retirements` view shows finalized retirements and the basic attributes of the retired credits. It does not show from which blocks these credits have been retired and which sinking transactions are filled by these retirements. Its filters are very similar to the sink view.
+
+```text
+Usage: sc-audit view retirements [OPTIONS]
+
+  View finalized retirements and the attributes of the retired credits
+
+Options:
+  -f, --format [df|csv|json]  The output format for this view  [default: df]
+  --beneficiary TEXT          Only show retirements for the given beneficiary
+                              address
+  --from-date [%Y-%m-%d]      Filter retirements that happened on or after the
+                              given date
+  --before-date [%Y-%m-%d]    Filter retirements that happened before the
+                              given date
+  --project INTEGER           Filter by impact project
+  --help                      Show this message and exit.
+```
+
+The Python API is located at `sc_audit.views.retirement` and returns the retirements table as a Pandas DataFrame:
+
+```python
+def view_retirements(
+        for_beneficiary: str | None = None, 
+        from_date: dt.date | None = None,
+        before_date: dt.date | None = None,
+        project: int | None = None,
+        cursor: int | None = None,
+        limit: int | None = None,
+        order: Literal['asc', 'desc'] = 'desc',
 ) -> pd.DataFrame
 ```
 

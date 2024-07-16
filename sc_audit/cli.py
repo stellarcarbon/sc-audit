@@ -22,6 +22,7 @@ from sc_audit.loader.retirements import load_retirements
 from sc_audit.loader.sink_status import load_sink_statuses
 from sc_audit.loader.sinking_txs import load_sinking_txs
 from sc_audit.views.inventory import view_inventory
+from sc_audit.views.retirement import view_retirements
 from sc_audit.views.sink_status import view_sinking_txs
 from sc_audit.views.utils import format_df
 
@@ -72,6 +73,38 @@ def cli_view_inventory(omit_empty: bool, until_date: dt.datetime | None, format:
     until_dt_date = until_date.date() if until_date else None
     mbdf = view_inventory(omit_empty=omit_empty, until_date=until_dt_date)
     click.echo(format_df(mbdf, format=format))
+
+
+@view.command(name="retirements", params=[view_format])
+@click.option("--beneficiary", help="Only show retirements for the given beneficiary address")
+@click.option(
+    "--from-date", 
+    type=click.DateTime(formats=["%Y-%m-%d"]), 
+    help="Filter retirements that happened on or after the given date"
+)
+@click.option(
+    "--before-date", 
+    type=click.DateTime(formats=["%Y-%m-%d"]), 
+    help="Filter retirements that happened before the given date"
+)
+@click.option("--project", type=int, help="Filter by impact project")
+def cli_view_retirments(
+        beneficiary: str | None, 
+        from_date: dt.datetime | None,
+        before_date: dt.datetime | None,
+        project: int | None,
+        format: str,
+    ):
+    """View finalized retirements and the attributes of the retired credits"""
+    from_dt_date = from_date.date() if from_date else None
+    before_dt_date = before_date.date() if before_date else None
+    rtdf = view_retirements(
+        for_beneficiary=beneficiary,
+        from_date=from_dt_date,
+        before_date=before_dt_date,
+        project=project,
+    )
+    click.echo(format_df(rtdf, format=format))
 
 
 @view.command(name="sink", params=[view_format])
