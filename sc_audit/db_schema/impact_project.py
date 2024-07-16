@@ -36,6 +36,12 @@ class VcsProject(ScBase):
         order_by="asc(MintedBlock.block_start)"
     )
 
+    def as_dict(self):
+        return {
+            col: getattr(self, col)
+            for col in self.__table__.columns.keys()
+        }
+
 
 class UnknownVcsProject(Exception):
     def __init__(self, msg, vcs_id: int):

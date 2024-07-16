@@ -219,6 +219,7 @@ class TestGetByPk:
             ret and ret['serial_number'] == 
             "8040-449402275-449402275-VCU-042-MER-PE-14-1360-01072013-30062014-1"
         )
+        assert ret['vcs_project']['id'] == 1360
 
 
 class TestConstructRetQuery:

@@ -71,7 +71,11 @@ def construct_retirement_query(
 def get_retirement(certificate_id: int) -> dict[str, Any] | None:
     rt_query = (
         select(Retirement)
-        .options(selectinload(Retirement.retired_from), selectinload(Retirement.sink_statuses))
+        .options(
+            selectinload(Retirement.retired_from), 
+            selectinload(Retirement.sink_statuses),
+            selectinload(Retirement.vcs_project)
+        )
         .where(Retirement.certificate_id == certificate_id)
     )
     with Session.begin() as session:

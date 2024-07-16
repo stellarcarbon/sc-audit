@@ -40,12 +40,10 @@ class Retirement(ScBase):
     retired_from: Mapped[list[RetirementFromBlock]] = relationship(
         init=False, repr=False, 
         back_populates='retirement',
-        lazy='selectin',
     )
     sink_statuses: Mapped[list[SinkStatus]] = relationship(
         init=False, repr=False, 
         back_populates='retirement',
-        lazy='selectin',
     )
 
     @property
@@ -60,6 +58,8 @@ class Retirement(ScBase):
             for col in self.__table__.columns.keys()
         }
         if related:
+            del data['vcs_project_id']
+            data['vcs_project'] = self.vcs_project.as_dict()
             data['retired_from'] = [
                 rfb.as_dict() for rfb in self.retired_from
                 if rfb.retirement_id
