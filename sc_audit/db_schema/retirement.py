@@ -40,10 +40,12 @@ class Retirement(ScBase):
     retired_from: Mapped[list[RetirementFromBlock]] = relationship(
         init=False, repr=False, 
         back_populates='retirement',
+        lazy='selectin',
     )
     sink_statuses: Mapped[list[SinkStatus]] = relationship(
         init=False, repr=False, 
         back_populates='retirement',
+        lazy='selectin',
     )
 
     @property
@@ -51,6 +53,23 @@ class Retirement(ScBase):
         tag, *tx_hashes = self.retirement_details.split()
         assert tag.startswith("stellarcarbon")
         return tx_hashes
+    
+    def as_dict(self, related: bool = False):
+        data = {
+            col: getattr(self, col)
+            for col in self.__table__.columns.keys()
+        }
+        if related:
+            data['retired_from'] = [
+                rfb.as_dict() for rfb in self.retired_from
+                if rfb.retirement_id
+            ]
+            data['sink_statuses'] = [
+                status.as_dict() for status in self.sink_statuses
+                if status.certificate_id
+            ]
+        
+        return data
 
 
 idx_retirement_date = Index("idx_retirement_date", Retirement.retirement_date.desc())

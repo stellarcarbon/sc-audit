@@ -26,6 +26,12 @@ class RetirementFromBlock(ScBase):
         back_populates='consumed_by'
     )
 
+    def as_dict(self):
+        return {
+            col: getattr(self, col)
+            for col in self.__table__.columns.keys()
+        }
+
 
 class SinkStatus(ScBase):
     __tablename__ = "sink_status"

@@ -7,7 +7,7 @@ import pytest
 from sc_audit.loader import minted_blocks, retirement_from_block
 from sc_audit.loader import sinking_txs as sink_loader
 from sc_audit.loader import sink_status as sink_status_loader
-from sc_audit.views import inventory, sink_status as sink_status_view
+from sc_audit.views import inventory, retirement, sink_status as sink_status_view
 from tests.data_fixtures.retirements import get_retirements
 from tests.db_fixtures import new_session, vcs_project
 from tests.test_mint import mock_http as mock_mint_http
@@ -213,6 +213,125 @@ class TestGetByPk:
         )
         assert stx and stx['paging_token'] == 164821723627237383
 
+    def test_get_retirement(self, mock_session_with_associations):
+        ret = retirement.get_retirement(143471)
+        assert (
+            ret and ret['serial_number'] == 
+            "8040-449402275-449402275-VCU-042-MER-PE-14-1360-01072013-30062014-1"
+        )
+
+
+class TestConstructRetQuery:
+    def test_construct_query_unfiltered(self):
+        retq = retirement.construct_retirement_query(
+            for_beneficiary=None,
+            from_date=None,
+            before_date=None,
+            project=None
+        )
+        assert "FROM retirements" in str(retq)
+        assert "WHERE" not in str(retq)
+
+    def test_construct_query_for_beneficiary(self):
+        retq = retirement.construct_retirement_query(
+            for_beneficiary="beneficiary-address",
+            from_date=None,
+            before_date=None,
+            project=None
+        )
+        assert "WHERE (retirements.retirement_beneficiary LIKE" in str(retq)
+
+    def test_construct_query_from_date(self):
+        retq = retirement.construct_retirement_query(
+            for_beneficiary=None,
+            from_date=dt.date(2023, 1, 1),
+            before_date=None,
+            project=None
+        )
+        assert "WHERE retirements.retirement_date >=" in str(retq)
+
+    def test_construct_query_before_date(self) -> None:
+        retq = retirement.construct_retirement_query(
+            for_beneficiary=None,
+            from_date=None,
+            before_date=dt.date(2023, 1, 1),
+            project=None
+        )
+        assert "WHERE retirements.retirement_date <" in str(retq)
+
+    def test_construct_query_project(self):
+        retq = retirement.construct_retirement_query(
+            for_beneficiary=None,
+            from_date=None,
+            before_date=None,
+            project=999
+        )
+        assert "WHERE retirements.vcs_project_id" in str(retq)
+
+
+class TestRetirementView:
+    def test_retirements_full(self, mock_session_with_associations):
+        rtdf = retirement.view_retirements()
+        assert len(rtdf) == 11
+        assert rtdf.vcu_amount.sum() == 23
+        assert rtdf.vcs_project_id.min() == 1360
+        assert rtdf.vcs_project_id.max() == 1360
+
+    def test_retirements_for_beneficiary(self, mock_session_with_associations):
+        rtdf = retirement.view_retirements(
+            for_beneficiary="GBIH7Z3SMZUX62JPLLDTHA3QEVMRCGUCUQVCFFRJTEGCKB4MV4NGU7BE",
+            order='asc',
+        )
+        assert len(rtdf) == 2
+        assert rtdf.vcu_amount.sum() == 2
+        assert list(rtdf.certificate_id.unique()) == [187117, 187118]
+
+    def test_retirements_from_date(self, mock_session_with_associations):
+        rtdf = retirement.view_retirements(
+            for_beneficiary="GC53JCXZHW3SVNRE4CT6XFP46WX4ACFQU32P4PR3CU43OB7AKKMFXZ6Y",
+            from_date=dt.date(2023, 5, 7)
+        )
+        assert len(rtdf) == 1
+        assert rtdf.certificate_id.item() == 188439
+
+    def test_retirements_before_date(self, mock_session_with_associations):
+        rtdf = retirement.view_retirements(
+            for_beneficiary="GC53JCXZHW3SVNRE4CT6XFP46WX4ACFQU32P4PR3CU43OB7AKKMFXZ6Y",
+            before_date=dt.date(2023, 5, 7)
+        )
+        assert len(rtdf) == 1
+        assert rtdf.certificate_id.item() == 152309
+
+    def test_retirements_of_project(self, mock_session_with_associations):
+        rtdf = retirement.view_retirements(project=67)
+        assert len(rtdf) == 0
+
+    def test_retirements_pagination_asc(self, mock_session_with_associations):
+        rtdf = retirement.view_retirements(limit=2, order='asc')
+        assert len(rtdf) == 2
+        pages = [rtdf]
+        while len(rtdf) == 2:
+            cursor = int(rtdf.certificate_id.iloc[-1])
+            rtdf = retirement.view_retirements(cursor=cursor, limit=2, order='asc')
+            pages.append(rtdf)
+
+        combined_pages = pd.concat(pages)
+        assert combined_pages.certificate_id.is_unique
+        assert len(combined_pages) == 11
+
+    def test_retirements_pagination_desc(self, mock_session_with_associations):
+        rtdf = retirement.view_retirements(limit=3, order='desc')
+        assert len(rtdf) == 3
+        pages = [rtdf]
+        while len(rtdf) == 3:
+            cursor = int(rtdf.certificate_id.iloc[-1])
+            rtdf = retirement.view_retirements(cursor=cursor, limit=3, order='desc')
+            pages.append(rtdf)
+
+        combined_pages = pd.concat(pages)
+        assert combined_pages.certificate_id.is_unique
+        assert len(combined_pages) == 11
+
 
 @pytest.fixture
 def mock_session(monkeypatch, new_session):
@@ -222,6 +341,7 @@ def mock_session(monkeypatch, new_session):
     monkeypatch.setattr(sink_status_loader, 'Session', new_session)
     monkeypatch.setattr(inventory, 'Session', new_session)
     monkeypatch.setattr(sink_status_view, 'Session', new_session)
+    monkeypatch.setattr(retirement, 'Session', new_session)
     return new_session
 
 @pytest.fixture
