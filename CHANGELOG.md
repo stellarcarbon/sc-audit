@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.5.0](https://github.com/stellarcarbon/sc-audit/compare/v0.4.0...v0.5.0) (2024-07-16)
+
+
+### Features
+
+* add retirement view ([dc19448](https://github.com/stellarcarbon/sc-audit/commit/dc194482ae82fd7296d01968ef330042603a3586))
+* add vcs project to retirement detail ([e662e50](https://github.com/stellarcarbon/sc-audit/commit/e662e5086bcf2915463c1a9476138d8be2b987f6))
+* **cli:** add view retirements command ([4ac3234](https://github.com/stellarcarbon/sc-audit/commit/4ac32341940c3ddd5381f11b53eadbdc951ef0e7))
+
+
+### Dependencies
+
+* fix minor vulnerability ([1b50984](https://github.com/stellarcarbon/sc-audit/commit/1b50984923de2bdcb5ddff978f9bc7b39e7007e5))
+
 ## [0.4.0](https://github.com/stellarcarbon/sc-audit/compare/v0.3.1...v0.4.0) (2024-07-10)
 
 
