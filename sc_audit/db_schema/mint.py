@@ -10,7 +10,7 @@ import typing
 
 from sqlalchemy import ForeignKey, Index, SQLColumnExpression, String, func, select
 from sqlalchemy.ext.hybrid import hybrid_method, hybrid_property
-from sqlalchemy.orm import Mapped, mapped_column, relationship
+from sqlalchemy.orm import Mapped, MappedAsDataclass, mapped_column, relationship
 
 from sc_audit.db_schema.base import HexBinary, ScBase, hashpk
 from sc_audit.db_schema.impact_project import VcsProject
@@ -33,14 +33,13 @@ verra_carbon_pool = VerraSubAccount(11273, "CARBON Pool | stellarcarbon.io")
 verra_carbon_sink = VerraSubAccount(11274, "CARBON Sink | stellarcarbon.io")
 
 
-class MintedBlock(ScBase):
+class MintedBlockBase(MappedAsDataclass, kw_only=True):
     __tablename__ = "minted_blocks"
 
     serial_hash: Mapped[hashpk]
     transaction_hash: Mapped[str] = mapped_column(HexBinary(length=32))
     created_at: Mapped[dt.datetime]
     vcs_project_id: Mapped[int] = mapped_column(ForeignKey('vcs_projects.id'))
-    vcs_project: Mapped[VcsProject] = relationship(init=False, repr=False, back_populates='minted_blocks')
     serial_number: Mapped[str] = mapped_column(String(128))
     block_start: Mapped[int]
     block_end: Mapped[int]
@@ -50,6 +49,11 @@ class MintedBlock(ScBase):
     vintage_end: Mapped[dt.date]
     paging_token: Mapped[int]
 
+
+class MintedBlock(MintedBlockBase, ScBase):
+    __tablename__ = "minted_blocks"
+
+    vcs_project: Mapped[VcsProject] = relationship(init=False, repr=False, back_populates='minted_blocks')
     consumed_by: Mapped[list[RetirementFromBlock]] = relationship(
         init=False, repr=False, 
         back_populates='block',

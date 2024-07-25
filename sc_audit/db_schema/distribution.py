@@ -6,13 +6,12 @@ Author: Alex Olieman <https://keybase.io/alioli>
 import datetime as dt
 
 from sqlalchemy import Index
-from sqlalchemy.orm import Mapped
+from sqlalchemy.orm import Mapped, MappedAsDataclass
 
 from sc_audit.db_schema.base import ScBase, hashpk, kgdecimal, strkey
 
 
-class DistributionTx(ScBase):
-    __tablename__ = "distribution_txs"
+class DistributionTxBase(MappedAsDataclass):
 
     hash: Mapped[hashpk]
     created_at: Mapped[dt.datetime]
@@ -20,6 +19,10 @@ class DistributionTx(ScBase):
     recipient: Mapped[strkey]
     carbon_amount: Mapped[kgdecimal]
     paging_token: Mapped[int]
+
+
+class DistributionTx(DistributionTxBase, ScBase):
+    __tablename__ = "distribution_txs"
 
 
 idx_created_at = Index("idx_dtx_created_at", DistributionTx.created_at.desc())

@@ -39,3 +39,20 @@ stroopdecimal = Annotated[Decimal, mapped_column(types.DECIMAL(precision=21, sca
 
 class ScBase(MappedAsDataclass, DeclarativeBase):
     pass
+
+
+def create_test_mappers():
+    """
+    Create testnet versions of all registered models.
+    These mappers are not needed at runtime, but they must exist when generating migrations.
+    """
+    models = [
+        mapper.class_
+        for mapper in ScBase.registry.mappers
+    ]
+    for model in models:
+        type(
+            f'Test{model.__name__}', 
+            model.__bases__, 
+            {"__tablename__": f"test_{model.__tablename__}"}
+        )

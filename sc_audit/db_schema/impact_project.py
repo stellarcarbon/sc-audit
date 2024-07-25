@@ -7,7 +7,7 @@ from __future__ import annotations
 import typing
 
 from sqlalchemy import Unicode
-from sqlalchemy.orm import Mapped, mapped_column, relationship
+from sqlalchemy.orm import Mapped, MappedAsDataclass, mapped_column, relationship
 
 from sc_audit.db_schema.base import ScBase, intpk
 
@@ -19,8 +19,7 @@ VcsCategory = typing.Literal["Agriculture Forestry and Other Land Use"]
 VcsProtocol = typing.Literal["VM0015"]
 
 
-class VcsProject(ScBase):
-    __tablename__ = "vcs_projects"
+class VcsProjectBase(MappedAsDataclass):
 
     id: Mapped[intpk]
     name: Mapped[str]
@@ -29,6 +28,10 @@ class VcsProject(ScBase):
     additional_certifications: Mapped[str | None]
     region: Mapped[str] = mapped_column(Unicode(128))
     country: Mapped[str] = mapped_column(Unicode(128))
+
+
+class VcsProject(VcsProjectBase, ScBase):
+    __tablename__ = "vcs_projects"
 
     minted_blocks: Mapped[list[MintedBlock]] = relationship(
         init=False, repr=False, 

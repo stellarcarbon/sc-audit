@@ -8,7 +8,7 @@ import datetime as dt
 import typing
 
 from sqlalchemy import ForeignKey, Index, String
-from sqlalchemy.orm import Mapped, mapped_column, relationship
+from sqlalchemy.orm import Mapped, MappedAsDataclass, mapped_column, relationship
 
 from sc_audit.db_schema.base import ScBase, intpk, strkey
 from sc_audit.db_schema.impact_project import VcsProject
@@ -20,7 +20,7 @@ if typing.TYPE_CHECKING:
 InstrumentType = typing.Literal['VCU']
 
 
-class Retirement(ScBase):
+class RetirementBase(MappedAsDataclass, kw_only=True):
     __tablename__ = "retirements"
 
     certificate_id: Mapped[intpk]
@@ -30,13 +30,17 @@ class Retirement(ScBase):
     retirement_beneficiary: Mapped[strkey]
     retirement_details: Mapped[str]
     vcs_project_id: Mapped[int] = mapped_column(ForeignKey("vcs_projects.id"))
-    vcs_project: Mapped[VcsProject] = relationship(init=False, repr=False)
     issuance_date: Mapped[dt.date]
     instrument_type: Mapped[InstrumentType]
     vintage_start: Mapped[dt.date]
     vintage_end: Mapped[dt.date]
     total_vintage_quantity: Mapped[int]
 
+
+class Retirement(RetirementBase, ScBase):
+    __tablename__ = "retirements"
+
+    vcs_project: Mapped[VcsProject] = relationship(init=False, repr=False)
     retired_from: Mapped[list[RetirementFromBlock]] = relationship(
         init=False, repr=False, 
         back_populates='retirement',

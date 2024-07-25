@@ -10,7 +10,7 @@ import typing
 
 from sqlalchemy import ForeignKey, Index, String
 from sqlalchemy.ext.hybrid import hybrid_property
-from sqlalchemy.orm import Mapped, mapped_column, relationship
+from sqlalchemy.orm import Mapped, MappedAsDataclass, mapped_column, relationship
 
 from sc_audit.db_schema.base import ScBase, hashpk, kgdecimal, strkey, stroopdecimal
 from sc_audit.db_schema.impact_project import VcsProject
@@ -22,8 +22,7 @@ if typing.TYPE_CHECKING:
 MemoType = typing.Literal['text', 'hash', 'none']
 
 
-class SinkingTx(ScBase):
-    __tablename__ = "sinking_txs"
+class SinkingTxBase(MappedAsDataclass, kw_only=True):
 
     hash: Mapped[hashpk]
     created_at: Mapped[dt.datetime]
@@ -37,11 +36,15 @@ class SinkingTx(ScBase):
     dest_asset_issuer: Mapped[strkey]
     dest_asset_amount: Mapped[stroopdecimal]
     vcs_project_id: Mapped[int] = mapped_column(ForeignKey("vcs_projects.id"))
-    vcs_project: Mapped[VcsProject] = relationship(init=False, repr=False)
     memo_type: Mapped[MemoType]
     memo_value: Mapped[str | None] = mapped_column(String(64))
     paging_token: Mapped[int]
 
+
+class SinkingTx(SinkingTxBase, ScBase):
+    __tablename__ = "sinking_txs"
+
+    vcs_project: Mapped[VcsProject] = relationship(init=False, repr=False)
     statuses: Mapped[list[SinkStatus]] = relationship(
         init=False, repr=False, 
         back_populates='sinking_transaction',
