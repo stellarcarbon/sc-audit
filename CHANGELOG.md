@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.6.0](https://github.com/stellarcarbon/sc-audit/compare/v0.5.0...v0.6.0) (2024-07-26)
+
+
+### Features
+
+* add test-prefixed tables ([7a38e1e](https://github.com/stellarcarbon/sc-audit/commit/7a38e1e6683bca7bd0fffeabe25b7c84ce38d8c8))
+* configure db tables with optional prefix ([8b56a9e](https://github.com/stellarcarbon/sc-audit/commit/8b56a9e0cd70adaad7f368fe53ee15017c36e46c))
+
 ## [0.5.0](https://github.com/stellarcarbon/sc-audit/compare/v0.4.0...v0.5.0) (2024-07-16)
 
 
