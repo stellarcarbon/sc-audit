@@ -8,7 +8,7 @@ import datetime as dt
 import httpx
 from parsel import Selector
 
-from sc_audit.constants import VERRA_ASSET_SEARCH_URL, VERRA_ASSET_SEARCH_TIMEOUT
+from sc_audit.config import settings
 from sc_audit.sources.common import verra_default_headers
 
 
@@ -36,11 +36,11 @@ def get_retirements_list(from_date: dt.date | None = None):
             "issuanceTypeCodes": ["ISSUE"],
         }
         resp: httpx.Response = client.post(
-            url=VERRA_ASSET_SEARCH_URL,
+            url=str(settings.VERRA_ASSET_SEARCH_URL),
             headers=headers,
             params=query_params,
             json=payload,
-            timeout=VERRA_ASSET_SEARCH_TIMEOUT
+            timeout=settings.VERRA_ASSET_SEARCH_TIMEOUT
         )
 
     retirements_data = format_verra_retirements(resp.text)

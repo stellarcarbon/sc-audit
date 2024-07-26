@@ -15,7 +15,7 @@ from typing import Any, Literal, Sequence
 
 from sqlalchemy import select
 
-from sc_audit.constants import FIRST_MINT_CURSOR
+from sc_audit.config import settings
 from sc_audit.db_schema.impact_project import UnknownVcsProject, VcsProject
 from sc_audit.db_schema.mint import MintedBlock, verra_carbon_pool
 from sc_audit.db_schema.retirement import Retirement
@@ -25,7 +25,7 @@ from sc_audit.sources.carbon_pool import get_carbon_pool_state
 from sc_audit.sources.minting_txs import get_minting_transactions
 
 
-def load_minted_blocks(cursor: int=FIRST_MINT_CURSOR) -> int:
+def load_minted_blocks(cursor: int=settings.FIRST_MINT_CURSOR) -> int:
     """
     Load (all) minting transactions from Horizon into the DB.
 

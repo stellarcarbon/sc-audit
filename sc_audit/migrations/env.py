@@ -4,7 +4,7 @@ from typing import Literal
 from alembic import context
 import sqlalchemy.types as types
 
-from sc_audit.constants import DBAPI_URL
+from sc_audit.config import settings
 from sc_audit.db_schema.base import HexBinary, ScBase
 from sc_audit import session_manager
 
@@ -75,7 +75,7 @@ def run_migrations_offline() -> None:
     script output.
 
     """
-    url = DBAPI_URL
+    url = settings.DBAPI_URL
     context.configure(
         url=url,
         target_metadata=target_metadata,

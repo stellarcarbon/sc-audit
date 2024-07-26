@@ -6,7 +6,7 @@ Author: Alex Olieman <https://keybase.io/alioli>
 import httpx
 from parsel import Selector
 
-from sc_audit.constants import VERRA_REPORT_URL
+from sc_audit.config import settings
 from sc_audit.db_schema.mint import verra_carbon_pool
 from sc_audit.sources.common import verra_default_headers
 
@@ -22,7 +22,7 @@ def get_carbon_pool_state():
             "idSubAccount": verra_carbon_pool.id,
         }
         resp: httpx.Response = client.get(
-            url=VERRA_REPORT_URL,
+            url=str(settings.VERRA_REPORT_URL),
             headers=headers,
             params=query_params,
         )

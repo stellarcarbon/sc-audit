@@ -7,7 +7,7 @@ from decimal import Decimal
 from typing import Any, Literal
 from sqlalchemy import select
 
-from sc_audit.constants import FIRST_SINK_CURSOR
+from sc_audit.config import settings
 from sc_audit.db_schema.base import intpk
 from sc_audit.db_schema.impact_project import UnknownVcsProject, VcsProject
 from sc_audit.db_schema.sink import SinkingTx
@@ -16,7 +16,7 @@ from sc_audit.session_manager import Session
 from sc_audit.sources.sinking_txs import get_sinking_transactions, get_tx_operations
 
 
-def load_sinking_txs(cursor: int=FIRST_SINK_CURSOR) -> int:
+def load_sinking_txs(cursor: int=settings.FIRST_SINK_CURSOR) -> int:
     """
     Load (all) sinking transactions from Horizon into the DB.
 

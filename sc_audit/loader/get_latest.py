@@ -9,7 +9,7 @@ from typing import Literal, Union
 from sqlalchemy import select
 from stellar_sdk.sep.toid import TOID
 
-from sc_audit.constants import FIRST_DIST_CURSOR, FIRST_MINT_CURSOR, FIRST_SINK_CURSOR
+from sc_audit.config import settings
 from sc_audit.db_schema.distribution import DistributionTx
 from sc_audit.db_schema.mint import MintedBlock
 from sc_audit.db_schema.retirement import Retirement
@@ -33,17 +33,17 @@ def get_latest_attr(*models: CoreModelName) -> LatestAttr | list[LatestAttr]:
                 latest_sink_tx_cursor = session.scalar(
                     select(SinkingTx.paging_token).order_by(SinkingTx.created_at.desc())
                 )
-                latest_attrs[i] = increment_paging_token(latest_sink_tx_cursor) or FIRST_SINK_CURSOR
+                latest_attrs[i] = increment_paging_token(latest_sink_tx_cursor) or settings.FIRST_SINK_CURSOR
             elif model == 'mint_tx':
                 latest_mint_tx_cursor = session.scalar(
                     select(MintedBlock.paging_token).order_by(MintedBlock.created_at.desc())
                 )
-                latest_attrs[i] = increment_paging_token(latest_mint_tx_cursor) or FIRST_MINT_CURSOR
+                latest_attrs[i] = increment_paging_token(latest_mint_tx_cursor) or settings.FIRST_MINT_CURSOR
             elif model == 'dist_tx':
                 latest_dist_tx_cursor = session.scalar(
                     select(DistributionTx.paging_token).order_by(DistributionTx.created_at.desc())
                 )
-                latest_attrs[i] = increment_paging_token(latest_dist_tx_cursor) or FIRST_DIST_CURSOR
+                latest_attrs[i] = increment_paging_token(latest_dist_tx_cursor) or settings.FIRST_DIST_CURSOR
 
     if len(latest_attrs) == 1:
         return latest_attrs[0]
