@@ -34,7 +34,6 @@ verra_carbon_sink = VerraSubAccount(11274, "CARBON Sink | stellarcarbon.io")
 
 
 class MintedBlockBase(MappedAsDataclass, kw_only=True):
-    __tablename__ = "minted_blocks"
 
     serial_hash: Mapped[hashpk]
     transaction_hash: Mapped[str] = mapped_column(HexBinary(length=32))

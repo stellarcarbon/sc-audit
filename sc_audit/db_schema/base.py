@@ -11,6 +11,8 @@ import sqlalchemy.types as types
 from sqlalchemy.orm import mapped_column
 from sqlalchemy.orm import DeclarativeBase, MappedAsDataclass
 
+from sc_audit.config import settings
+
 
 class HexBinary(types.TypeDecorator):
     """
@@ -38,7 +40,12 @@ stroopdecimal = Annotated[Decimal, mapped_column(types.DECIMAL(precision=21, sca
 
 
 class ScBase(MappedAsDataclass, DeclarativeBase):
-    pass
+
+    def __init_subclass__(cls) -> None:
+        if settings.TABLE_PREFIX:
+            cls.__tablename__ = f"{settings.TABLE_PREFIX}_{cls.__tablename__}"
+
+        super().__init_subclass__()
 
 
 def create_test_mappers():
