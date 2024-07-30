@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.7.0](https://github.com/stellarcarbon/sc-audit/compare/v0.6.0...v0.7.0) (2024-07-30)
+
+
+### Features
+
+* add carbon stats view ([c5c3f7d](https://github.com/stellarcarbon/sc-audit/commit/c5c3f7d212f2934636155e312404339a3669837a))
+
 ## [0.6.0](https://github.com/stellarcarbon/sc-audit/compare/v0.5.0...v0.6.0) (2024-07-26)
 
 
