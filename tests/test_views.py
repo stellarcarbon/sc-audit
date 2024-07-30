@@ -7,7 +7,7 @@ import pytest
 from sc_audit.loader import minted_blocks, retirement_from_block
 from sc_audit.loader import sinking_txs as sink_loader
 from sc_audit.loader import sink_status as sink_status_loader
-from sc_audit.views import inventory, retirement, sink_status as sink_status_view
+from sc_audit.views import inventory, retirement, sink_status as sink_status_view, stats
 from tests.data_fixtures.retirements import get_retirements
 from tests.db_fixtures import new_session, vcs_project
 from tests.test_mint import mock_http as mock_mint_http
@@ -334,6 +334,32 @@ class TestRetirementView:
         assert len(combined_pages) == 11
 
 
+class TestStatsView:
+    def test_stats_global(self, mock_session_with_associations):
+        carbon_stats = stats.get_carbon_stats()
+        assert carbon_stats["carbon_sunk"] == Decimal('26.298')
+        assert carbon_stats["carbon_retired"] == Decimal('23.000')
+        assert carbon_stats["carbon_pending"] == Decimal('3.298')
+        assert carbon_stats["carbon_stored"] == Decimal('202.000')
+
+    def test_stats_recipient(self, mock_session_with_associations):
+        r1_stats = stats.get_carbon_stats(
+            recipient="GAXLLGNPEMRUMSLHO3QLYDWZCNPQMBDCWYNLVDPR32ABYWDWQO6YXHSL"
+        )
+        assert r1_stats["carbon_sunk"] == Decimal('3.015')
+        assert r1_stats["carbon_retired"] == Decimal('0')
+        assert r1_stats["carbon_pending"] == Decimal('3.015')
+        assert "carbon_stored" not in r1_stats
+
+        r2_stats = stats.get_carbon_stats(
+            recipient="GC53JCXZHW3SVNRE4CT6XFP46WX4ACFQU32P4PR3CU43OB7AKKMFXZ6Y"
+        )
+        assert r2_stats["carbon_sunk"] == Decimal('10')
+        assert r2_stats["carbon_retired"] == Decimal('10')
+        assert r2_stats["carbon_pending"] == Decimal('0')
+        assert "carbon_stored" not in r2_stats
+
+
 @pytest.fixture
 def mock_session(monkeypatch, new_session):
     monkeypatch.setattr(minted_blocks, 'Session', new_session)
@@ -343,6 +369,7 @@ def mock_session(monkeypatch, new_session):
     monkeypatch.setattr(inventory, 'Session', new_session)
     monkeypatch.setattr(sink_status_view, 'Session', new_session)
     monkeypatch.setattr(retirement, 'Session', new_session)
+    monkeypatch.setattr(stats, 'Session', new_session)
     return new_session
 
 @pytest.fixture
