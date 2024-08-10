@@ -18,7 +18,7 @@ class HexBinary(types.TypeDecorator):
     """
     Converts between fixed-length bytes and their hexadecimal string representations.
     """
-    impl = types.BINARY
+    impl = types.LargeBinary
     cache_ok = True
 
     def process_bind_param(self, value: str, dialect: Dialect) -> bytes:
