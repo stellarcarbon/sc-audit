@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.7.1](https://github.com/stellarcarbon/sc-audit/compare/v0.7.0...v0.7.1) (2024-08-10)
+
+
+### Bug Fixes
+
+* change HexBinary to LargeBinary for postgres compatibility ([f909554](https://github.com/stellarcarbon/sc-audit/commit/f9095541d12e24d08ae4fe8686158ab9ed3f2e05))
+
 ## [0.7.0](https://github.com/stellarcarbon/sc-audit/compare/v0.6.0...v0.7.0) (2024-07-30)
 
 
