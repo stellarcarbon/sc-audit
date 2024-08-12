@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.7.3](https://github.com/stellarcarbon/sc-audit/compare/v0.7.2...v0.7.3) (2024-08-12)
+
+
+### Miscellaneous Chores
+
+* release 0.7.3 ([8a529dd](https://github.com/stellarcarbon/sc-audit/commit/8a529dd5d0e4cfcc1676319469937f3a22cfa709))
+
 ## [0.7.2](https://github.com/stellarcarbon/sc-audit/compare/v0.7.1...v0.7.2) (2024-08-12)
 
 
