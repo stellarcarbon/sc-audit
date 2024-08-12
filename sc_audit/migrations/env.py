@@ -59,6 +59,14 @@ def my_compare_type(context, inspected_column,
             return False
         else:
             return True
+    elif isinstance(metadata_type, types.String):
+        if (
+            isinstance(inspected_type, types.String) 
+            and inspected_type.length == metadata_type.length
+        ):
+            return False
+        else:
+            return True
 
     return None
 

@@ -27,7 +27,7 @@ class RetirementBase(MappedAsDataclass, kw_only=True):
     vcu_amount: Mapped[int]
     serial_number: Mapped[str] = mapped_column(String(128))
     retirement_date: Mapped[dt.date]
-    retirement_beneficiary: Mapped[strkey]
+    retirement_beneficiary: Mapped[str]
     retirement_details: Mapped[str]
     vcs_project_id: Mapped[int] = mapped_column(ForeignKey("vcs_projects.id"))
     issuance_date: Mapped[dt.date]
