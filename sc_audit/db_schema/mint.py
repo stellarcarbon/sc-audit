@@ -12,7 +12,7 @@ from sqlalchemy import ForeignKey, Index, SQLColumnExpression, String, func, sel
 from sqlalchemy.ext.hybrid import hybrid_method, hybrid_property
 from sqlalchemy.orm import Mapped, MappedAsDataclass, mapped_column, relationship
 
-from sc_audit.db_schema.base import HexBinary, ScBase, hashpk
+from sc_audit.db_schema.base import HexBinary, ScBase, bigint, hashpk
 from sc_audit.db_schema.impact_project import VcsProject
 
 if typing.TYPE_CHECKING:
@@ -46,7 +46,7 @@ class MintedBlockBase(MappedAsDataclass, kw_only=True):
     sub_account_name: Mapped[VerraSubAccountName]
     vintage_start: Mapped[dt.date]
     vintage_end: Mapped[dt.date]
-    paging_token: Mapped[int]
+    paging_token: Mapped[bigint]
 
 
 class MintedBlock(MintedBlockBase, ScBase):

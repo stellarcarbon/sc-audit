@@ -104,6 +104,7 @@ def run_migrations_online() -> None:
             target_metadata=target_metadata, 
             render_item=render_item,
             compare_type=my_compare_type,
+            render_as_batch=True,
         )
 
         with context.begin_transaction():

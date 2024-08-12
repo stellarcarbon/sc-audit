@@ -12,7 +12,7 @@ from sqlalchemy import ForeignKey, Index, String
 from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.orm import Mapped, MappedAsDataclass, mapped_column, relationship
 
-from sc_audit.db_schema.base import ScBase, hashpk, kgdecimal, strkey, stroopdecimal
+from sc_audit.db_schema.base import ScBase, bigint, hashpk, kgdecimal, strkey, stroopdecimal
 from sc_audit.db_schema.impact_project import VcsProject
 
 if typing.TYPE_CHECKING:
@@ -38,7 +38,7 @@ class SinkingTxBase(MappedAsDataclass, kw_only=True):
     vcs_project_id: Mapped[int] = mapped_column(ForeignKey("vcs_projects.id"))
     memo_type: Mapped[MemoType]
     memo_value: Mapped[str | None] = mapped_column(String(64))
-    paging_token: Mapped[int]
+    paging_token: Mapped[bigint]
 
 
 class SinkingTx(SinkingTxBase, ScBase):

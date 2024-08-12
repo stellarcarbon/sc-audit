@@ -8,7 +8,7 @@ import datetime as dt
 from sqlalchemy import Index
 from sqlalchemy.orm import Mapped, MappedAsDataclass
 
-from sc_audit.db_schema.base import ScBase, hashpk, kgdecimal, strkey
+from sc_audit.db_schema.base import ScBase, bigint, hashpk, kgdecimal, strkey
 
 
 class DistributionTxBase(MappedAsDataclass):
@@ -18,7 +18,7 @@ class DistributionTxBase(MappedAsDataclass):
     sender: Mapped[strkey]
     recipient: Mapped[strkey]
     carbon_amount: Mapped[kgdecimal]
-    paging_token: Mapped[int]
+    paging_token: Mapped[bigint]
 
 
 class DistributionTx(DistributionTxBase, ScBase):
