@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.7.4](https://github.com/stellarcarbon/sc-audit/compare/v0.7.3...v0.7.4) (2024-08-12)
+
+
+### Bug Fixes
+
+* replace total with sum+coalesce ([dddeea1](https://github.com/stellarcarbon/sc-audit/commit/dddeea10318ad6d2f7575f5217c95d3456c26670))
+
 ## [0.7.3](https://github.com/stellarcarbon/sc-audit/compare/v0.7.2...v0.7.3) (2024-08-12)
 
 
