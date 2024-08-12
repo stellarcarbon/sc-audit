@@ -30,7 +30,7 @@ def load_sink_statuses() -> int:
             select(Retirement)
             .outerjoin(Retirement.sink_statuses)
             .group_by(Retirement.certificate_id)
-            .having(func.total(SinkStatus.amount_filled) < Retirement.vcu_amount)
+            .having(func.coalesce(func.sum(SinkStatus.amount_filled), 0) < Retirement.vcu_amount)
         )
         open_retirements = session.scalars(query).unique().all()
         for retirement in open_retirements:

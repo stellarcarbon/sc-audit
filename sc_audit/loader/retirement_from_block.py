@@ -31,7 +31,9 @@ def load_retirement_from_block() -> int:
             select(Retirement)
             .outerjoin(Retirement.retired_from)
             .group_by(Retirement.certificate_id)
-            .having(func.total(RetirementFromBlock.vcu_amount) < Retirement.vcu_amount)
+            .having(
+                func.coalesce(func.sum(RetirementFromBlock.vcu_amount), 0) < Retirement.vcu_amount
+            )
         )
         uncovered_retirements = session.scalars(query).unique().all()
         for retirement in uncovered_retirements:
