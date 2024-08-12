@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.7.2](https://github.com/stellarcarbon/sc-audit/compare/v0.7.1...v0.7.2) (2024-08-12)
+
+
+### Bug Fixes
+
+* specify paging_token as BigInt for postgres compatibility ([e0f0152](https://github.com/stellarcarbon/sc-audit/commit/e0f015222bff7ebebf976b206f9ca6c772fc7e9a))
+
 ## [0.7.1](https://github.com/stellarcarbon/sc-audit/compare/v0.7.0...v0.7.1) (2024-08-10)
 
 
