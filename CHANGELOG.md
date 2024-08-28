@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.8.0](https://github.com/stellarcarbon/sc-audit/compare/v0.7.4...v0.8.0) (2024-08-28)
+
+
+### Features
+
+* provide initial VCS project ([9adb635](https://github.com/stellarcarbon/sc-audit/commit/9adb6358383ac365dac0693a164826bffefabdfe))
+
 ## [0.7.4](https://github.com/stellarcarbon/sc-audit/compare/v0.7.3...v0.7.4) (2024-08-12)
 
 
