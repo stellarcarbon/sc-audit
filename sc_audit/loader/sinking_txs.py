@@ -9,7 +9,7 @@ from sqlalchemy import select
 
 from sc_audit.config import settings
 from sc_audit.db_schema.base import intpk
-from sc_audit.db_schema.impact_project import UnknownVcsProject, VcsProject
+from sc_audit.db_schema.impact_project import UnknownVcsProject, VcsProject, get_vcs_project
 from sc_audit.db_schema.sink import SinkingTx
 from sc_audit.loader.utils import decode_hash_memo, parse_iso_datetime
 from sc_audit.session_manager import Session
@@ -31,11 +31,16 @@ def load_sinking_txs(cursor: int=settings.FIRST_SINK_CURSOR) -> int:
             # ensure that the related VCS Project exists
             vcs_project_id = get_vcs_project_id(sink_tx)
             if vcs_project_id not in existing_vcs_projects:
-                raise UnknownVcsProject(
-                    f"VCS project {vcs_project_id} needs to be loaded before related transactions"
-                    " can be stored. It may help to catch up on retirements first.",
-                    vcs_id=vcs_project_id
-                )
+                vcs_project = get_vcs_project(vcs_project_id)
+                if vcs_project:
+                    existing_vcs_projects.add(vcs_project_id)
+                    session.add(vcs_project)
+                else:
+                    raise UnknownVcsProject(
+                        f"VCS project {vcs_project_id} needs to be loaded before related transactions"
+                        " can be stored.",
+                        vcs_id=vcs_project_id
+                    )
             
             tx_operations = get_tx_operations(sink_tx['transaction_hash'])
             payment_data = get_payment_data(tx_operations)

@@ -16,7 +16,7 @@ from typing import Any, Literal, Sequence
 from sqlalchemy import select
 
 from sc_audit.config import settings
-from sc_audit.db_schema.impact_project import UnknownVcsProject, VcsProject
+from sc_audit.db_schema.impact_project import UnknownVcsProject, VcsProject, get_vcs_project
 from sc_audit.db_schema.mint import MintedBlock, verra_carbon_pool
 from sc_audit.db_schema.retirement import Retirement
 from sc_audit.loader.utils import VcsSerialNumber, decode_hash_memo, parse_iso_datetime
@@ -41,11 +41,16 @@ def load_minted_blocks(cursor: int=settings.FIRST_MINT_CURSOR) -> int:
             # ensure that the related VCS Project exists
             vcs_project_id = get_vcs_project_id(mint_tx)
             if vcs_project_id not in existing_vcs_projects:
-                raise UnknownVcsProject(
-                    f"VCS project {vcs_project_id} needs to be loaded before related transactions"
-                    " can be stored. It may help to catch up on retirements first.",
-                    vcs_id=vcs_project_id
-                )
+                vcs_project = get_vcs_project(vcs_project_id)
+                if vcs_project:
+                    existing_vcs_projects.add(vcs_project_id)
+                    session.add(vcs_project)
+                else:
+                    raise UnknownVcsProject(
+                        f"VCS project {vcs_project_id} needs to be loaded before related transactions"
+                        " can be stored.",
+                        vcs_id=vcs_project_id
+                    )
             # check whether the block is pristine
             serial_hash = decode_hash_memo(mint_tx['transaction']['memo'])
             if serial_hash in carbon_pool:

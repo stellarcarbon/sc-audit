@@ -49,3 +49,18 @@ class VcsProject(VcsProjectBase, ScBase):
 class UnknownVcsProject(Exception):
     def __init__(self, msg, vcs_id: int):
         super().__init__(msg, vcs_id)
+
+
+def get_vcs_project(vcs_project_id: int) -> VcsProject | None:
+    vcs_projects = {
+        1360: VcsProject(
+            id=1360, 
+            name="Forest Management to reduce deforestation and degradation in Shipibo Conibo and Cacataibo Indigenous communities of Ucayali region", 
+            category="Agriculture Forestry and Other Land Use", 
+            protocol="VM0015", 
+            additional_certifications="CCB-Gold", 
+            region="Latin America", 
+            country="Peru"
+        ),
+    }
+    return vcs_projects.get(vcs_project_id)

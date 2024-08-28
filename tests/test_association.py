@@ -9,7 +9,7 @@ from sc_audit.loader import minted_blocks, retirement_from_block, sink_status
 from sc_audit.loader import sinking_txs as sink_loader
 from sc_audit.loader.utils import VcsSerialNumber
 from tests.data_fixtures.retirements import get_retirements
-from tests.db_fixtures import new_session, vcs_project
+from tests.db_fixtures import new_session
 from tests.test_mint import mock_http as mock_mint_http
 from tests.test_sink import mock_http as mock_sink_http
 
@@ -250,9 +250,8 @@ def mock_session(monkeypatch, new_session):
     return new_session
 
 @pytest.fixture
-def mock_session_with_blocks(mock_mint_http, mock_session, vcs_project):
+def mock_session_with_blocks(mock_mint_http, mock_session):
     with mock_session.begin() as session:
-        session.add(vcs_project)
         session.add_all(get_retirements())
 
     minted_blocks.load_minted_blocks()

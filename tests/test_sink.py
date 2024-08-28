@@ -11,7 +11,7 @@ from sc_audit.loader.sinking_txs import get_payment_data, load_sinking_txs
 from sc_audit.sources import sinking_txs as sink_sources
 from sc_audit.sources.sinking_txs import get_sinking_transactions, get_tx_operations
 from tests.data_fixtures.sinking_transactions import operations_resp, payments_resp
-from tests.db_fixtures import new_session, vcs_project
+from tests.db_fixtures import new_session
 
 
 class MockPaymentsCallBuilder(PaymentsCallBuilder):
@@ -69,14 +69,13 @@ class TestSinkLoader:
         assert payment_data['dest_asset_code'] == "USDC"
         assert payment_data['dest_asset_amount'] == "11.0000000"
 
-    def test_load_sinking_vcs_missing(self, mock_http, mock_session):
+    def test_load_sinking_vcs_missing(self, mock_http, mock_session, monkeypatch):
+        monkeypatch.setattr(sink_loader, "get_vcs_project", lambda x65: None)
+
         with pytest.raises(UnknownVcsProject):
             load_sinking_txs(cursor=999)
 
-    def test_load_sinking_transactions(self, mock_http, mock_session, vcs_project):
-        with mock_session.begin() as session:
-            session.add(vcs_project)
-
+    def test_load_sinking_transactions(self, mock_http, mock_session):
         load_sinking_txs(cursor=999)
 
         with mock_session.begin() as session:

@@ -19,7 +19,7 @@ from sc_audit.loader.minted_blocks import (
 )
 from sc_audit.loader.utils import VcsSerialNumber, decode_hash_memo
 from sc_audit.sources.minting_txs import filter_distribution_txs, filter_minting_txs
-from tests.db_fixtures import connection, new_session, vcs_project
+from tests.db_fixtures import connection, new_session
 from tests.data_fixtures.carbon_pool import carbon_pool as carbon_pool_fix
 from tests.data_fixtures.minting_transactions import distribution_records as outflows_fix
 from tests.data_fixtures.minting_transactions import minting_transactions as mint_tx_fix
@@ -33,7 +33,7 @@ class TestMintDb:
         with pytest.raises(orm_exc.DetachedInstanceError):
             first_block.vcs_project
 
-    def test_get_block(self, session_with_block, first_block_data, vcs_project: VcsProject):
+    def test_get_block(self, session_with_block, first_block_data):
         with session_with_block.begin() as session:
             found_block = session.get_one(MintedBlock, first_block_data['shash'])
             assert found_block.transaction_hash == first_block_data['txhash']
@@ -142,20 +142,18 @@ class TestMintLoader:
         assert blocks[0].serial_hash == decode_hash_memo(mint_tx_fix[1]['transaction']['memo'])
         assert blocks[1].serial_hash == decode_hash_memo(mint_tx_fix[2]['transaction']['memo'])
 
-    def test_load_minted_blocks_vcs_missing(self, mock_session, mock_http):
+    def test_load_minted_blocks_vcs_missing(self, mock_session, mock_http, monkeypatch):
+        monkeypatch.setattr(minted_blocks, "get_vcs_project", lambda x: None)
+
         with pytest.raises(UnknownVcsProject):
             load_minted_blocks()
     
-    def test_load_minted_blocks_retirements_missing(self, mock_session, mock_http, vcs_project):
-        with mock_session.begin() as session:
-            session.add(vcs_project)
-
+    def test_load_minted_blocks_retirements_missing(self, mock_session, mock_http):
         with pytest.raises(ValueError):
             load_minted_blocks()
 
-    def test_load_minted_blocks_verify(self, mock_session, mock_http, vcs_project):
+    def test_load_minted_blocks_verify(self, mock_session, mock_http):
         with mock_session.begin() as session:
-            session.add(vcs_project)
             session.add_all(get_retirements())
 
         load_minted_blocks()
@@ -198,13 +196,13 @@ def first_block_data():
     }
 
 @pytest.fixture
-def first_block(vcs_project: VcsProject, first_block_data) -> MintedBlock:
+def first_block(first_block_data) -> MintedBlock:
     serial_number = VcsSerialNumber.from_str(first_block_data['serial_number'])
     return MintedBlock(
         serial_hash=first_block_data['shash'], 
         transaction_hash=first_block_data['txhash'], 
         created_at=first_block_data['mint_timestamp'], 
-        vcs_project_id=vcs_project.id,
+        vcs_project_id=1360,
         serial_number=serial_number.to_str(),
         block_start=serial_number.block_start,
         block_end=serial_number.block_end,
@@ -216,9 +214,8 @@ def first_block(vcs_project: VcsProject, first_block_data) -> MintedBlock:
     )
 
 @pytest.fixture
-def session_with_block(new_session, vcs_project, first_block):
+def session_with_block(new_session, first_block):
     with new_session.begin() as session:
-        session.add(vcs_project)
         session.add(first_block)
 
     yield new_session
