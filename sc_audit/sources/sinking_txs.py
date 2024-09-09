@@ -29,7 +29,8 @@ def get_sinking_transactions(cursor: int=settings.FIRST_SINK_CURSOR):
 def filter_sinking_txs(horizon_records):
     for payment in horizon_records:
         if (
-            payment['from'] == settings.SINK_ISSUER_PUB
+            payment["type_i"] == 1
+            and payment['from'] == settings.SINK_ISSUER_PUB
             and payment['asset_code'] == settings.SINK_ASSET.code
         ):
             yield payment
