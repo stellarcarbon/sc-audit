@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.8.1](https://github.com/stellarcarbon/sc-audit/compare/v0.8.0...v0.8.1) (2024-09-09)
+
+
+### Bug Fixes
+
+* prefix all foreign key column references ([4f446fa](https://github.com/stellarcarbon/sc-audit/commit/4f446fad891083b1e0e55d10ba7b5597903991e6))
+
 ## [0.8.0](https://github.com/stellarcarbon/sc-audit/compare/v0.7.4...v0.8.0) (2024-08-28)
 
 
