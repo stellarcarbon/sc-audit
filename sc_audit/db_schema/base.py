@@ -3,6 +3,7 @@ SQLAlchemy Declarative Dataclass setup.
 
 Author: Alex Olieman <https://keybase.io/alioli>
 """
+from dataclasses import fields
 from decimal import Decimal
 from typing import Annotated
 
@@ -44,7 +45,14 @@ class ScBase(MappedAsDataclass, DeclarativeBase):
 
     def __init_subclass__(cls) -> None:
         if settings.TABLE_PREFIX:
+            # prefix the table name
             cls.__tablename__ = f"{settings.TABLE_PREFIX}_{cls.__tablename__}"
+            for dfield in fields(cls):
+                field = getattr(cls, dfield.name, None)
+                if field and hasattr(field, 'foreign_keys'):
+                    # prefix all foreign key column references
+                    for fk in field.foreign_keys:
+                        fk._colspec = f"{settings.TABLE_PREFIX}_{fk._colspec}"
 
         super().__init_subclass__()
 

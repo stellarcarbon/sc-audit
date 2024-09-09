@@ -24,6 +24,8 @@ class TestSettings:
         for table_name, table in bmod.ScBase.metadata.tables.items():
             assert not table_name.startswith("test_")
             assert table_name == table.name
+            for fk in table.foreign_keys:
+                assert not fk.target_fullname.startswith("test_")
 
         del sys.modules[base_module]
 
@@ -38,6 +40,8 @@ class TestSettings:
         for table_name, table in bmod.ScBase.metadata.tables.items():
             assert table_name.startswith("test_")
             assert table_name == table.name
+            for fk in table.foreign_keys:
+                assert fk.target_fullname.startswith("test_")
 
         del sys.modules[base_module]
 
