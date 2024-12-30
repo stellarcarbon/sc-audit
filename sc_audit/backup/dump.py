@@ -47,4 +47,8 @@ def table_to_ndjson(db_table: Table) -> str:
 
 
 def get_table_names() -> list[str]:
-    return list(ScBase.metadata.tables.keys())
+    return [
+        table_name
+        for table_name in ScBase.metadata.tables.keys()
+        if not table_name.startswith("test_")
+    ]
