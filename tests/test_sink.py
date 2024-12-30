@@ -16,14 +16,20 @@ from tests.db_fixtures import new_session
 
 class MockPaymentsCallBuilder(PaymentsCallBuilder):
      def call(self):
-          assert self.params['cursor'] == "999"
-          self._check_pageable(payments_resp)
-          return payments_resp
+        assert self.params['cursor'] == "999"
+        self._check_pageable(payments_resp)
+        return payments_resp
      
+     def next(self):
+        assert self.params['cursor'] == "999"
+        return {
+            '_embedded': {'records': []}
+        }
+
 
 class MockOperationsCallBuilder(OperationsCallBuilder):
      def call(self):
-          return operations_resp
+        return operations_resp
 
 
 @pytest.fixture
