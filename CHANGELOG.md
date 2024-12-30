@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.9.0](https://github.com/stellarcarbon/sc-audit/compare/v0.8.2...v0.9.0) (2024-12-30)
+
+
+### Features
+
+* **backup:** exclude testnet data from DB dumps ([befc5da](https://github.com/stellarcarbon/sc-audit/commit/befc5da402de068d29f2c3e717f80427f50110a7))
+
+
+### Bug Fixes
+
+* don't fetch next payments in tests ([df102f1](https://github.com/stellarcarbon/sc-audit/commit/df102f122ebc07315a3c2b336fef50efca4478ae))
+
 ## [0.8.2](https://github.com/stellarcarbon/sc-audit/compare/v0.8.1...v0.8.2) (2024-09-09)
 
 
