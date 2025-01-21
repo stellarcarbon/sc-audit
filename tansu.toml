@@ -1,0 +1,20 @@
+VERSION="2.6.0"
+
+ACCOUNTS=[
+    "GC53JCXZHW3SVNRE4CT6XFP46WX4ACFQU32P4PR3CU43OB7AKKMFXZ6Y"
+]
+
+[DOCUMENTATION]
+ORG_NAME="Stellarcarbon"
+ORG_URL="https://www.stellarcarbon.io"
+ORG_LOGO="https://test.stellarcarbon.io/stellarcarbon-logo.svg"
+ORG_DESCRIPTION="""
+Stellarcarbon core database with monitoring and audit functionality.
+This is a stand-alone tool that can be used to monitor and audit Stellarcarbon accounts through a command-line interface. We recommend the use of sc-audit through Docker for users who don't want to manage their own Python installation. If you're already running a recent version of Python, installation of the Python package is likely the most convenient option.
+Programmatic access to sc-audit and its data is possible in several ways. To integrate it with your Python project, simply include the sc-audit package as a dependency. Other environments are able to use the CLI for basic commands, and can either use the filesystem or a connection to its SQLite database to obtain the data and do further processing."""
+ORG_GITHUB="stellarcarbon"
+
+[[PRINCIPALS]]
+name="Alex Olieman"
+keybase="alioli"
+github="aolieman"
