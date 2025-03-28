@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.9.1](https://github.com/stellarcarbon/sc-audit/compare/v0.9.0...v0.9.1) (2025-03-28)
+
+
+### Dependencies
+
+* fix major vulnerability ([02d2a3d](https://github.com/stellarcarbon/sc-audit/commit/02d2a3db537c3b5f0cfd6a3334f3e7c8a6a10740))
+
 ## [0.9.0](https://github.com/stellarcarbon/sc-audit/compare/v0.8.2...v0.9.0) (2024-12-30)
 
 
