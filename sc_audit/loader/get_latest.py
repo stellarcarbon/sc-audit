@@ -4,7 +4,7 @@ Helper functions to load only new records from data sources.
 Author: Alex Olieman <https://keybase.io/alioli>
 """
 import datetime as dt
-from typing import Literal, Union
+from typing import Literal, Union, overload
 
 from sqlalchemy import select
 from stellar_sdk.sep.toid import TOID
@@ -19,6 +19,13 @@ from sc_audit.session_manager import Session
 
 CoreModelName = Literal['dist_tx', 'mint_tx', 'retirement', 'sink_tx']
 LatestAttr = Union[dt.date, int, None]
+
+
+@overload
+def get_latest_attr(*models: *tuple[CoreModelName]) -> LatestAttr: ...
+
+@overload
+def get_latest_attr(*models: CoreModelName) -> list[LatestAttr]: ...
 
 def get_latest_attr(*models: CoreModelName) -> LatestAttr | list[LatestAttr]:
     latest_attrs: list[LatestAttr] = [None] * len(models)

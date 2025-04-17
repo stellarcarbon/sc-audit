@@ -153,7 +153,7 @@ def load():
 def db_load_minted_blocks():
     """Load minted blocks into the DB"""
     mint_cursor = get_latest_attr('mint_tx')
-    num_minting_txs = load_minted_blocks(cursor=mint_cursor) # type: ignore
+    num_minting_txs = load_minted_blocks(cursor=mint_cursor) # type: ignore[arg-type]
     click.echo(f"Loaded {num_minting_txs} minted blocks")
 
 
@@ -161,7 +161,7 @@ def db_load_minted_blocks():
 def db_load_distribution_outflows():
     """Load distribution outflows into the DB"""
     dist_cursor = get_latest_attr('dist_tx')
-    num_distribution_txs = load_distribution_txs(cursor=dist_cursor) # type: ignore
+    num_distribution_txs = load_distribution_txs(cursor=dist_cursor) # type: ignore[arg-type]
     click.echo(f"Loaded {num_distribution_txs} distribution outflows")
 
 
@@ -169,7 +169,7 @@ def db_load_distribution_outflows():
 def db_load_sinking_txs():
     """Load sinking transactions into the DB"""
     sink_cursor = get_latest_attr('sink_tx')
-    num_sinking_txs = load_sinking_txs(cursor=sink_cursor) # type: ignore
+    num_sinking_txs = load_sinking_txs(cursor=sink_cursor) # type: ignore[arg-type]
     click.echo(f"Loaded {num_sinking_txs} sinking transactions")
 
 
@@ -177,7 +177,7 @@ def db_load_sinking_txs():
 def db_load_retirements():
     """Load retirements into the DB"""
     retirement_date = get_latest_attr('retirement')
-    num_retirements = load_retirements(from_date=retirement_date) # type: ignore
+    num_retirements = load_retirements(from_date=retirement_date) # type: ignore[arg-type]
     click.echo(f"Loaded {num_retirements} retirements")
 
 

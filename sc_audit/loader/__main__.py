@@ -36,7 +36,7 @@ def catch_up_from_sources():
         'sink_tx', 
         'mint_tx',
         'dist_tx'
-    ) # type: ignore
+    ) # type: ignore[return-value]
 
     print("Started catch-up from data sources...")
     num_distribution_txs = load_distribution_txs(cursor=dist_cursor)
