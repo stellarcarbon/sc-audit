@@ -2,7 +2,6 @@ from pathlib import Path
 from typing import Literal
 
 from pydantic import HttpUrl, computed_field
-from pydantic_core import Url
 from pydantic_settings import BaseSettings, SettingsConfigDict
 from stellar_sdk import Asset
 
@@ -39,11 +38,11 @@ class Settings(BaseSettings):
     DBAPI_URL: str = f"sqlite+pysqlite:///{get_default_db_path()}"
     TABLE_PREFIX: DbTablePrefix = None
 
-    VERRA_ASSET_SEARCH_URL: HttpUrl = Url("https://registry.verra.org/uiapi/asset/asset/search")
+    VERRA_ASSET_SEARCH_URL: HttpUrl = HttpUrl("https://registry.verra.org/uiapi/asset/asset/search")
     VERRA_ASSET_SEARCH_TIMEOUT: int = 8  # seconds
-    VERRA_REPORT_URL: HttpUrl = Url("https://registry.verra.org/mymodule/rpt/myRpt.asp")
+    VERRA_REPORT_URL: HttpUrl = HttpUrl("https://registry.verra.org/mymodule/rpt/myRpt.asp")
 
-    HORIZON_URL: HttpUrl = Url("https://horizon.stellar.org")
+    HORIZON_URL: HttpUrl = HttpUrl("https://horizon.stellar.org")
     CARBON_ISSUER_PUB: str = "GCBOATLWKXACOWKRRWORARDI2HFDSYPALMTS23YBZKHOB6XLW6CARBON"
     CARBON_DISTRIB_PUB: str = "GABXJLJDNWRIGCVQPPC2FJ2NORUJBGLNOBYXKW7WQD3CUZS6YTFCS4ZP"
     SINK_ISSUER_PUB: str = "GC7CDWMCWNCY7JYUW5UBEOLNBSTNDKKZSFTHKGZNPPSOXLFYFX3CSINK"
