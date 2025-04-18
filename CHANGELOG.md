@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.9.2](https://github.com/stellarcarbon/sc-audit/compare/v0.9.1...v0.9.2) (2025-04-18)
+
+
+### Bug Fixes
+
+* validate retirement.serial_number ([9233f57](https://github.com/stellarcarbon/sc-audit/commit/9233f57dccb84f1d16c58c9cc1b467207801ec50))
+
 ## [0.9.1](https://github.com/stellarcarbon/sc-audit/compare/v0.9.0...v0.9.1) (2025-03-28)
 
 
