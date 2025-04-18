@@ -7,11 +7,12 @@ from __future__ import annotations
 import datetime as dt
 import typing
 
-from sqlalchemy import ForeignKey, Index, String
+from sqlalchemy import ForeignKey, Index, String, event
 from sqlalchemy.orm import Mapped, MappedAsDataclass, mapped_column, relationship
 
-from sc_audit.db_schema.base import ScBase, intpk, strkey
+from sc_audit.db_schema.base import ScBase, intpk
 from sc_audit.db_schema.impact_project import VcsProject
+from sc_audit.loader.utils import VcsSerialNumber
 
 if typing.TYPE_CHECKING:
     from sc_audit.db_schema import RetirementFromBlock, SinkStatus
@@ -56,6 +57,23 @@ class Retirement(RetirementBase, ScBase):
         assert tag.startswith("stellarcarbon")
         return tx_hashes
     
+    def validate_serial_number(self):
+        value = self.serial_number
+        if not value:
+            raise ValueError("Serial number cannot be empty")
+        
+        serial_number = VcsSerialNumber.from_str(value)
+        vcu_amount = 1 + serial_number.block_end - serial_number.block_start
+        if serial_number.project_id != self.vcs_project_id:
+            raise ValueError(
+                f"Serial number {value} does not match VCS project ID {self.vcs_project_id}"
+            )
+        elif vcu_amount != self.vcu_amount:
+            raise ValueError(
+                f"Serial number {value} implies a VCU amount of {vcu_amount},"
+                f" but got vcu_amount={self.vcu_amount}"
+            )
+    
     def as_dict(self, related: bool = False):
         data = {
             col: getattr(self, col)
@@ -78,3 +96,7 @@ class Retirement(RetirementBase, ScBase):
 
 idx_retirement_date = Index("idx_retirement_date", Retirement.retirement_date.desc())
 idx_retirement_beneficiary = Index("idx_retirement_beneficiary", Retirement.retirement_beneficiary)
+
+@event.listens_for(Retirement, "before_insert")
+def validate_retirement(mapper, connection, target: Retirement):
+    target.validate_serial_number()

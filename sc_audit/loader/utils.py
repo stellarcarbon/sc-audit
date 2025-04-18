@@ -36,7 +36,7 @@ class VcsSerialNumber(BaseModel):
             split_serial = [*split_serial[:3], None, *split_serial[3:]]
         
         kwargs = dict(zip(VcsSerialNumber.model_fields, split_serial))
-        return VcsSerialNumber(**kwargs) # type: ignore
+        return VcsSerialNumber(**kwargs)  # type: ignore[arg-type]
     
     def to_str(self) -> str:
         serial_dict = self.model_dump()

@@ -9,6 +9,7 @@ from sqlalchemy import select
 from sc_audit.db_schema.retirement import Retirement
 from sc_audit.loader import retirements as retirements_loader
 from sc_audit.loader.retirements import load_retirements
+from sc_audit.loader.utils import VcsSerialNumber
 from sc_audit.sources.retirements import format_verra_retirements, get_retirements_list
 from tests.db_fixtures import new_session
 from tests.data_fixtures.retirements import search_response, get_retirements
@@ -89,5 +90,42 @@ class TestRetirementLoader:
         with mock_session.begin() as session:
             loaded_retirements = session.scalars(self.query).all()
             assert len(loaded_retirements) == 11
+
+    def test_load_inconsistent_retirement(self, mock_session):
+        serial_number = VcsSerialNumber.from_str(
+            "8040-449402275-449402276-VCU-042-MER-PE-14-1360-01072013-30062014-1"
+        )
+        # this retirement has a project_id that does not match the serial number
+        retirement = Retirement(
+            certificate_id=123456,
+            vcu_amount=2,
+            retirement_date=datetime.date(2023, 1, 1),
+            retirement_beneficiary="test_beneficiary",
+            retirement_details="test_details",
+            vcs_project_id=333,
+            issuance_date=datetime.date(2017, 1, 1),
+            serial_number=serial_number.to_str(),
+            instrument_type="VCU",
+            vintage_start=serial_number.vintage_start_date,
+            vintage_end=serial_number.vintage_end_date,
+            total_vintage_quantity=97555,
+        )
+        with pytest.raises(ValueError, match="Serial number .* does not match VCS project ID .*"):
+            with mock_session.begin() as session:
+                session.add(retirement)
+
+        retirement.vcs_project_id = serial_number.project_id
+        # this retirement has a vcu_amount that is smaller than the serial number implies
+        retirement.vcu_amount = 1
+        with pytest.raises(ValueError, match=".* implies a VCU amount of 2.* vcu_amount=1"):
+            with mock_session.begin() as session:
+                session.add(retirement)
+
+        # this retirement has a vcu_amount that is larger than the serial number implies
+        retirement.vcu_amount = 3
+        with pytest.raises(ValueError, match=".* implies a VCU amount of 2.* vcu_amount=3"):
+            with mock_session.begin() as session:
+                session.add(retirement)
+   
 
         
