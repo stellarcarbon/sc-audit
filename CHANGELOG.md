@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.9.3](https://github.com/stellarcarbon/sc-audit/compare/v0.9.2...v0.9.3) (2025-05-02)
+
+
+### Bug Fixes
+
+* prevent the table prefix from being applied multiple times ([877fcbb](https://github.com/stellarcarbon/sc-audit/commit/877fcbbdd452b2a04765f4e37af60bfb99c2bf35))
+
 ## [0.9.2](https://github.com/stellarcarbon/sc-audit/compare/v0.9.1...v0.9.2) (2025-04-18)
 
 
