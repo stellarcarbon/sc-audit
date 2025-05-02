@@ -45,14 +45,18 @@ class ScBase(MappedAsDataclass, DeclarativeBase):
 
     def __init_subclass__(cls) -> None:
         if settings.TABLE_PREFIX:
-            # prefix the table name
-            cls.__tablename__ = f"{settings.TABLE_PREFIX}_{cls.__tablename__}"
-            for dfield in fields(cls):
-                field = getattr(cls, dfield.name, None)
-                if field and hasattr(field, 'foreign_keys'):
-                    # prefix all foreign key column references
-                    for fk in field.foreign_keys:
-                        fk._colspec = f"{settings.TABLE_PREFIX}_{fk._colspec}"
+            # Check if the prefix has already been applied
+            if not cls.__tablename__.startswith(settings.TABLE_PREFIX):
+                # Prefix the table name
+                cls.__tablename__ = f"{settings.TABLE_PREFIX}_{cls.__tablename__}"
+
+                for dfield in fields(cls):
+                    field = getattr(cls, dfield.name, None)
+                    if field and hasattr(field, 'foreign_keys'):
+                        # Prefix all foreign key column references
+                        for fk in field.foreign_keys:
+                            if not fk._colspec.startswith(settings.TABLE_PREFIX):
+                                fk._colspec = f"{settings.TABLE_PREFIX}_{fk._colspec}"
 
         super().__init_subclass__()
 
