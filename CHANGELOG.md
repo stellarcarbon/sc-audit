@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.9.5](https://github.com/stellarcarbon/sc-audit/compare/v0.9.4...v0.9.5) (2025-05-16)
+
+
+### Documentation
+
+* pre-commit install ([3ceb239](https://github.com/stellarcarbon/sc-audit/commit/3ceb23914f805f0e0f0f71b50f60777ead671c3c))
+
 ## [0.9.4](https://github.com/stellarcarbon/sc-audit/compare/v0.9.3...v0.9.4) (2025-05-16)
 
 
