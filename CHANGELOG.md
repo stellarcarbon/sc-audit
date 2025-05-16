@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.9.4](https://github.com/stellarcarbon/sc-audit/compare/v0.9.3...v0.9.4) (2025-05-16)
+
+
+### Bug Fixes
+
+* stop fetching from github on every import ([0db220e](https://github.com/stellarcarbon/sc-audit/commit/0db220e46de2f28ff76d05ff942f4a71a9aea273))
+
+
+### Dependencies
+
+* fix critical vulnerability ([5fe39b4](https://github.com/stellarcarbon/sc-audit/commit/5fe39b485343fef5be49a4b6f4e2d1524033fb2b))
+
 ## [0.9.3](https://github.com/stellarcarbon/sc-audit/compare/v0.9.2...v0.9.3) (2025-05-02)
 
 
