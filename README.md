@@ -255,7 +255,8 @@ poetry install
 You also need to install the git hooks that are configured for this repo:
 
 ```bash
-pre-commit install
+pre-commit install --install-hooks --hook-type pre-commit
+pre-commit install --install-hooks --hook-type commit-msg
 ```
 
 ### Release management
