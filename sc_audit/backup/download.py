@@ -13,10 +13,11 @@ from github.GithubObject import NotSet, Opt
 
 
 github = Github()
-data_repo = github.get_repo("stellarcarbon/sc-data")
+repo_name = "stellarcarbon/sc-data"
 
 
 def download_compatible_dumps() -> Path:
+    data_repo = github.get_repo(repo_name)
     package_version = metadata.version("sc_audit")
     matching_refs = data_repo.get_git_matching_refs("tags/sc-audit")
     for ref_obj in matching_refs:
@@ -34,6 +35,7 @@ def download_dumps(ref: Opt[str] = NotSet) -> Path:
     Download DB table dump files from GitHub and return the tempdir where they are located.
     The caller of this function is responsible for deleting the tempdir after loading the files.
     """
+    data_repo = github.get_repo(repo_name)
     # note: the `get_contents` endpoint will fail for files >100 MB
     dump_cfiles = data_repo.get_contents("sc-audit", ref=ref)
     assert isinstance(dump_cfiles, list)
