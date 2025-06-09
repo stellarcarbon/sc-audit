@@ -4,6 +4,7 @@ Fetch sink events from Mercury Retroshades.
 Author: Alex Olieman <https://keybase.io/alioli>
 """
 
+import datetime as dt
 from decimal import Decimal
 
 import httpx
@@ -16,7 +17,7 @@ UNIT_IN_STROOPS = 10_000_000
 
 class SinkEvent(BaseModel):
     transaction: str
-    # TODO: created_at
+    created_at: dt.datetime
     contract_id: str
     funder: str
     recipient: str
@@ -29,6 +30,7 @@ class SinkEvent(BaseModel):
     @classmethod
     def from_raw(cls, **data):
         data["amount"] = data["amount"] / UNIT_IN_STROOPS
+        data["created_at"] = dt.datetime.fromtimestamp(data["timestamp"], dt.UTC)
         return cls(**data)
 
 
