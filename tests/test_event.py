@@ -7,6 +7,21 @@ import pytest
 
 from sc_audit.sources.sink_events import get_sink_events
 from tests.data_fixtures.events import query_response
+from tests.test_settings import patch_settings
+
+
+@pytest.mark.usefixtures("mock_client", "patch_mercury_key")
+class TestSinkEventSources:
+    def test_events_list_full(self):
+        events = get_sink_events(cursor=0)
+        assert len(events) == 10
+        assert events[0].amount == Decimal("0.2")
+        assert events[0].created_at == dt.datetime(2024, 6, 8, 18, 40, 2, tzinfo=dt.UTC)
+        assert events[6].amount == Decimal("0.06")
+        assert events[6].created_at == dt.datetime(2024, 6, 8, 19, 40, 0, tzinfo=dt.UTC)
+        assert events[9].amount == Decimal("0.01")
+        assert events[6].created_at == events[9].created_at
+        assert events[6].ledger == events[9].ledger
 
 
 class MockClient(Client):
@@ -35,14 +50,7 @@ def mock_client(monkeypatch):
     monkeypatch.setattr(httpx, "Client", MockClient)
 
 
-class TestSinkEventSources:
-    def test_events_list_full(self, mock_client):
-        events = get_sink_events(cursor=0)
-        assert len(events) == 10
-        assert events[0].amount == Decimal("0.2")
-        assert events[0].created_at == dt.datetime(2024, 6, 8, 18, 40, 2, tzinfo=dt.UTC)
-        assert events[6].amount == Decimal("0.06")
-        assert events[6].created_at == dt.datetime(2024, 6, 8, 19, 40, 0, tzinfo=dt.UTC)
-        assert events[9].amount == Decimal("0.01")
-        assert events[6].created_at == events[9].created_at
-        assert events[6].ledger == events[9].ledger
+@pytest.fixture
+def patch_mercury_key(patch_settings):
+    if not patch_settings.MERCURY_KEY:
+        patch_settings.MERCURY_KEY = "123456789ABCDEFGHJKLMNPQRSTUVWXY"
