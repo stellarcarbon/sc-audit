@@ -22,7 +22,8 @@ def load_sinking_txs(cursor: int=settings.FIRST_SINK_CURSOR) -> int:
     Load (all) sinking transactions from Horizon into the DB.
 
     To catch up with Horizon, specify the cursor parameter to be the incremented paging
-    token of the latest record present in the DB.
+    token of the latest record present in the DB. Always get the latest cursor once, and
+    then load both sinking transactions and sink events using that cursor.
     """
     number_loaded = 0
 
@@ -54,6 +55,7 @@ def load_sinking_txs(cursor: int=settings.FIRST_SINK_CURSOR) -> int:
                 SinkingTx(
                     hash=sink_tx['transaction_hash'],
                     created_at=parse_iso_datetime(sink_tx['created_at']),
+                    contract_id=None,
                     funder=payment_data['funder'],
                     recipient=sink_tx['to'],
                     carbon_amount=Decimal(sink_tx['amount']),
