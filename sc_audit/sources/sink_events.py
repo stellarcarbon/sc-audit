@@ -10,6 +10,7 @@ from decimal import Decimal
 import httpx
 from pydantic import BaseModel
 from stellar_sdk.sep.toid import TOID
+
 from sc_audit.config import settings
 
 UNIT_IN_STROOPS = 10_000_000

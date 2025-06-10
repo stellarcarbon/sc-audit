@@ -1,10 +1,11 @@
 """
 Load all database records in the order:
-  1. Retirements
+  1. Distribution Outflows
   2. Sinking Transactions
   3. Minted Blocks
-  4. Retirement from Block
-  5. Sink Statuses
+  5. Retirements
+  5. Retirement from Block
+  6. Sink Statuses
 
 Loading from scratch may fail if a Horizon instance with pruned history is selected.
 You may select another instance with the SC_HORIZON_URL env variable.

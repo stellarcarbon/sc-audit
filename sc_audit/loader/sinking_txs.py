@@ -5,6 +5,7 @@ Author: Alex Olieman <https://keybase.io/alioli>
 """
 from decimal import Decimal
 from typing import Any, Literal
+
 from sqlalchemy import select
 
 from sc_audit.config import settings

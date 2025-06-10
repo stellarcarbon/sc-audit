@@ -27,7 +27,7 @@ def dump_table(db_model: type[ScBase] | str, output_path: Path | None = None) ->
     ndjson_table = table_to_ndjson(db_table)
     if output_path is not None:
         with output_path.open('w') as ofile:
-            ofile.write(ndjson_table)
+            ofile.write(ndjson_table + "\n")
     else:
         return ndjson_table
 
