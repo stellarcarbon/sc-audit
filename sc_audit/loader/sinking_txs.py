@@ -47,7 +47,7 @@ def load_sinking_txs(cursor: int=settings.FIRST_SINK_CURSOR) -> int:
             tx_operations = get_tx_operations(sink_tx['transaction_hash'])
             payment_data = get_payment_data(tx_operations)
             memo_type = sink_tx['transaction']['memo_type']
-            memo_value=sink_tx['transaction'].get('memo')
+            memo_value = sink_tx['transaction'].get('memo')
             if memo_type == 'hash':
                 memo_value = decode_hash_memo(memo_value)
 

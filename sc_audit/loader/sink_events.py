@@ -29,7 +29,10 @@ def load_sink_events(cursor: int=settings.FIRST_SINK_CURSOR) -> tuple[int, list[
     recipient_emails: dict[str, str] = {}
 
     with Session.begin() as session:
-        last_ledger, tx_order = 0, 0
+        last_ledger = 0
+        # For each new ledger, reset tx_order to 2^16 to avoid collisions with SinkingTxs.
+        # This is a pragmatic choice; ideally, the order should come from Retroshades.
+        tx_order = first_tx_index = 2**16
         for sink_event in get_sink_events(cursor):
             if sink_event.email:
                 recipient_emails[sink_event.recipient] = sink_event.email
@@ -39,10 +42,14 @@ def load_sink_events(cursor: int=settings.FIRST_SINK_CURSOR) -> tuple[int, list[
             # FIXME: the TOID should come from Retroshades if possible
             if sink_event.ledger == last_ledger:
                 tx_order += 1
+            else:
+                tx_order = first_tx_index
 
             event_toid = TOID(sink_event.ledger, tx_order, 0)
             last_ledger = sink_event.ledger
             # TODO: support multiple events per transaction
+            # We can support >1 event per tx by abandoning tx hash as PK, replacing it
+            # with the TOID (paging_token). Not done yet, because it requires a data migration.
 
             session.add(
                 SinkingTx(
