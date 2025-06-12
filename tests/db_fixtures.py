@@ -3,7 +3,6 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, close_all_sessions
 
 from sc_audit.db_schema.base import ScBase
-from sc_audit.db_schema.impact_project import VcsProject, get_vcs_project
 
 engine = create_engine("sqlite+pysqlite:///:memory:", echo=True)
 

@@ -1,11 +1,12 @@
 """
 Load all database records in the order:
-  1. Distribution Outflows
-  2. Sinking Transactions
-  3. Minted Blocks
-  5. Retirements
-  5. Retirement from Block
-  6. Sink Statuses
+    1. Impact Projects
+    2. Distribution Outflows
+    3. Sinking Transactions
+    4. Minted Blocks
+    5. Retirements
+    6. Retirement from Block
+    7. Sink Statuses
 
 Loading from scratch may fail if a Horizon instance with pruned history is selected.
 You may select another instance with the SC_HORIZON_URL env variable.
@@ -16,6 +17,7 @@ import datetime as dt
 
 from sc_audit.loader.distribution_outflows import load_distribution_txs
 from sc_audit.loader.get_latest import get_latest_attr
+from sc_audit.loader.impact_projects import load_impact_projects
 from sc_audit.loader.minted_blocks import load_minted_blocks
 from sc_audit.loader.retirement_from_block import load_retirement_from_block
 from sc_audit.loader.retirements import load_retirements
@@ -40,6 +42,8 @@ def catch_up_from_sources():
     ) # type: ignore[return-value]
 
     print("Started catch-up from data sources...")
+    num_impact_projects = load_impact_projects()
+    print(f"Loaded {num_impact_projects} impact projects")
     num_distribution_txs = load_distribution_txs(cursor=dist_cursor)
     print(f"Loaded {num_distribution_txs} distribution outflows")
     num_sinking_txs = load_sinking_txs(cursor=sink_cursor)

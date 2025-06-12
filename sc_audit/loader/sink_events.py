@@ -4,9 +4,11 @@ Load sink events from sorocarbon into the DB as SinkingTx records.
 Author: Alex Olieman <https://keybase.io/alioli>
 """
 
+from functools import lru_cache
 from stellar_sdk.sep.toid import TOID
 
 from sc_audit.config import settings
+from sc_audit.db_schema.impact_project import get_vcs_project
 from sc_audit.db_schema.sink import SinkingTx
 from sc_audit.session_manager import Session
 from sc_audit.sources.sink_events import get_sink_events
@@ -77,6 +79,7 @@ def load_sink_events(cursor: int=settings.FIRST_SINK_CURSOR) -> tuple[int, list[
     return number_loaded, list(recipient_emails.items())
 
 
+@lru_cache(maxsize=32)
 def try_project_id(project_id: str) -> int:
     """
     Try to parse the project_id into a VCS project ID.
@@ -86,8 +89,11 @@ def try_project_id(project_id: str) -> int:
     """
     if project_id.startswith("VCS"):
         try:
-            return int(project_id[3:])
+            vcs_id = int(project_id[3:])
+            vcs_project = get_vcs_project(vcs_id)
+            if vcs_project:
+                return vcs_project.id
         except ValueError:
-            return 1360
-    else:
-        return 1360  # Default VCS project ID
+            pass
+
+    return 1360  # Default VCS project ID

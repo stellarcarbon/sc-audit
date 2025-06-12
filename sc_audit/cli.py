@@ -16,6 +16,7 @@ from sc_audit.backup.restore import TABLE_LOADING_ORDER, get_table_row_counts, r
 from sc_audit.loader.__main__ import catch_up_from_sources
 from sc_audit.loader.distribution_outflows import load_distribution_txs
 from sc_audit.loader.get_latest import get_latest_attr
+from sc_audit.loader.impact_projects import load_impact_projects
 from sc_audit.loader.minted_blocks import load_minted_blocks
 from sc_audit.loader.retirement_from_block import load_retirement_from_block
 from sc_audit.loader.retirements import load_retirements
@@ -147,6 +148,13 @@ def cli_view_sink_status(
 def load():
     """Load data from their original sources"""
     pass
+
+
+@load.command(name="impact-projects")
+def db_load_impact_projects():
+    """Load impact projects into the DB"""
+    num_impact_projects = load_impact_projects()
+    click.echo(f"Loaded {num_impact_projects} impact projects")
 
 
 @load.command(name="minted-blocks")

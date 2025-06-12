@@ -16,7 +16,7 @@ from typing import Any, Literal, Sequence
 from sqlalchemy import select
 
 from sc_audit.config import settings
-from sc_audit.db_schema.impact_project import UnknownVcsProject, VcsProject, get_vcs_project
+from sc_audit.db_schema.impact_project import UnknownVcsProject, get_vcs_project
 from sc_audit.db_schema.mint import MintedBlock, verra_carbon_pool
 from sc_audit.db_schema.retirement import Retirement
 from sc_audit.loader.utils import VcsSerialNumber, decode_hash_memo, parse_iso_datetime
@@ -36,21 +36,16 @@ def load_minted_blocks(cursor: int=settings.FIRST_MINT_CURSOR) -> int:
     pristine_blocks: list[MintedBlock] = []
     carbon_pool = index_carbon_pool()
     with Session.begin() as session:
-        existing_vcs_projects: set[int] = set(session.scalars(select(VcsProject.id)).all())
         for mint_tx in get_minting_transactions(cursor):
-            # ensure that the related VCS Project exists
+            # ensure that the related VCS Project is available
             vcs_project_id = get_vcs_project_id(mint_tx)
-            if vcs_project_id not in existing_vcs_projects:
-                vcs_project = get_vcs_project(vcs_project_id)
-                if vcs_project:
-                    existing_vcs_projects.add(vcs_project_id)
-                    session.add(vcs_project)
-                else:
-                    raise UnknownVcsProject(
-                        f"VCS project {vcs_project_id} needs to be loaded before related transactions"
-                        " can be stored.",
-                        vcs_id=vcs_project_id
-                    )
+            vcs_project = get_vcs_project(vcs_project_id)
+            if not vcs_project:
+                raise UnknownVcsProject(
+                    f"VCS project {vcs_project_id} needs to be loaded before related transactions"
+                    " can be stored.",
+                    vcs_id=vcs_project_id
+                )
             # check whether the block is pristine
             serial_hash = decode_hash_memo(mint_tx['transaction']['memo'])
             if serial_hash in carbon_pool:
@@ -91,7 +86,7 @@ def load_minted_blocks(cursor: int=settings.FIRST_MINT_CURSOR) -> int:
     return len(retired_blocks) + len(pristine_blocks)
             
             
-def get_vcs_project_id(sinking_tx) -> Literal[1360]:
+def get_vcs_project_id(mint_tx) -> Literal[1360]:
     # TODO: support multiple VCS projects
     return 1360
 
