@@ -6,11 +6,8 @@ Author: Alex Olieman <https://keybase.io/alioli>
 from decimal import Decimal
 from typing import Any, Literal
 
-from sqlalchemy import select
-
 from sc_audit.config import settings
-from sc_audit.db_schema.base import intpk
-from sc_audit.db_schema.impact_project import UnknownVcsProject, VcsProject, get_vcs_project
+from sc_audit.db_schema.impact_project import UnknownVcsProject, get_vcs_project
 from sc_audit.db_schema.sink import SinkingTx
 from sc_audit.loader.utils import decode_hash_memo, parse_iso_datetime
 from sc_audit.session_manager import Session

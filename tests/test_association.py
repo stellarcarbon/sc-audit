@@ -5,7 +5,7 @@ from sqlalchemy import func, select
 
 from sc_audit.db_schema.association import RetirementFromBlock, SinkStatus
 from sc_audit.db_schema.sink import SinkingTx
-from sc_audit.loader import minted_blocks, retirement_from_block, sink_status
+from sc_audit.loader import impact_projects, minted_blocks, retirement_from_block, sink_status
 from sc_audit.loader import sinking_txs as sink_loader
 from sc_audit.loader.utils import VcsSerialNumber
 from tests.data_fixtures.retirements import get_retirements
@@ -243,10 +243,12 @@ class TestSinkStatus:
 
 @pytest.fixture
 def mock_session(monkeypatch, new_session):
+    monkeypatch.setattr(impact_projects, 'Session', new_session)
     monkeypatch.setattr(minted_blocks, 'Session', new_session)
     monkeypatch.setattr(retirement_from_block, 'Session', new_session)
     monkeypatch.setattr(sink_loader, 'Session', new_session)
     monkeypatch.setattr(sink_status, 'Session', new_session)
+    impact_projects.load_impact_projects()
     return new_session
 
 @pytest.fixture

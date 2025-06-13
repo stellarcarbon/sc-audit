@@ -9,7 +9,7 @@ from sc_audit.db_schema import *
 from sc_audit.db_schema.distribution import DistributionTx
 from sc_audit.db_schema.impact_project import UnknownVcsProject
 from sc_audit.db_schema.mint import verra_carbon_pool
-from sc_audit.loader import minted_blocks
+from sc_audit.loader import impact_projects, minted_blocks
 from sc_audit.loader import distribution_outflows
 from sc_audit.loader.minted_blocks import (
     index_carbon_pool, 
@@ -104,8 +104,10 @@ class TestMintSources:
 
 @pytest.fixture
 def mock_session(monkeypatch, new_session):
+    monkeypatch.setattr(impact_projects, 'Session', new_session)
     monkeypatch.setattr(minted_blocks, 'Session', new_session)
     monkeypatch.setattr(distribution_outflows, 'Session', new_session)
+    impact_projects.load_impact_projects()
     return new_session
 
 @pytest.fixture
@@ -214,7 +216,9 @@ def first_block(first_block_data) -> MintedBlock:
     )
 
 @pytest.fixture
-def session_with_block(new_session, first_block):
+def session_with_block(monkeypatch, new_session, first_block):
+    monkeypatch.setattr(impact_projects, 'Session', new_session)
+    impact_projects.load_impact_projects()
     with new_session.begin() as session:
         session.add(first_block)
 

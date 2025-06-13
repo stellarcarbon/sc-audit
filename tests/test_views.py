@@ -372,11 +372,11 @@ def mock_session(monkeypatch, new_session):
     monkeypatch.setattr(sink_status_view, 'Session', new_session)
     monkeypatch.setattr(retirement, 'Session', new_session)
     monkeypatch.setattr(stats, 'Session', new_session)
+    impact_projects.load_impact_projects()
     return new_session
 
 @pytest.fixture
 def mock_session_with_associations(mock_mint_http, mock_sink_http, mock_session):
-    impact_projects.load_impact_projects()
     with mock_session.begin() as session:
         session.add_all(get_retirements())
 

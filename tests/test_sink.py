@@ -6,7 +6,7 @@ from stellar_sdk.server import OperationsCallBuilder, PaymentsCallBuilder
 
 from sc_audit.db_schema.impact_project import UnknownVcsProject
 from sc_audit.db_schema.sink import SinkingTx
-from sc_audit.loader import sinking_txs as sink_loader
+from sc_audit.loader import impact_projects, sinking_txs as sink_loader
 from sc_audit.loader.sinking_txs import get_payment_data, load_sinking_txs
 from sc_audit.sources import sinking_txs as sink_sources
 from sc_audit.sources.sinking_txs import get_sinking_transactions, get_tx_operations
@@ -56,7 +56,9 @@ class TestSinkSources:
 
 @pytest.fixture
 def mock_session(monkeypatch, new_session):
+    monkeypatch.setattr(impact_projects, 'Session', new_session)
     monkeypatch.setattr(sink_loader, 'Session', new_session)
+    impact_projects.load_impact_projects()
     return new_session
 
 

@@ -5,6 +5,7 @@ Author: Alex Olieman <https://keybase.io/alioli>
 """
 
 from functools import lru_cache
+
 from stellar_sdk.sep.toid import TOID
 
 from sc_audit.config import settings
@@ -53,6 +54,7 @@ def load_sink_events(cursor: int=settings.FIRST_SINK_CURSOR) -> tuple[int, list[
             # We can support >1 event per tx by abandoning tx hash as PK, replacing it
             # with the TOID (paging_token). Not done yet, because it requires a data migration.
 
+            memo = sink_event.memo_text or None
             session.add(
                 SinkingTx(
                     hash=sink_event.transaction,
@@ -68,8 +70,8 @@ def load_sink_events(cursor: int=settings.FIRST_SINK_CURSOR) -> tuple[int, list[
                     dest_asset_issuer=settings.CARBON_ISSUER_PUB,
                     dest_asset_amount=sink_event.amount,
                     vcs_project_id=vcs_project_id,
-                    memo_type='text' if sink_event.memo_text else 'none',
-                    memo_value=sink_event.memo_text,
+                    memo_type='text' if memo else 'none',
+                    memo_value=memo,
                     paging_token=event_toid.to_int64(),
                 )
             )
