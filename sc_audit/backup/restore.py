@@ -70,7 +70,7 @@ def df_from_ndjson(json_path: Path) -> pd.DataFrame:
     table_name = json_path.stem
     db_table = ScBase.metadata.tables[table_name]
     with open(json_path, 'r') as infile:
-        ndjson = infile.read()
+        ndjson = infile.read().rstrip("\n")
 
     # turn json lines into a valid array
     json_array = "[" + ndjson.replace("\n", ",") + "]"

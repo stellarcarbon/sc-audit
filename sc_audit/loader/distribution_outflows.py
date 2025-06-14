@@ -5,6 +5,7 @@ Author: Alex Olieman <https://keybase.io/alioli>
 """
 
 from decimal import Decimal
+
 from sc_audit.config import settings
 from sc_audit.db_schema.distribution import DistributionTx
 from sc_audit.loader.utils import parse_iso_datetime

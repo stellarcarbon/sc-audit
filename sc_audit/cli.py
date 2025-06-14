@@ -16,11 +16,14 @@ from sc_audit.backup.restore import TABLE_LOADING_ORDER, get_table_row_counts, r
 from sc_audit.loader.__main__ import catch_up_from_sources
 from sc_audit.loader.distribution_outflows import load_distribution_txs
 from sc_audit.loader.get_latest import get_latest_attr
+from sc_audit.loader.impact_projects import load_impact_projects
 from sc_audit.loader.minted_blocks import load_minted_blocks
 from sc_audit.loader.retirement_from_block import load_retirement_from_block
 from sc_audit.loader.retirements import load_retirements
+from sc_audit.loader.sink_events import load_sink_events
 from sc_audit.loader.sink_status import load_sink_statuses
 from sc_audit.loader.sinking_txs import load_sinking_txs
+from sc_audit.sources.sink_events import MercuryError
 from sc_audit.views.inventory import view_inventory
 from sc_audit.views.retirement import view_retirements
 from sc_audit.views.sink_status import view_sinking_txs
@@ -149,6 +152,13 @@ def load():
     pass
 
 
+@load.command(name="impact-projects")
+def db_load_impact_projects():
+    """Load impact projects into the DB"""
+    num_impact_projects = load_impact_projects()
+    click.echo(f"Loaded {num_impact_projects} impact projects")
+
+
 @load.command(name="minted-blocks")
 def db_load_minted_blocks():
     """Load minted blocks into the DB"""
@@ -171,6 +181,12 @@ def db_load_sinking_txs():
     sink_cursor = get_latest_attr('sink_tx')
     num_sinking_txs = load_sinking_txs(cursor=sink_cursor) # type: ignore[arg-type]
     click.echo(f"Loaded {num_sinking_txs} sinking transactions")
+    try:
+        num_sink_events = load_sink_events(cursor=sink_cursor)  # type: ignore[arg-type]
+        print(f"Loaded {num_sink_events} sink events")
+    except MercuryError as exc:
+        click.echo(f"Couldn't load sink events from Mercury")
+        click.echo(repr(exc), err=True)
 
 
 @load.command(name="retirements")

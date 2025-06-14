@@ -7,7 +7,7 @@ import pytest
 from sqlalchemy import select
 
 from sc_audit.db_schema.retirement import Retirement
-from sc_audit.loader import retirements as retirements_loader
+from sc_audit.loader import impact_projects, retirements as retirements_loader
 from sc_audit.loader.retirements import load_retirements
 from sc_audit.loader.utils import VcsSerialNumber
 from sc_audit.sources.retirements import format_verra_retirements, get_retirements_list
@@ -64,7 +64,9 @@ class TestRetirementSources:
 
 @pytest.fixture
 def mock_session(monkeypatch, new_session):
+    monkeypatch.setattr(impact_projects, 'Session', new_session)
     monkeypatch.setattr(retirements_loader, 'Session', new_session)
+    impact_projects.load_impact_projects()
     return new_session
 
 

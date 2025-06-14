@@ -5,11 +5,9 @@ Author: Alex Olieman <https://keybase.io/alioli>
 """
 from decimal import Decimal
 from typing import Any, Literal
-from sqlalchemy import select
 
 from sc_audit.config import settings
-from sc_audit.db_schema.base import intpk
-from sc_audit.db_schema.impact_project import UnknownVcsProject, VcsProject, get_vcs_project
+from sc_audit.db_schema.impact_project import UnknownVcsProject, get_vcs_project
 from sc_audit.db_schema.sink import SinkingTx
 from sc_audit.loader.utils import decode_hash_memo, parse_iso_datetime
 from sc_audit.session_manager import Session
@@ -21,31 +19,27 @@ def load_sinking_txs(cursor: int=settings.FIRST_SINK_CURSOR) -> int:
     Load (all) sinking transactions from Horizon into the DB.
 
     To catch up with Horizon, specify the cursor parameter to be the incremented paging
-    token of the latest record present in the DB.
+    token of the latest record present in the DB. Always get the latest cursor once, and
+    then load both sinking transactions and sink events using that cursor.
     """
     number_loaded = 0
 
     with Session.begin() as session:
-        existing_vcs_projects: set[intpk] = set(session.scalars(select(VcsProject.id)).all())
         for sink_tx in get_sinking_transactions(cursor):
-            # ensure that the related VCS Project exists
+            # ensure that the related VCS Project is available
             vcs_project_id = get_vcs_project_id(sink_tx)
-            if vcs_project_id not in existing_vcs_projects:
-                vcs_project = get_vcs_project(vcs_project_id)
-                if vcs_project:
-                    existing_vcs_projects.add(vcs_project_id)
-                    session.add(vcs_project)
-                else:
-                    raise UnknownVcsProject(
-                        f"VCS project {vcs_project_id} needs to be loaded before related transactions"
-                        " can be stored.",
-                        vcs_id=vcs_project_id
-                    )
+            vcs_project = get_vcs_project(vcs_project_id)
+            if not vcs_project:
+                raise UnknownVcsProject(
+                    f"VCS project {vcs_project_id} needs to be loaded before related transactions"
+                    " can be stored.",
+                    vcs_id=vcs_project_id
+                )
             
             tx_operations = get_tx_operations(sink_tx['transaction_hash'])
             payment_data = get_payment_data(tx_operations)
             memo_type = sink_tx['transaction']['memo_type']
-            memo_value=sink_tx['transaction'].get('memo')
+            memo_value = sink_tx['transaction'].get('memo')
             if memo_type == 'hash':
                 memo_value = decode_hash_memo(memo_value)
 
@@ -53,6 +47,7 @@ def load_sinking_txs(cursor: int=settings.FIRST_SINK_CURSOR) -> int:
                 SinkingTx(
                     hash=sink_tx['transaction_hash'],
                     created_at=parse_iso_datetime(sink_tx['created_at']),
+                    contract_id=None,
                     funder=payment_data['funder'],
                     recipient=sink_tx['to'],
                     carbon_amount=Decimal(sink_tx['amount']),

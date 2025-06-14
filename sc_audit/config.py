@@ -33,7 +33,7 @@ DbTablePrefix = Literal["test"] | None
 
 
 class Settings(BaseSettings):
-    model_config = SettingsConfigDict(env_prefix='SC_')
+    model_config = SettingsConfigDict(env_prefix='SC_', env_file=".env")
 
     DBAPI_URL: str = f"sqlite+pysqlite:///{get_default_db_path()}"
     TABLE_PREFIX: DbTablePrefix = None
@@ -49,6 +49,10 @@ class Settings(BaseSettings):
     FIRST_SINK_CURSOR: int = 164821723627237376
     FIRST_MINT_CURSOR: int = 164806777139924992
     FIRST_DIST_CURSOR: int = 164810659791396865
+
+    RETROSHADES_URL: HttpUrl = HttpUrl("https://api.mercurydata.app/retroshadesv1")
+    RETROSHADES_MD5: str = "571c515522665c5da4d18f7ccbf8eb3a"
+    MERCURY_KEY: str = ""
 
     @computed_field
     @property

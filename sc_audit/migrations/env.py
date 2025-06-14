@@ -5,8 +5,12 @@ from alembic import context
 import sqlalchemy.types as types
 
 from sc_audit.config import settings
-from sc_audit.db_schema.base import HexBinary, ScBase
+from sc_audit.db_schema.base import HexBinary, ScBase, create_test_mappers
 from sc_audit import session_manager
+
+
+# create test mappers after all models have been registered
+create_test_mappers()
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.

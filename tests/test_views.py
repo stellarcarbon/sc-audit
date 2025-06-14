@@ -4,6 +4,7 @@ from decimal import Decimal
 import pandas as pd
 import pytest
 
+from sc_audit.loader import impact_projects
 from sc_audit.loader import minted_blocks, retirement_from_block
 from sc_audit.loader import sinking_txs as sink_loader
 from sc_audit.loader import sink_status as sink_status_loader
@@ -362,6 +363,7 @@ class TestStatsView:
 
 @pytest.fixture
 def mock_session(monkeypatch, new_session):
+    monkeypatch.setattr(impact_projects, 'Session', new_session)
     monkeypatch.setattr(minted_blocks, 'Session', new_session)
     monkeypatch.setattr(retirement_from_block, 'Session', new_session)
     monkeypatch.setattr(sink_loader, 'Session', new_session)
@@ -370,6 +372,7 @@ def mock_session(monkeypatch, new_session):
     monkeypatch.setattr(sink_status_view, 'Session', new_session)
     monkeypatch.setattr(retirement, 'Session', new_session)
     monkeypatch.setattr(stats, 'Session', new_session)
+    impact_projects.load_impact_projects()
     return new_session
 
 @pytest.fixture

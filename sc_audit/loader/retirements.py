@@ -4,11 +4,10 @@ Load finalized retirements into the DB.
 Author: Alex Olieman <https://keybase.io/alioli>
 """
 import datetime as dt
-from functools import partial
 
 from sqlalchemy import select
 
-from sc_audit.db_schema.impact_project import VcsProject
+from sc_audit.db_schema.impact_project import UnknownVcsProject, get_vcs_project
 from sc_audit.db_schema.retirement import Retirement
 from sc_audit.loader.utils import parse_iso_date
 from sc_audit.session_manager import Session
@@ -26,25 +25,18 @@ def load_retirements(from_date: dt.date | None = None) -> int:
 
     with Session.begin() as session:
         existing_ids: set[int] = set(session.scalars(select(Retirement.certificate_id)).all())
-        existing_vcs_projects: set[int] = set(session.scalars(select(VcsProject.id)).all())
         for retirement_item in retirement_data['retirements']:
             # only load new retirements
             certificate_id = int(retirement_item['certificate_id'])
             if certificate_id not in existing_ids:
-                # ensure that the related VCS Project exists
+                # ensure that the related VCS Project is available
                 vcs_project_id = int(retirement_item['vcs_id'])
-                if vcs_project_id not in existing_vcs_projects:
-                    existing_vcs_projects.add(vcs_project_id)
-                    session.add(
-                        VcsProject(
-                            id=vcs_project_id,
-                            name=retirement_item['vcs_name'],
-                            category=retirement_item['vcs_category'],
-                            protocol=retirement_item['vcs_protocol'],
-                            additional_certifications=retirement_item['additional_certifications'],
-                            region=retirement_item['region'],
-                            country=retirement_item['country'],
-                        )
+                vcs_project = get_vcs_project(vcs_project_id)
+                if not vcs_project:
+                    raise UnknownVcsProject(
+                        f"VCS project {vcs_project_id} needs to be loaded before related retirements"
+                        " can be stored.",
+                        vcs_id=vcs_project_id
                     )
 
                 session.add(

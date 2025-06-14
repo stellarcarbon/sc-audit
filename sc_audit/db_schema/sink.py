@@ -26,6 +26,7 @@ class SinkingTxBase(MappedAsDataclass, kw_only=True):
 
     hash: Mapped[hashpk]
     created_at: Mapped[dt.datetime]
+    contract_id: Mapped[strkey | None]
     funder: Mapped[strkey]
     recipient: Mapped[strkey]
     carbon_amount: Mapped[kgdecimal]
