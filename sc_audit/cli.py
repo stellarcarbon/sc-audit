@@ -20,8 +20,10 @@ from sc_audit.loader.impact_projects import load_impact_projects
 from sc_audit.loader.minted_blocks import load_minted_blocks
 from sc_audit.loader.retirement_from_block import load_retirement_from_block
 from sc_audit.loader.retirements import load_retirements
+from sc_audit.loader.sink_events import load_sink_events
 from sc_audit.loader.sink_status import load_sink_statuses
 from sc_audit.loader.sinking_txs import load_sinking_txs
+from sc_audit.sources.sink_events import MercuryError
 from sc_audit.views.inventory import view_inventory
 from sc_audit.views.retirement import view_retirements
 from sc_audit.views.sink_status import view_sinking_txs
@@ -179,6 +181,12 @@ def db_load_sinking_txs():
     sink_cursor = get_latest_attr('sink_tx')
     num_sinking_txs = load_sinking_txs(cursor=sink_cursor) # type: ignore[arg-type]
     click.echo(f"Loaded {num_sinking_txs} sinking transactions")
+    try:
+        num_sink_events = load_sink_events(cursor=sink_cursor)  # type: ignore[arg-type]
+        print(f"Loaded {num_sink_events} sink events")
+    except MercuryError as exc:
+        click.echo(f"Couldn't load sink events from Mercury")
+        click.echo(repr(exc), err=True)
 
 
 @load.command(name="retirements")

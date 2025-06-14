@@ -36,6 +36,13 @@ class SinkEvent(BaseModel):
 
 
 def get_sink_events(cursor: int=settings.FIRST_SINK_CURSOR) -> list[SinkEvent]:
+    if not settings.MERCURY_KEY:
+        raise MercuryError(
+            "Skip sink events: Mercury key is not set in the configuration.",
+            mercury_key=settings.MERCURY_KEY,
+            retroshades_md5=settings.RETROSHADES_MD5,
+        )
+
     headers = {
         "Authorization": settings.MERCURY_KEY,
         "Content-Type": "application/json",
@@ -52,10 +59,25 @@ def get_sink_events(cursor: int=settings.FIRST_SINK_CURSOR) -> list[SinkEvent]:
             url=str(settings.RETROSHADES_URL),
             json=payload,
         )
-        resp.raise_for_status()
+        if resp.is_error:
+            err_msg = f"Failed to fetch sink events <{resp.status_code}>: {resp.text}"
+            if resp.text.endswith('does not exist")'):
+                err_msg = f"Retroshades table sink_event{settings.RETROSHADES_MD5} does not exist."
+            raise MercuryError(
+                err_msg,
+                mercury_key=settings.MERCURY_KEY,
+                retroshades_md5=settings.RETROSHADES_MD5,
+            )
+        
         events = resp.json()
 
     return [SinkEvent.from_raw(**event) for event in events]
+
+
+class MercuryError(Exception):
+    def __init__(self, msg, mercury_key: str, retroshades_md5: str):
+        super().__init__(msg, mercury_key, retroshades_md5)
+
 
 
 if __name__ == "__main__":
