@@ -37,6 +37,7 @@ Options:
   --help     Show this message and exit.
 
 Commands:
+  backup    Database dump and restore commands
   catch-up  Let the DB catch up with the data sources
   load      Load data from their original sources
   schema    Database schema migration commands
@@ -104,6 +105,7 @@ Options:
 Commands:
   associations      Load associations into the DB
   distribution-txs  Load distribution outflows into the DB
+  impact-projects   Load impact projects into the DB
   minted-blocks     Load minted blocks into the DB
   retirements       Load retirements into the DB
   sinking-txs       Load sinking transactions into the DB
@@ -182,14 +184,14 @@ The Python API is located at `sc_audit.views.sink_status` and returns the sinkin
 
 ```python
 def view_sinking_txs(
-        for_funder: str | None = None,
-        for_recipient: str | None = None, 
-        from_date: dt.date | None = None,
-        before_date: dt.date | None = None,
-        finalized: bool | None = None,
-        cursor: int | None = None,
-        limit: int | None = None,
-        order: Literal['asc', 'desc'] = 'desc',
+    for_funder: str | None = None,
+    for_recipient: str | None = None, 
+    from_date: dt.date | None = None,
+    before_date: dt.date | None = None,
+    finalized: bool | None = None,
+    cursor: int | None = None,
+    limit: int | None = None,
+    order: Literal['asc', 'desc'] = 'desc',
 ) -> pd.DataFrame
 ```
 
@@ -216,24 +218,26 @@ The Python API is located at `sc_audit.views.retirement` and returns the retirem
 
 ```python
 def view_retirements(
-        for_beneficiary: str | None = None, 
-        from_date: dt.date | None = None,
-        before_date: dt.date | None = None,
-        project: int | None = None,
-        cursor: int | None = None,
-        limit: int | None = None,
-        order: Literal['asc', 'desc'] = 'desc',
+    for_beneficiary: str | None = None, 
+    from_date: dt.date | None = None,
+    before_date: dt.date | None = None,
+    project: int | None = None,
+    cursor: int | None = None,
+    limit: int | None = None,
+    order: Literal['asc', 'desc'] = 'desc',
 ) -> pd.DataFrame
 ```
 
 ### Configuration
 
-There isn't much to configure in sc-audit. Two variables can be overriden by environment variables.
+There isn't much to configure in sc-audit. Several settings can be overriden by environment variables.
 
-| env variable     | description               |
-|------------------|---------------------------|
-| `SC_DBAPI_URL`   | default: `sqlite+pysqlite:///{get_default_db_path()}`<br>The default value places an SQLite DB file in the working dir or in a subdir of the home dir. |
-| `SC_HORIZON_URL` | default: `https://horizon.stellar.org`<br>Set this value to a Horizon instance with full history to be able to do a fresh load. |
+| env variable         | description               |
+|----------------------|---------------------------|
+| `SC_DBAPI_URL`       | default: `sqlite+pysqlite:///{get_default_db_path()}`<br>The default value places an SQLite DB file in the working dir or in a subdir of the home dir. |
+| `SC_HORIZON_URL`     | default: `https://horizon.stellar.org`<br>Set this value to a Horizon instance with full history to be able to do a fresh load. |
+| `SC_MERCURY_KEY`     | Provide a Mercury key generated from your own account (persistent; not the JWT) |
+| `SC_RETROSHADES_MD5` | default: latest `SinkContract`<br>You'll need to do your own Mercury deployment, and check if the WASM MD5 hash is the same as the default value here. |
 
 ## Development
 
