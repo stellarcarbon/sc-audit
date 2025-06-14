@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.10.0](https://github.com/stellarcarbon/sc-audit/compare/v0.9.4...v0.10.0) (2025-06-14)
+
+
+### Features
+
+* Ingest SinkEvents as SinkingTxs ([#21](https://github.com/stellarcarbon/sc-audit/issues/21)) ([f87fb81](https://github.com/stellarcarbon/sc-audit/commit/f87fb817520c8eca5d91de38d6b6a3c12adbc2ae))
+
+
+### Documentation
+
+* **cli:** update for v0.10 ([d9abb32](https://github.com/stellarcarbon/sc-audit/commit/d9abb321ba32bb362b31c6386eb27a910aadc96e))
+* pre-commit install ([3ceb239](https://github.com/stellarcarbon/sc-audit/commit/3ceb23914f805f0e0f0f71b50f60777ead671c3c))
+
 ## [0.9.4](https://github.com/stellarcarbon/sc-audit/compare/v0.9.3...v0.9.4) (2025-05-16)
 
 
