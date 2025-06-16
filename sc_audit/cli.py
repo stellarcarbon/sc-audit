@@ -178,11 +178,11 @@ def db_load_distribution_outflows():
 @load.command(name="sinking-txs")
 def db_load_sinking_txs():
     """Load sinking transactions into the DB"""
-    sink_cursor = get_latest_attr('sink_tx')
-    num_sinking_txs = load_sinking_txs(cursor=sink_cursor) # type: ignore[arg-type]
+    sink_cursor: int = get_latest_attr('sink_tx') # type: ignore[return-value]
+    num_sinking_txs = load_sinking_txs(cursor=sink_cursor)
     click.echo(f"Loaded {num_sinking_txs} sinking transactions")
     try:
-        num_sink_events = load_sink_events(cursor=sink_cursor)  # type: ignore[arg-type]
+        num_sink_events, _ = load_sink_events(cursor=sink_cursor)
         print(f"Loaded {num_sink_events} sink events")
     except MercuryError as exc:
         click.echo(f"Couldn't load sink events from Mercury")
