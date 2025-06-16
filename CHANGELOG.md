@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.10.1](https://github.com/stellarcarbon/sc-audit/compare/v0.10.0...v0.10.1) (2025-06-16)
+
+
+### Bug Fixes
+
+* unpack load_sink_events return value ([de10e1c](https://github.com/stellarcarbon/sc-audit/commit/de10e1ce138c885307e90fad36468c7c37ca0ac9))
+
 ## [0.10.0](https://github.com/stellarcarbon/sc-audit/compare/v0.9.4...v0.10.0) (2025-06-14)
 
 
