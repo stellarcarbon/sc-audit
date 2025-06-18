@@ -7,7 +7,7 @@ from dataclasses import fields
 from decimal import Decimal
 from typing import Annotated
 
-from sqlalchemy import Dialect, String
+from sqlalchemy import Dialect, MetaData, String
 import sqlalchemy.types as types
 from sqlalchemy.orm import mapped_column
 from sqlalchemy.orm import DeclarativeBase, MappedAsDataclass
@@ -42,11 +42,22 @@ bigint = Annotated[int, mapped_column(types.BigInteger())]
 
 
 class ScBase(MappedAsDataclass, DeclarativeBase):
+    metadata = MetaData(naming_convention={
+        "ix": "idx_%(column_0_name)s",
+        "uq": "uq_%(table_name)s_%(column_0_name)s",
+        "ck": "ck_%(table_name)s_`%(constraint_name)s`",
+        "fk": "%(table_name)s_%(column_0_name)s_fkey",
+        "pk": "pk_%(table_name)s"
+    })
 
     def __init_subclass__(cls) -> None:
         if settings.TABLE_PREFIX:
             # Check if the prefix has already been applied
-            if not cls.__tablename__.startswith(settings.TABLE_PREFIX):
+            # unless the class is a test mapper class
+            if (
+                cls.__name__.startswith('Test') 
+                or not cls.__tablename__.startswith(settings.TABLE_PREFIX)
+            ):
                 # Prefix the table name
                 cls.__tablename__ = f"{settings.TABLE_PREFIX}_{cls.__tablename__}"
 
@@ -57,6 +68,8 @@ class ScBase(MappedAsDataclass, DeclarativeBase):
                         for fk in field.foreign_keys:
                             if not fk._colspec.startswith(settings.TABLE_PREFIX):
                                 fk._colspec = f"{settings.TABLE_PREFIX}_{fk._colspec}"
+                            if fk.name and not fk.name.startswith(settings.TABLE_PREFIX):
+                                fk.name = f"{settings.TABLE_PREFIX}_{fk.name}"
 
         super().__init_subclass__()
 
@@ -70,9 +83,11 @@ def create_test_mappers():
         mapper.class_
         for mapper in ScBase.registry.mappers
     ]
+    # TODO: generate indexes for test tables
+    settings.TABLE_PREFIX = "test"
     for model in models:
         type(
             f'Test{model.__name__}', 
             model.__bases__, 
-            {"__tablename__": f"test_{model.__tablename__}"}
+            {"__tablename__": model.__tablename__}
         )

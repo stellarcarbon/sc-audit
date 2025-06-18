@@ -26,6 +26,20 @@
             "program": "${file}",
             "console": "integratedTerminal",
             "args": "${command:pickArgs}"
+        },
+        {
+            "name": "Debug Alembic Autogenerate",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "alembic",
+            "cwd": "${workspaceFolder}/sc_audit",
+            "args": [
+                "revision",
+                "--autogenerate",
+                "-m",
+                "TEST DO NOT COMMIT"
+            ],
+            "justMyCode": false
         }
     ]
 }
