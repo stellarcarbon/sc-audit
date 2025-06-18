@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.10.2](https://github.com/stellarcarbon/sc-audit/compare/v0.10.1...v0.10.2) (2025-06-18)
+
+
+### Bug Fixes
+
+* prefix foreign key constraints ([d1b4cb6](https://github.com/stellarcarbon/sc-audit/commit/d1b4cb6b1c8e14e3bd7d2aed855ac8d53a59e3a1))
+
 ## [0.10.1](https://github.com/stellarcarbon/sc-audit/compare/v0.10.0...v0.10.1) (2025-06-16)
 
 
