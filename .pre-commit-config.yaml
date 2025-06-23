@@ -4,3 +4,5 @@ repos:
     hooks:
       - id: conventional-pre-commit
         stages: [commit-msg]
+        args: [feat, fix, perf, deps, revert, docs, style, chore, refactor, test, build, ci]
+        # the types after "docs" are hidden from the changelog by default
