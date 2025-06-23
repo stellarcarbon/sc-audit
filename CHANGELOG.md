@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.10.3](https://github.com/stellarcarbon/sc-audit/compare/v0.10.2...v0.10.3) (2025-06-23)
+
+
+### Bug Fixes
+
+* **Mercury:** update RETROSHADES_MD5 ([31eae99](https://github.com/stellarcarbon/sc-audit/commit/31eae990b9fbee713ed23759a27a9946fc9ce310))
+
+
+### Dependencies
+
+* bump pygithub to v2.6.x; poetry update ([17a58b4](https://github.com/stellarcarbon/sc-audit/commit/17a58b4354a47dc61b3f6e4ef0be1c43222494f0))
+
 ## [0.10.2](https://github.com/stellarcarbon/sc-audit/compare/v0.10.1...v0.10.2) (2025-06-18)
 
 
