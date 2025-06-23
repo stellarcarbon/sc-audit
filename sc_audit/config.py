@@ -51,7 +51,7 @@ class Settings(BaseSettings):
     FIRST_DIST_CURSOR: int = 164810659791396865
 
     RETROSHADES_URL: HttpUrl = HttpUrl("https://api.mercurydata.app/retroshadesv1")
-    RETROSHADES_MD5: str = "571c515522665c5da4d18f7ccbf8eb3a"
+    RETROSHADES_MD5: str = "3dd6e7b71adb9fda05a5b45a154611f3"
     MERCURY_KEY: str = ""
 
     @computed_field
