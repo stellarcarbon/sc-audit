@@ -19,7 +19,7 @@ stellar-sdk = ">=10"
 pandas = "^2.2.2"
 alembic = "^1.13.2"
 click = "^8.1.7"
-pygithub = "^2.3.0"
+pygithub = "^2.6.1"
 pydantic-settings = "^2.3.4"
 
 [tool.poetry.group.dev.dependencies]
