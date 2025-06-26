@@ -24,7 +24,7 @@ from tests.data_fixtures.carbon_pool import carbon_pool as carbon_pool_fix
 from tests.data_fixtures.minting_transactions import distribution_records as outflows_fix
 from tests.data_fixtures.minting_transactions import minting_transactions as mint_tx_fix
 from tests.data_fixtures.minting_transactions import payment_records as payments_fix
-from tests.data_fixtures.retirements import get_retirements
+from tests.data_fixtures.retirements import get_retirements_whole_and_round_up
 
 
 class TestMintDb:
@@ -129,7 +129,7 @@ def mock_http(monkeypatch):
 class TestMintLoader:
     def test_reconstructed_from_retirement(self):
         blocks = reconstruct_blocks(
-            mint_txs=mint_tx_fix[:3], latest_block=None, retirements=get_retirements()[:1]
+            mint_txs=mint_tx_fix[:3], latest_block=None, retirements=get_retirements_whole_and_round_up()[:1]
         )
         assert len(blocks) == 3
         assert blocks[0].serial_hash == decode_hash_memo(mint_tx_fix[0]['transaction']['memo'])
@@ -156,7 +156,7 @@ class TestMintLoader:
 
     def test_load_minted_blocks_verify(self, mock_session, mock_http):
         with mock_session.begin() as session:
-            session.add_all(get_retirements())
+            session.add_all(get_retirements_whole_and_round_up())
 
         load_minted_blocks()
 

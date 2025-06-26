@@ -9,7 +9,7 @@ from sc_audit.loader import minted_blocks, retirement_from_block
 from sc_audit.loader import sinking_txs as sink_loader
 from sc_audit.loader import sink_status as sink_status_loader
 from sc_audit.views import inventory, retirement, sink_status as sink_status_view, stats
-from tests.data_fixtures.retirements import get_retirements
+from tests.data_fixtures.retirements import get_retirements_with_round_down_and_community
 from tests.db_fixtures import new_session
 from tests.test_mint import mock_http as mock_mint_http
 from tests.test_sink import mock_http as mock_sink_http
@@ -274,7 +274,7 @@ class TestConstructRetQuery:
 class TestRetirementView:
     def test_retirements_full(self, mock_session_with_associations):
         rtdf = retirement.view_retirements()
-        assert len(rtdf) == 11
+        assert len(rtdf) == 12
         assert rtdf.vcu_amount.sum() == 23
         assert rtdf.vcs_project_id.min() == 1360
         assert rtdf.vcs_project_id.max() == 1360
@@ -319,7 +319,7 @@ class TestRetirementView:
 
         combined_pages = pd.concat(pages)
         assert combined_pages.certificate_id.is_unique
-        assert len(combined_pages) == 11
+        assert len(combined_pages) == 12
 
     def test_retirements_pagination_desc(self, mock_session_with_associations):
         rtdf = retirement.view_retirements(limit=3, order='desc')
@@ -332,7 +332,7 @@ class TestRetirementView:
 
         combined_pages = pd.concat(pages)
         assert combined_pages.certificate_id.is_unique
-        assert len(combined_pages) == 11
+        assert len(combined_pages) == 12
 
 
 class TestStatsView:
@@ -348,8 +348,8 @@ class TestStatsView:
             recipient="GAXLLGNPEMRUMSLHO3QLYDWZCNPQMBDCWYNLVDPR32ABYWDWQO6YXHSL"
         )
         assert r1_stats["carbon_sunk"] == Decimal('3.015')
-        assert r1_stats["carbon_retired"] == Decimal('0')
-        assert r1_stats["carbon_pending"] == Decimal('3.015')
+        assert r1_stats["carbon_retired"] == Decimal('3.015')
+        assert r1_stats["carbon_pending"] == Decimal('0')
         assert "carbon_stored" not in r1_stats
 
         r2_stats = stats.get_carbon_stats(
@@ -359,6 +359,14 @@ class TestStatsView:
         assert r2_stats["carbon_retired"] == Decimal('10')
         assert r2_stats["carbon_pending"] == Decimal('0')
         assert "carbon_stored" not in r2_stats
+
+        r3_stats = stats.get_carbon_stats(
+            recipient="GDZTF5ELO5GIJVYYJS4QDN5UMTROJFLYQIG4ACPXWYGLC7VMHCEGIXKX"
+        )
+        assert r3_stats["carbon_sunk"] == Decimal('5')
+        assert r3_stats["carbon_retired"] == Decimal('1.985')
+        assert r3_stats["carbon_pending"] == Decimal('3.015')
+        assert "carbon_stored" not in r3_stats
 
 
 @pytest.fixture
@@ -378,7 +386,7 @@ def mock_session(monkeypatch, new_session):
 @pytest.fixture
 def mock_session_with_associations(mock_mint_http, mock_sink_http, mock_session):
     with mock_session.begin() as session:
-        session.add_all(get_retirements())
+        session.add_all(get_retirements_with_round_down_and_community())
 
     minted_blocks.load_minted_blocks()
     sink_loader.load_sinking_txs(cursor=999)

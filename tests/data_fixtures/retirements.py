@@ -2,7 +2,7 @@ import datetime
 
 from sc_audit.db_schema.retirement import Retirement
 
-def get_retirements():
+def get_retirements_whole_and_round_up():
     retirements = [
         Retirement(certificate_id=143471, vcu_amount=1, serial_number='8040-449402275-449402275-VCU-042-MER-PE-14-1360-01072013-30062014-1', retirement_date=datetime.date(2021, 11, 21), retirement_beneficiary='GAVF6ZB7Z7FKCWM5HEY2OV4ENPK3OSSHMFTVR4HHSBFHKW36U3FUH2CB', retirement_details='stellarcarbon.io 61d4ff5516b7098bbc2219d244e7f29a039c32735e1c16d1c05d66a0739727d9', vcs_project_id=1360, issuance_date=datetime.date(2020, 3, 20), instrument_type='VCU', vintage_start=datetime.date(2013, 7, 1), vintage_end=datetime.date(2014, 6, 30), total_vintage_quantity=97259), 
         Retirement(certificate_id=152309, vcu_amount=1, serial_number='8040-449402276-449402276-VCU-042-MER-PE-14-1360-01072013-30062014-1', retirement_date=datetime.date(2022, 9, 18), retirement_beneficiary='GC53JCXZHW3SVNRE4CT6XFP46WX4ACFQU32P4PR3CU43OB7AKKMFXZ6Y via stellarcarbon.io', retirement_details='stellarcarbon.io 63f55c3ff92b239ecdb774c336cb91e896a3e4906a81cbeb23a60f20563c198f', vcs_project_id=1360, issuance_date=datetime.date(2020, 3, 20), instrument_type='VCU', vintage_start=datetime.date(2013, 7, 1), vintage_end=datetime.date(2014, 6, 30), total_vintage_quantity=97259), 
@@ -17,6 +17,15 @@ def get_retirements():
         Retirement(certificate_id=203704, vcu_amount=5, serial_number='8040-449402293-449402297-VCU-042-MER-PE-14-1360-01072013-30062014-1', retirement_date=datetime.date(2023, 6, 14), retirement_beneficiary='GDZTF5ELO5GIJVYYJS4QDN5UMTROJFLYQIG4ACPXWYGLC7VMHCEGIXKX via stellarcarbon.io', retirement_details='stellarcarbon.io f4bdee046a289d32933a8bae36fa272bfde3acce6d0c68c412be1534249c9134 ce0f7783a87ee385216ba9d797ce69d951abba31a02cb25fb83659fc7a7371b0', vcs_project_id=1360, issuance_date=datetime.date(2020, 3, 20), instrument_type='VCU', vintage_start=datetime.date(2013, 7, 1), vintage_end=datetime.date(2014, 6, 30), total_vintage_quantity=97259)
     ]
     return retirements
+
+
+def get_retirements_with_round_down_and_community():
+    retirements = get_retirements_whole_and_round_up()[:-1]
+    assert len(retirements) == 10, "need to update slice on the preceding line"
+    round_down = Retirement(certificate_id=203704, vcu_amount=3, serial_number='8040-449402293-449402295-VCU-042-MER-PE-14-1360-01072013-30062014-1', retirement_date=datetime.date(2023, 6, 14), retirement_beneficiary='GAXLLGNPEMRUMSLHO3QLYDWZCNPQMBDCWYNLVDPR32ABYWDWQO6YXHSL via stellarcarbon.io', retirement_details='stellarcarbon.io 20dbafdc604fc1a48eafc4ce0df2b6151dfa5a5241c307f811a99ce4ddf2fb7f', vcs_project_id=1360, issuance_date=datetime.date(2020, 3, 20), instrument_type='VCU', vintage_start=datetime.date(2013, 7, 1), vintage_end=datetime.date(2014, 6, 30), total_vintage_quantity=97259)
+    community = Retirement(certificate_id=203705, vcu_amount=2, serial_number='8040-449402296-449402297-VCU-042-MER-PE-14-1360-01072013-30062014-1', retirement_date=datetime.date(2023, 6, 14), retirement_beneficiary='The Stellarcarbon Community', retirement_details='stellarcarbon.io 20dbafdc604fc1a48eafc4ce0df2b6151dfa5a5241c307f811a99ce4ddf2fb7f f4bdee046a289d32933a8bae36fa272bfde3acce6d0c68c412be1534249c9134', vcs_project_id=1360, issuance_date=datetime.date(2020, 3, 20), instrument_type='VCU', vintage_start=datetime.date(2013, 7, 1), vintage_end=datetime.date(2014, 6, 30), total_vintage_quantity=97259)
+    return retirements + [round_down, community]
+
 
 search_response = """
     {

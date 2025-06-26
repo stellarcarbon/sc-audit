@@ -8,7 +8,7 @@ from sc_audit.db_schema.sink import SinkingTx
 from sc_audit.loader import impact_projects, minted_blocks, retirement_from_block, sink_status
 from sc_audit.loader import sinking_txs as sink_loader
 from sc_audit.loader.utils import VcsSerialNumber
-from tests.data_fixtures.retirements import get_retirements
+from tests.data_fixtures.retirements import get_retirements_whole_and_round_up
 from tests.db_fixtures import new_session
 from tests.test_mint import mock_http as mock_mint_http
 from tests.test_sink import mock_http as mock_sink_http
@@ -16,7 +16,7 @@ from tests.test_sink import mock_http as mock_sink_http
 
 class TestRetirementFromBlock:
     def test_cover_retirement_block_start(self, mock_session_with_blocks):
-        retirement = get_retirements()[0]
+        retirement = get_retirements_whole_and_round_up()[0]
         serial_number = VcsSerialNumber.from_str(retirement.serial_number)
         retirement.vcu_amount = 1
         serial_number.block_start = 449402277
@@ -35,7 +35,7 @@ class TestRetirementFromBlock:
             assert rfb.block.block_end != serial_number.block_end
 
     def test_cover_retirement_block_end(self, mock_session_with_blocks):
-        retirement = get_retirements()[0]
+        retirement = get_retirements_whole_and_round_up()[0]
         serial_number = VcsSerialNumber.from_str(retirement.serial_number)
         retirement.vcu_amount = 2
         serial_number.block_start = 449402299
@@ -54,7 +54,7 @@ class TestRetirementFromBlock:
             assert rfb.block.block_end == serial_number.block_end
 
     def test_cover_retirement_block_middle(self, mock_session_with_blocks):
-        retirement = get_retirements()[0]
+        retirement = get_retirements_whole_and_round_up()[0]
         serial_number = VcsSerialNumber.from_str(retirement.serial_number)
         retirement.vcu_amount = 3
         serial_number.block_start = 449402280
@@ -73,7 +73,7 @@ class TestRetirementFromBlock:
             assert rfb.block.block_end != serial_number.block_end
 
     def test_cover_retirement_spans_two(self, mock_session_with_blocks):
-        retirement = get_retirements()[0]
+        retirement = get_retirements_whole_and_round_up()[0]
         serial_number = VcsSerialNumber.from_str(retirement.serial_number)
         retirement.vcu_amount = 24
         serial_number.block_start = 449402280
@@ -95,7 +95,7 @@ class TestRetirementFromBlock:
             assert rfb_two.block.block_start < serial_number.block_end < rfb_two.block.block_end
 
     def test_cover_retirement_spans_three(self, mock_session_with_blocks):
-        retirement = get_retirements()[0]
+        retirement = get_retirements_whole_and_round_up()[0]
         serial_number = VcsSerialNumber.from_str(retirement.serial_number)
         retirement.vcu_amount = 32
         serial_number.block_start = 449402289
@@ -119,7 +119,7 @@ class TestRetirementFromBlock:
             assert rfb_three.block.block_start < serial_number.block_end < rfb_three.block.block_end
 
     def test_cover_retirement_overspent(self, mock_session_with_blocks):
-        retirements = get_retirements()
+        retirements = get_retirements_whole_and_round_up()
         with mock_session_with_blocks.begin() as session:
             session.add_all(retirement_from_block.cover_retirement(session, retirements[0]))
             session.add_all(retirement_from_block.cover_retirement(session, retirements[1]))
@@ -129,7 +129,7 @@ class TestRetirementFromBlock:
 
     def test_cover_retirement_uncovered(self, mock_session_with_blocks):
         # craft a retirement that extends beyond a known block range
-        retirement = get_retirements()[0]
+        retirement = get_retirements_whole_and_round_up()[0]
         serial_number = VcsSerialNumber.from_str(retirement.serial_number)
         retirement.vcu_amount = 7
         serial_number.block_start = 449402320
@@ -147,11 +147,11 @@ class TestRetirementFromBlock:
             rfbs = session.scalars(select(RetirementFromBlock)).all()
             assert len(rfbs) == 11
             rfb_total_amount = sum(rfb.vcu_amount for rfb in rfbs)
-            retirement_total_amount = sum(ret.vcu_amount for ret in get_retirements())
+            retirement_total_amount = sum(ret.vcu_amount for ret in get_retirements_whole_and_round_up())
             assert rfb_total_amount == retirement_total_amount
 
     def test_load_rfb_overspent(self, mock_session_with_blocks):
-        duplicate_retirement = get_retirements()[0]
+        duplicate_retirement = get_retirements_whole_and_round_up()[0]
         duplicate_retirement.certificate_id = 0
         with mock_session_with_blocks.begin() as session:
             session.add(duplicate_retirement)
@@ -162,7 +162,7 @@ class TestRetirementFromBlock:
 
 class TestSinkStatus:
     def test_create_sink_status_one(self, mock_session_with_sink_txs):
-        retirement = get_retirements()[0]
+        retirement = get_retirements_whole_and_round_up()[0]
         with mock_session_with_sink_txs.begin() as session:
             sink_statuses = sink_status.create_sink_statuses(session, retirement)
             assert len(sink_statuses) == 1
@@ -173,7 +173,7 @@ class TestSinkStatus:
             assert status.finalized is True
 
     def test_create_sink_status_two(self, mock_session_with_sink_txs):
-        retirement = get_retirements()[10]
+        retirement = get_retirements_whole_and_round_up()[10]
         with mock_session_with_sink_txs.begin() as session:
             sink_statuses = sink_status.create_sink_statuses(session, retirement)
             assert len(sink_statuses) == 2
@@ -185,7 +185,7 @@ class TestSinkStatus:
                 assert status.finalized is True
 
     def test_create_sink_status_more(self, mock_session_with_sink_txs):
-        retirement = get_retirements()[8]
+        retirement = get_retirements_whole_and_round_up()[8]
         with mock_session_with_sink_txs.begin() as session:
             sink_statuses = sink_status.create_sink_statuses(session, retirement)
             assert len(sink_statuses) == 7
@@ -196,7 +196,7 @@ class TestSinkStatus:
                 assert status.finalized is True
 
     def test_create_sink_status_split_tx(self, mock_session_with_sink_txs):
-        retirements = get_retirements()
+        retirements = get_retirements_whole_and_round_up()
         # construct a retirement that partially fills a sink tx (filling in minimal fields)
         retirement_one = retirements[0]
         retirement_one.retirement_details = "stellarcarbon.io 20dbafdc604fc1a48eafc4ce0df2b6151dfa5a5241c307f811a99ce4ddf2fb7f"
@@ -241,8 +241,8 @@ class TestSinkStatus:
             assert sink_tx_two.carbon_amount - sink_tx_two.total_filled == Decimal("0.015")
 
     def test_create_sink_status_empty(self, mock_session_with_sink_txs):
-        retirement_one = get_retirements()[0]
-        retirement_two = get_retirements()[1]
+        retirement_one = get_retirements_whole_and_round_up()[0]
+        retirement_two = get_retirements_whole_and_round_up()[1]
         retirement_two.retirement_details = retirement_one.retirement_details
         with mock_session_with_sink_txs.begin() as session:
             sink_statuses = sink_status.create_sink_statuses(session, retirement_one)
@@ -261,7 +261,7 @@ class TestSinkStatus:
             sss = session.scalars(select(SinkStatus)).all()
             assert len(sss) == 18
             ss_total_amount = sum(ss.amount_filled for ss in sss)
-            retirement_total_amount = sum(ret.vcu_amount for ret in get_retirements())
+            retirement_total_amount = sum(ret.vcu_amount for ret in get_retirements_whole_and_round_up())
             assert ss_total_amount == retirement_total_amount
 
             q_finalized_txs = (
@@ -295,7 +295,7 @@ def mock_session(monkeypatch, new_session):
 @pytest.fixture
 def mock_session_with_blocks(mock_mint_http, mock_session):
     with mock_session.begin() as session:
-        session.add_all(get_retirements())
+        session.add_all(get_retirements_whole_and_round_up())
 
     minted_blocks.load_minted_blocks()
     return mock_session

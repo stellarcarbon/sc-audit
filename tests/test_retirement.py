@@ -12,7 +12,7 @@ from sc_audit.loader.retirements import load_retirements
 from sc_audit.loader.utils import VcsSerialNumber
 from sc_audit.sources.retirements import format_verra_retirements, get_retirements_list
 from tests.db_fixtures import new_session
-from tests.data_fixtures.retirements import search_response, get_retirements
+from tests.data_fixtures.retirements import search_response, get_retirements_whole_and_round_up
 
 
 class MockClient(Client):
@@ -44,7 +44,7 @@ class TestRetirementSources:
     def test_format_retirements(self):
         retirements_data = format_verra_retirements(search_response)
         assert retirements_data['total_count'] == 11
-        retirements_fix = get_retirements()
+        retirements_fix = get_retirements_whole_and_round_up()
         for i, retirement in enumerate(retirements_data['retirements']):
             assert int(retirement['certificate_id']) == retirements_fix[i].certificate_id
 
