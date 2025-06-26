@@ -195,24 +195,51 @@ class TestSinkStatus:
                 assert status.amount_filled == status.sinking_transaction.carbon_amount
                 assert status.finalized is True
 
-    def test_create_sink_status_pending(self, mock_session_with_sink_txs):
+    def test_create_sink_status_split_tx(self, mock_session_with_sink_txs):
+        retirements = get_retirements()
         # construct a retirement that partially fills a sink tx (filling in minimal fields)
-        retirement = get_retirements()[0]
-        retirement.retirement_details = "stellarcarbon.io 20dbafdc604fc1a48eafc4ce0df2b6151dfa5a5241c307f811a99ce4ddf2fb7f"
-        retirement.vcu_amount = 3
+        retirement_one = retirements[0]
+        retirement_one.retirement_details = "stellarcarbon.io 20dbafdc604fc1a48eafc4ce0df2b6151dfa5a5241c307f811a99ce4ddf2fb7f"
+        retirement_one.vcu_amount = 3
+        # construct a retirement that fully fills the first tx, and partially fills a second one
+        retirement_two = retirements[1]
+        retirement_two.retirement_details = "stellarcarbon.io 20dbafdc604fc1a48eafc4ce0df2b6151dfa5a5241c307f811a99ce4ddf2fb7f 40def47032e4ab8fc7f06b817ca58f354ee0ba590ac318377856e8658e512771"
+        retirement_two.vcu_amount = 1
         with mock_session_with_sink_txs.begin() as session:
-            sink_statuses = sink_status.create_sink_statuses(session, retirement)
+            # partially fill the first sinking tx
+            sink_statuses = sink_status.create_sink_statuses(session, retirement_one)
             assert len(sink_statuses) == 1
             status = sink_statuses[0]
-            assert status.sinking_tx_hash == retirement.tx_hashes_from_details[0]
-            assert status.certificate_id == retirement.certificate_id
-            assert status.amount_filled == retirement.vcu_amount
+            assert status.sinking_tx_hash == retirement_one.tx_hashes_from_details[0]
+            assert status.certificate_id == retirement_one.certificate_id
+            assert status.amount_filled == retirement_one.vcu_amount
             assert status.finalized is False
 
             # check sink tx amount filled and amount remaining
             sink_tx = status.sinking_transaction
-            assert sink_tx.total_filled == retirement.vcu_amount
+            assert sink_tx.total_filled == retirement_one.vcu_amount
             assert sink_tx.carbon_amount - sink_tx.total_filled == Decimal("0.015")
+
+            # fully fill the first tx, and partially fill the second one
+            sink_statuses = sink_status.create_sink_statuses(session, retirement_two)
+            assert len(sink_statuses) == 2
+            status_one = sink_statuses[0]
+            assert status_one.sinking_tx_hash == retirement_two.tx_hashes_from_details[0]
+            assert status_one.certificate_id == retirement_two.certificate_id
+            assert status_one.amount_filled == Decimal("0.015")
+            assert status_one.finalized is True
+
+            # check sink tx one amount filled, there is no amount remaining
+            assert sink_tx.total_filled == sink_tx.carbon_amount
+
+            # check status two, sink tx two amount filled, and amount remaining
+            status_two = sink_statuses[1]
+            sink_tx_two = status_two.sinking_transaction
+            assert status_two.certificate_id == retirement_two.certificate_id
+            assert status_two.amount_filled == sink_tx_two.total_filled == 1 - Decimal("0.015")
+            assert status_two.finalized is False
+            assert sink_tx_two.carbon_amount - sink_tx_two.total_filled == Decimal("0.015")
+
 
     def test_load_sink_statuses(self, mock_session_with_sink_txs):
         sink_status.load_sink_statuses()
