@@ -60,6 +60,12 @@ def create_sink_statuses(session, for_retirement: Retirement) -> list[SinkStatus
         sink_tx = session.get_one(SinkingTx, tx_hash)
         retirement_remaining = retirement.vcu_amount - existing_status_amount
         sink_remaining = sink_tx.carbon_amount - sink_tx.total_filled
+        if not sink_remaining:
+            raise EmptySinkStatus(
+                f"Trying to create a status for tx {tx_hash} that is already finalized.",
+                sinking_tx_hash=tx_hash,
+                certificate_id=retirement.certificate_id
+            )
         # status amount is the sink amount up to the remaining retirement amount
         amount_filled = min(sink_remaining, retirement_remaining)
         sink_status = SinkStatus(
@@ -74,3 +80,8 @@ def create_sink_statuses(session, for_retirement: Retirement) -> list[SinkStatus
         new_sink_statuses.append(sink_status)
 
     return new_sink_statuses
+
+
+class EmptySinkStatus(Exception):
+    def __init__(self, msg, sinking_tx_hash: str, certificate_id: int):
+        super().__init__(msg, sinking_tx_hash, certificate_id)

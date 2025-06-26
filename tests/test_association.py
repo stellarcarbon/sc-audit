@@ -240,6 +240,20 @@ class TestSinkStatus:
             assert status_two.finalized is False
             assert sink_tx_two.carbon_amount - sink_tx_two.total_filled == Decimal("0.015")
 
+    def test_create_sink_status_empty(self, mock_session_with_sink_txs):
+        retirement_one = get_retirements()[0]
+        retirement_two = get_retirements()[1]
+        retirement_two.retirement_details = retirement_one.retirement_details
+        with mock_session_with_sink_txs.begin() as session:
+            sink_statuses = sink_status.create_sink_statuses(session, retirement_one)
+            status_one = sink_statuses[0]
+            assert status_one.finalized is True
+
+            # create a new status for the already finalized sinking tx
+            tx_hash = status_one.sinking_tx_hash
+            with pytest.raises(sink_status.EmptySinkStatus, match=f"Trying to create a status for tx {tx_hash} that is already finalized"):
+                sink_statuses = sink_status.create_sink_statuses(session, retirement_two)
+
 
     def test_load_sink_statuses(self, mock_session_with_sink_txs):
         sink_status.load_sink_statuses()
