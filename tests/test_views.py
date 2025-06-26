@@ -1,5 +1,6 @@
 import datetime as dt
 from decimal import Decimal
+import re
 
 import pandas as pd
 import pytest
@@ -64,11 +65,8 @@ class TestConstructStxQuery:
             before_date=None,
             finalized=None
         )
-        assert (
-            "FROM sinking_txs LEFT OUTER JOIN sink_status ON sinking_txs.hash = sink_status.sinking_tx_hash"
-            in str(stxq)
-        )
         assert "WHERE" not in str(stxq)
+        assert re.fullmatch(r'SELECT (sinking_txs\.[_a-z]+,?\s*)+FROM sinking_txs', str(stxq))
 
     def test_construct_query_for_funder(self):
         stxq = sink_status_view.construct_stx_query(
@@ -170,13 +168,14 @@ class TestSinkStatusView:
 
     def test_sink_status_finalized_true(self, mock_session_with_associations):
         txdf = sink_status_view.view_sinking_txs(finalized=True)
-        assert len(txdf) == 18
-        assert txdf.carbon_amount.sum() == 23
+        assert len(txdf) == 17
+        assert txdf.statuses.map(add_amount_filled).sum() == txdf.carbon_amount.sum() == Decimal('21.015')
         assert all(txdf.statuses.astype(bool))
 
     def test_sink_status_finalized_false(self, mock_session_with_associations):
         txdf = sink_status_view.view_sinking_txs(finalized=False)
         assert len(txdf) == 2
+        assert txdf.statuses.map(add_amount_filled).sum() == Decimal('1.985')
         assert txdf.carbon_amount.sum() == Decimal('3.298')
         assert not any(txdf.statuses.astype(bool))
 
@@ -393,3 +392,7 @@ def mock_session_with_associations(mock_mint_http, mock_sink_http, mock_session)
     retirement_from_block.load_retirement_from_block()
     sink_status_loader.load_sink_statuses()
     return mock_session
+
+
+def add_amount_filled(statuses: list) -> Decimal:
+    return sum((s["amount_filled"] for s in statuses), start=Decimal())

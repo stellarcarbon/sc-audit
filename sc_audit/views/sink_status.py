@@ -27,21 +27,40 @@ def view_sinking_txs(
         limit: int | None = None,
         order: Literal['asc', 'desc'] = 'desc',
 ) -> pd.DataFrame:
-    stx_query = construct_stx_query(for_funder, for_recipient, from_date, before_date, finalized)
-
+    base_query = construct_stx_query(
+        for_funder, for_recipient, from_date, before_date, finalized
+    ).subquery()
+    subq_paging_token = base_query.c.paging_token
+    # Determine order and cursor filter
     if order == 'asc':
-        stx_query = stx_query.order_by(SinkingTx.paging_token.asc())
-        if cursor:
-            stx_query = stx_query.where(SinkingTx.paging_token > cursor)
-    if order == 'desc':
-        stx_query = stx_query.order_by(SinkingTx.paging_token.desc())
-        if cursor:
-            stx_query = stx_query.where(SinkingTx.paging_token < cursor)
-
-    if limit:
-        stx_query = stx_query.limit(limit)
+        subq_order = subq_paging_token.asc()
+        stx_order = SinkingTx.paging_token.asc()
+        cursor_filter = subq_paging_token > (cursor or 0)
+    elif order == 'desc':
+        subq_order = subq_paging_token.desc()
+        stx_order = SinkingTx.paging_token.desc()
+        cursor_filter = subq_paging_token < (cursor or 0)
 
     with Session.begin() as session:
+        # Step 1: Get unique paging_tokens for the page
+        token_query = select(subq_paging_token).select_from(base_query)
+        if cursor and cursor > 0:
+            token_query = token_query.where(cursor_filter)
+        
+        token_query = token_query.order_by(subq_order).distinct().limit(limit)
+        paging_tokens = session.scalars(token_query).all()
+
+        if not paging_tokens:
+            return pd.DataFrame()
+
+        # Step 2: Fetch SinkingTxs for those paging_tokens, eager load statuses
+        stx_query = (
+            select(SinkingTx)
+            .outerjoin(SinkStatus)
+            .options(contains_eager(SinkingTx.statuses))
+            .where(SinkingTx.paging_token.in_(paging_tokens))
+            .order_by(stx_order)
+        )
         stx_records = session.scalars(stx_query).unique().all()
         txdf = pd.DataFrame.from_records(stx.as_dict() for stx in stx_records)
 
@@ -55,27 +74,30 @@ def construct_stx_query(
         before_date: dt.date | None,
         finalized: bool | None,
 ) -> Select[tuple[SinkingTx]]:
-    q_txs = select(SinkingTx).outerjoin(SinkStatus).options(contains_eager(SinkingTx.statuses))
+    # Only build the base query and filters
+    q_txs = select(SinkingTx)
     if for_funder:
         q_txs = q_txs.where(SinkingTx.funder == for_funder)
-
+    
     if for_recipient:
         q_txs = q_txs.where(SinkingTx.recipient == for_recipient)
-
+    
     if from_date:
         from_dt = dt.datetime(from_date.year, from_date.month, from_date.day)
         q_txs = q_txs.where(SinkingTx.created_at >= from_dt)
-
+    
     if before_date:
         before_dt = dt.datetime(before_date.year, before_date.month, before_date.day)
         q_txs = q_txs.where(SinkingTx.created_at < before_dt)
-
+    
+    if finalized is not None:
+        q_txs = q_txs.outerjoin(SinkStatus)
     if finalized is False:
         # not_ and in_ do not work here because NULL and false are treated differently
         q_txs = q_txs.where(or_(SinkStatus.finalized == None, SinkStatus.finalized == False))
     elif finalized is True:
         q_txs = q_txs.where(SinkStatus.finalized == True)
-
+    
     return q_txs
 
 
