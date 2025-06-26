@@ -102,3 +102,4 @@ class MintedBlock(MintedBlockBase, ScBase):
 
 
 idx_created_at = Index("idx_block_created_at", MintedBlock.created_at)
+idx_toid = Index("idx_block_toid", MintedBlock.paging_token.desc(), unique=True)

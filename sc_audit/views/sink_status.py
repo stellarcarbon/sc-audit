@@ -30,11 +30,11 @@ def view_sinking_txs(
     stx_query = construct_stx_query(for_funder, for_recipient, from_date, before_date, finalized)
 
     if order == 'asc':
-        stx_query = stx_query.order_by(SinkingTx.created_at.asc())
+        stx_query = stx_query.order_by(SinkingTx.paging_token.asc())
         if cursor:
             stx_query = stx_query.where(SinkingTx.paging_token > cursor)
     if order == 'desc':
-        stx_query = stx_query.order_by(SinkingTx.created_at.desc())
+        stx_query = stx_query.order_by(SinkingTx.paging_token.desc())
         if cursor:
             stx_query = stx_query.where(SinkingTx.paging_token < cursor)
 

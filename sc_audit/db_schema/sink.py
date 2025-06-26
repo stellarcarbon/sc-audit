@@ -73,5 +73,6 @@ class SinkingTx(SinkingTxBase, ScBase):
     
 
 idx_created_at = Index("idx_stx_created_at", SinkingTx.created_at.desc())
+idx_toid = Index("idx_stx_toid", SinkingTx.paging_token.desc(), unique=True)
 idx_funder = Index("idx_stx_funder", SinkingTx.funder)
 idx_recipient = Index("idx_stx_recipient", SinkingTx.recipient)

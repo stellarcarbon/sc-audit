@@ -26,4 +26,5 @@ class DistributionTx(DistributionTxBase, ScBase):
 
 
 idx_created_at = Index("idx_dtx_created_at", DistributionTx.created_at.desc())
+idx_toid = Index("idx_dtx_toid", DistributionTx.paging_token.desc(), unique=True)
 idx_recipient = Index("idx_dtx_recipient", DistributionTx.recipient)

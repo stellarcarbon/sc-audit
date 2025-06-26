@@ -38,17 +38,17 @@ def get_latest_attr(*models: CoreModelName) -> LatestAttr | list[LatestAttr]:
                 latest_attrs[i] = latest_retirement_date
             elif model == 'sink_tx':
                 latest_sink_tx_cursor = session.scalar(
-                    select(SinkingTx.paging_token).order_by(SinkingTx.created_at.desc())
+                    select(SinkingTx.paging_token).order_by(SinkingTx.paging_token.desc())
                 )
                 latest_attrs[i] = increment_paging_token(latest_sink_tx_cursor) or settings.FIRST_SINK_CURSOR
             elif model == 'mint_tx':
                 latest_mint_tx_cursor = session.scalar(
-                    select(MintedBlock.paging_token).order_by(MintedBlock.created_at.desc())
+                    select(MintedBlock.paging_token).order_by(MintedBlock.paging_token.desc())
                 )
                 latest_attrs[i] = increment_paging_token(latest_mint_tx_cursor) or settings.FIRST_MINT_CURSOR
             elif model == 'dist_tx':
                 latest_dist_tx_cursor = session.scalar(
-                    select(DistributionTx.paging_token).order_by(DistributionTx.created_at.desc())
+                    select(DistributionTx.paging_token).order_by(DistributionTx.paging_token.desc())
                 )
                 latest_attrs[i] = increment_paging_token(latest_dist_tx_cursor) or settings.FIRST_DIST_CURSOR
 
