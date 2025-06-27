@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.10.4](https://github.com/stellarcarbon/sc-audit/compare/v0.10.3...v0.10.4) (2025-06-27)
+
+
+### Bug Fixes
+
+* **pagination:** refactor sink status queries to improve pagination predictability ([67c9756](https://github.com/stellarcarbon/sc-audit/commit/67c975654f0707158837ea2ac923cb7c3370153c))
+* **SinkStatus:** make finalized filters perfect negations of each other ([2691c3e](https://github.com/stellarcarbon/sc-audit/commit/2691c3ee9c105cf4003901f8d526eac691d8fdd9))
+* **SinkStatus:** raise on empty sink status ([74e77a4](https://github.com/stellarcarbon/sc-audit/commit/74e77a42efef903c59f1530854afab9373fb7898))
+
+
+### Performance Improvements
+
+* order by paging_token rather than created_at ([60da22a](https://github.com/stellarcarbon/sc-audit/commit/60da22a103d1da54fab9c8222413af014168a04a))
+
 ## [0.10.3](https://github.com/stellarcarbon/sc-audit/compare/v0.10.2...v0.10.3) (2025-06-23)
 
 
