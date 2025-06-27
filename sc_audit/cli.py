@@ -91,7 +91,7 @@ def cli_view_inventory(omit_empty: bool, until_date: dt.datetime | None, format:
     help="Filter retirements that happened before the given date"
 )
 @click.option("--project", type=int, help="Filter by impact project")
-def cli_view_retirments(
+def cli_view_retirements(
         beneficiary: str | None, 
         from_date: dt.datetime | None,
         before_date: dt.datetime | None,
