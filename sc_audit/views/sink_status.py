@@ -9,7 +9,7 @@ import datetime as dt
 from typing import Any, Literal
 
 import pandas as pd
-from sqlalchemy import Select, or_, select
+from sqlalchemy import Select, exists, not_, select
 from sqlalchemy.orm import contains_eager, selectinload
 
 from sc_audit.db_schema.association import SinkStatus
@@ -90,13 +90,17 @@ def construct_stx_query(
         before_dt = dt.datetime(before_date.year, before_date.month, before_date.day)
         q_txs = q_txs.where(SinkingTx.created_at < before_dt)
     
-    if finalized is not None:
-        q_txs = q_txs.outerjoin(SinkStatus)
     if finalized is False:
-        # not_ and in_ do not work here because NULL and false are treated differently
-        q_txs = q_txs.where(or_(SinkStatus.finalized == None, SinkStatus.finalized == False))
+        # filter on sink txs without any SinkStatus with finalized=True
+        # this clause needs to be the perfect negation of `finalized is True`
+        q_txs = q_txs.where(
+            not_(exists().where(
+                SinkStatus.sinking_tx_hash == SinkingTx.hash, SinkStatus.finalized == True
+            ).correlate(SinkingTx))
+        )
     elif finalized is True:
-        q_txs = q_txs.where(SinkStatus.finalized == True)
+        # select sink txs that have at least one SinkStatus with finalized=True
+        q_txs = q_txs.outerjoin(SinkStatus).where(SinkStatus.finalized == True)
     
     return q_txs
 

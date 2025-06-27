@@ -125,7 +125,9 @@ class TestConstructStxQuery:
             before_date=None,
             finalized=False
         )
-        assert "WHERE sink_status.finalized IS NULL OR sink_status.finalized = false" in str(stxq)
+        assert str(stxq).replace(' \n', '').endswith(
+            "WHERE NOT (EXISTS (SELECT *FROM sink_statusWHERE sink_status.sinking_tx_hash = sinking_txs.hash AND sink_status.finalized = true))"
+        )
 
 
 class TestSinkStatusView:
@@ -174,10 +176,13 @@ class TestSinkStatusView:
 
     def test_sink_status_finalized_false(self, mock_session_with_associations):
         txdf = sink_status_view.view_sinking_txs(finalized=False)
-        assert len(txdf) == 2
+        assert len(txdf) == 3
         assert txdf.statuses.map(add_amount_filled).sum() == Decimal('1.985')
-        assert txdf.carbon_amount.sum() == Decimal('3.298')
-        assert not any(txdf.statuses.astype(bool))
+        assert txdf.carbon_amount.sum() == Decimal('5.283')
+        # expect the last tx to have a sink status with finalized=False
+        assert len(txdf[txdf.statuses.astype(bool) == True]) == 1
+        assert len(txdf.statuses.iloc[-1]) == 1
+        assert txdf.statuses.iloc[-1][0]['finalized'] == False
 
     def test_sink_status_pagination_asc(self, mock_session_with_associations):
         txdf = sink_status_view.view_sinking_txs(limit=2, order='asc')
