@@ -17,14 +17,18 @@ down_revision: str | None = '77ea86674a18'
 branch_labels: str | Sequence[str] | None = None
 depends_on: str | Sequence[str] | None = None
 
-# get naming convention from the context
-migration_context = context.get_context()
-target_metadata = migration_context.opts.get("target_metadata")
-assert target_metadata is not None, "Target metadata must be set in the migration context"
-naming_convention = target_metadata.naming_convention
+
+def get_naming_convention():
+    # get naming convention from the context
+    migration_context = context.get_context()
+    target_metadata = migration_context.opts.get("target_metadata")
+    assert target_metadata is not None, "Target metadata must be set in the migration context"
+    return target_metadata.naming_convention
 
 
 def upgrade() -> None:
+    naming_convention = get_naming_convention()
+
     with op.batch_alter_table('test_minted_blocks', schema=None, naming_convention=naming_convention) as batch_op:
         batch_op.drop_constraint('test_minted_blocks_vcs_project_id_fkey', type_='foreignkey')
         batch_op.create_foreign_key(batch_op.f('test_minted_blocks_vcs_project_id_fkey'), 'test_vcs_projects', ['vcs_project_id'], ['id'])
@@ -51,6 +55,8 @@ def upgrade() -> None:
 
 
 def downgrade() -> None:
+    naming_convention = get_naming_convention()
+
     with op.batch_alter_table('test_sinking_txs', schema=None, naming_convention=naming_convention) as batch_op:
         batch_op.drop_constraint(batch_op.f('test_sinking_txs_vcs_project_id_fkey'), type_='foreignkey')
         batch_op.create_foreign_key(None, 'vcs_projects', ['vcs_project_id'], ['id'])
