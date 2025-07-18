@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.10.5](https://github.com/stellarcarbon/sc-audit/compare/v0.10.4...v0.10.5) (2025-07-18)
+
+
+### Bug Fixes
+
+* **migrations:** apply branch label in new revision ([8dbd146](https://github.com/stellarcarbon/sc-audit/commit/8dbd1462e1f6b2f1d88a0c5d57379110d0d43126))
+* **migrations:** wrap `context.get_context()` in a function ([8e7c48a](https://github.com/stellarcarbon/sc-audit/commit/8e7c48aae8b029eb3bca8604de2cb3360e6350fb))
+
 ## [0.10.4](https://github.com/stellarcarbon/sc-audit/compare/v0.10.3...v0.10.4) (2025-06-27)
 
 
