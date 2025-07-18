@@ -10,7 +10,7 @@ from sc_audit import session_manager
 
 
 # create test mappers after all models have been registered
-create_test_mappers()
+create_test_mappers(ScBase)
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.

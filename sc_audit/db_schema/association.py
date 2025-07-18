@@ -1,3 +1,8 @@
+"""
+Declare associative models that produce many-to-many tables.
+
+Author: Alex Olieman <https://keybase.io/alioli>
+"""
 from __future__ import annotations
 import typing
 

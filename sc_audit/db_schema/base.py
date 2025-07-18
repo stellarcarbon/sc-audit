@@ -5,7 +5,7 @@ Author: Alex Olieman <https://keybase.io/alioli>
 """
 from dataclasses import fields
 from decimal import Decimal
-from typing import Annotated
+from typing import Annotated, Type
 
 from sqlalchemy import Dialect, MetaData, String
 import sqlalchemy.types as types
@@ -51,37 +51,41 @@ class ScBase(MappedAsDataclass, DeclarativeBase):
     })
 
     def __init_subclass__(cls) -> None:
-        if settings.TABLE_PREFIX:
-            # Check if the prefix has already been applied
-            # unless the class is a test mapper class
-            if (
-                cls.__name__.startswith('Test') 
-                or not cls.__tablename__.startswith(settings.TABLE_PREFIX)
-            ):
-                # Prefix the table name
-                cls.__tablename__ = f"{settings.TABLE_PREFIX}_{cls.__tablename__}"
-
-                for dfield in fields(cls):
-                    field = getattr(cls, dfield.name, None)
-                    if field and hasattr(field, 'foreign_keys'):
-                        # Prefix all foreign key column references
-                        for fk in field.foreign_keys:
-                            if not fk._colspec.startswith(settings.TABLE_PREFIX):
-                                fk._colspec = f"{settings.TABLE_PREFIX}_{fk._colspec}"
-                            if fk.name and not fk.name.startswith(settings.TABLE_PREFIX):
-                                fk.name = f"{settings.TABLE_PREFIX}_{fk.name}"
-
+        prefix_tables_and_foreign_keys(cls)
         super().__init_subclass__()
 
 
-def create_test_mappers():
+def prefix_tables_and_foreign_keys(subclass: Type[DeclarativeBase]):
+    if settings.TABLE_PREFIX:
+        assert issubclass(subclass, MappedAsDataclass)
+        # Check if the prefix has already been applied
+        # unless the class is a test mapper class
+        if (
+            subclass.__name__.startswith('Test') 
+            or not subclass.__tablename__.startswith(settings.TABLE_PREFIX)
+        ):
+            # Prefix the table name
+            subclass.__tablename__ = f"{settings.TABLE_PREFIX}_{subclass.__tablename__}"
+
+            for dfield in fields(subclass):
+                field = getattr(subclass, dfield.name, None)
+                if field and hasattr(field, 'foreign_keys'):
+                    # Prefix all foreign key column references
+                    for fk in field.foreign_keys:
+                        if not fk._colspec.startswith(settings.TABLE_PREFIX):
+                            fk._colspec = f"{settings.TABLE_PREFIX}_{fk._colspec}"
+                        if fk.name and not fk.name.startswith(settings.TABLE_PREFIX):
+                            fk.name = f"{settings.TABLE_PREFIX}_{fk.name}"
+
+
+def create_test_mappers(base_class: Type[DeclarativeBase]):
     """
     Create testnet versions of all registered models.
     These mappers are not needed at runtime, but they must exist when generating migrations.
     """
     models = [
         mapper.class_
-        for mapper in ScBase.registry.mappers
+        for mapper in base_class.registry.mappers
     ]
     # TODO: generate indexes for test tables
     settings.TABLE_PREFIX = "test"
