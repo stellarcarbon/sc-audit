@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.10.6](https://github.com/stellarcarbon/sc-audit/compare/v0.10.5...v0.10.6) (2025-08-08)
+
+
+### Bug Fixes
+
+* **sources:** increase Verra asset search timeout to 10s ([8831a74](https://github.com/stellarcarbon/sc-audit/commit/8831a74f79c99826e431d8e7259336ca87e7521e))
+
 ## [0.10.5](https://github.com/stellarcarbon/sc-audit/compare/v0.10.4...v0.10.5) (2025-07-18)
 
 
