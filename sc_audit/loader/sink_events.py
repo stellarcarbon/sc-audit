@@ -15,7 +15,7 @@ from sc_audit.session_manager import Session
 from sc_audit.sources.sink_events import get_sink_events
 
 
-def load_sink_events(cursor: int=settings.FIRST_SINK_CURSOR) -> tuple[int, list[tuple[str, str]]]:
+def load_sink_events(cursor: int=settings.FIRST_SINK_CURSOR) -> int:
     """
     Load (all) sink events from Mercury Retroshades into the DB.
 
@@ -29,7 +29,6 @@ def load_sink_events(cursor: int=settings.FIRST_SINK_CURSOR) -> tuple[int, list[
     separately.
     """
     number_loaded = 0
-    recipient_emails: dict[str, str] = {}
 
     with Session.begin() as session:
         last_ledger = 0
@@ -37,9 +36,6 @@ def load_sink_events(cursor: int=settings.FIRST_SINK_CURSOR) -> tuple[int, list[
         # This is a pragmatic choice; ideally, the order should come from Retroshades.
         tx_order = first_tx_index = 2**16
         for sink_event in get_sink_events(cursor):
-            if sink_event.email:
-                recipient_emails[sink_event.recipient] = sink_event.email
-
             vcs_project_id = try_project_id(sink_event.project_id)
 
             # FIXME: the TOID should come from Retroshades if possible
@@ -78,7 +74,7 @@ def load_sink_events(cursor: int=settings.FIRST_SINK_CURSOR) -> tuple[int, list[
         
         number_loaded = len(session.new)
 
-    return number_loaded, list(recipient_emails.items())
+    return number_loaded
 
 
 @lru_cache(maxsize=32)

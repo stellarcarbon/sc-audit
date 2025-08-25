@@ -52,7 +52,7 @@ def catch_up_from_sources():
     num_sinking_txs = load_sinking_txs(cursor=sink_cursor)
     print(f"Loaded {num_sinking_txs} sinking transactions")
     try:
-        num_sink_events, _ = load_sink_events(cursor=sink_cursor)
+        num_sink_events = load_sink_events(cursor=sink_cursor)
         print(f"Loaded {num_sink_events} sink events")
     except MercuryError as exc:
         print(f"Couldn't load sink events from Mercury")
