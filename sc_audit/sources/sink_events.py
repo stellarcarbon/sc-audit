@@ -5,15 +5,14 @@ Author: Alex Olieman <https://keybase.io/alioli>
 """
 
 import datetime as dt
-from decimal import Decimal
+from decimal import ROUND_DOWN, Decimal
 
 import httpx
 from pydantic import BaseModel
 from stellar_sdk.sep.toid import TOID
 
 from sc_audit.config import settings
-
-UNIT_IN_STROOPS = 10_000_000
+from sc_audit.constants import KG, UNIT_IN_STROOPS
 
 
 class SinkEvent(BaseModel):
@@ -30,7 +29,7 @@ class SinkEvent(BaseModel):
 
     @classmethod
     def from_raw(cls, **data):
-        data["amount"] = data["amount"] / UNIT_IN_STROOPS
+        data["amount"] = (data["amount"] / UNIT_IN_STROOPS).quantize(KG, rounding=ROUND_DOWN)
         data["created_at"] = dt.datetime.fromtimestamp(data["timestamp"], dt.UTC)
         return cls(**data)
 
