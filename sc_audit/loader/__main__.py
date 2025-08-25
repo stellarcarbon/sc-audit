@@ -23,9 +23,11 @@ from sc_audit.loader.minted_blocks import load_minted_blocks
 from sc_audit.loader.retirement_from_block import load_retirement_from_block
 from sc_audit.loader.retirements import load_retirements
 from sc_audit.loader.sink_events import load_sink_events
+from sc_audit.loader.sink_invocations import load_sink_invocations
 from sc_audit.loader.sink_status import load_sink_statuses
 from sc_audit.loader.sinking_txs import load_sinking_txs
 from sc_audit.sources.sink_events import MercuryError
+from sc_audit.sources.sink_invocations import ObsrvrError
 
 
 def catch_up_from_sources():
@@ -51,12 +53,20 @@ def catch_up_from_sources():
     print(f"Loaded {num_distribution_txs} distribution outflows")
     num_sinking_txs = load_sinking_txs(cursor=sink_cursor)
     print(f"Loaded {num_sinking_txs} sinking transactions")
+    
+    # attempt to load SinkContract txs from Obsrvr or Mercury
     try:
-        num_sink_events = load_sink_events(cursor=sink_cursor)
-        print(f"Loaded {num_sink_events} sink events")
-    except MercuryError as exc:
-        print(f"Couldn't load sink events from Mercury")
+        num_sink_invocations = load_sink_invocations(cursor=sink_cursor)
+        print(f"Loaded {num_sink_invocations} sink invocations")
+    except ObsrvrError as exc:
+        print(f"Couldn't load sink invocations from Obsrvr")
         print(repr(exc), file=sys.stderr)
+        try:
+            num_sink_events = load_sink_events(cursor=sink_cursor)
+            print(f"Loaded {num_sink_events} sink events")
+        except MercuryError as exc:
+            print(f"Couldn't load sink events from Mercury")
+            print(repr(exc), file=sys.stderr)
         
     num_minting_txs = load_minted_blocks(cursor=mint_cursor)
     print(f"Loaded {num_minting_txs} minted blocks")

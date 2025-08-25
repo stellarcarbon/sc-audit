@@ -45,6 +45,7 @@ def mock_client(monkeypatch):
 
 @pytest.fixture
 def patch_mercury_key(patch_settings):
+    patch_settings.OBSRVR_FLOW_DB_URI = None
     if not patch_settings.MERCURY_KEY:
         patch_settings.MERCURY_KEY = "123456789ABCDEFGHJKLMNPQRSTUVWXY"
 

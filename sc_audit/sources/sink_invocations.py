@@ -43,7 +43,7 @@ class SinkInvocation(BaseModel):
         return cls(**data)
 
 
-def get_sink_events(cursor: int=settings.FIRST_SINK_CURSOR) -> list[SinkInvocation]:
+def get_sink_invocations(cursor: int=settings.FIRST_SINK_CURSOR) -> list[SinkInvocation]:
     if not settings.OBSRVR_FLOW_DB_URI:
         raise ObsrvrError(
              "Skip sink invocations: Obsrvr DB URI is not set in the configuration.",
@@ -79,5 +79,5 @@ class ObsrvrError(Exception):
 
 
 if __name__ == "__main__":
-    sink_events = get_sink_events(cursor=0)
+    sink_events = get_sink_invocations(cursor=0)
     pass

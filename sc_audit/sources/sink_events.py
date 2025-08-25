@@ -42,6 +42,12 @@ def get_sink_events(cursor: int=settings.FIRST_SINK_CURSOR) -> list[SinkEvent]:
             mercury_key=settings.MERCURY_KEY,
             retroshades_md5=settings.RETROSHADES_MD5,
         )
+    elif settings.OBSRVR_FLOW_DB_URI:
+        raise MercuryError(
+            "Only one of MERCURY_KEY and OBSRVR_FLOW_DB_URI may be provided.",
+            mercury_key=settings.MERCURY_KEY,
+            retroshades_md5=settings.RETROSHADES_MD5,
+        )
 
     headers = {
         "Authorization": settings.MERCURY_KEY,
