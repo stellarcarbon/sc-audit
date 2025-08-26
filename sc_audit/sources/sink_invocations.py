@@ -5,45 +5,55 @@ Author: Alex Olieman <https://keybase.io/alioli>
 """
 
 import datetime as dt
-from decimal import Decimal
+from decimal import ROUND_DOWN, Decimal
+from typing import Sequence
 
-from pydantic import BaseModel
-from sqlalchemy import create_engine, make_url, select, Table, MetaData
+from sqlalchemy import create_engine, make_url, select
+from sqlalchemy.ext.hybrid import hybrid_property
+from sqlalchemy.orm import DeclarativeBase, Mapped, MappedAsDataclass, Session
 
 from sc_audit.config import settings
+from sc_audit.constants import KG, UNIT_IN_STROOPS
+from sc_audit.db_schema.base import bigint, intpk
 
 
-UNIT_IN_STROOPS = 10_000_000
+db_url = make_url(str(settings.OBSRVR_FLOW_DB_URI))
+engine = create_engine(db_url)
+
+    
+class FlowBase(MappedAsDataclass, DeclarativeBase): ...
 
 
-class SinkInvocation(BaseModel):
-    id: int
-    toid: int
-    ledger: int
-    tx_hash: str
-    created_at: dt.datetime
-    contract_id: str
-    function_name: str
-    invoking_account: str
-    processed_at: dt.datetime
-    schema_name: str
-    successful: bool
+class SinkInvocation(FlowBase):
+    __tablename__ = settings.OBSRVR_FLOW_TABLE
 
-    funder: str
-    recipient: str
-    amount: Decimal
-    project_id: str
-    memo_text: str | None
-    email: str | None
+    id: Mapped[intpk]
+    toid: Mapped[bigint]
+    ledger: Mapped[int]
+    timestamp: Mapped[dt.datetime]
+    contract_id: Mapped[str]
+    function_name: Mapped[str]
+    invoking_account: Mapped[str]
+    tx_hash: Mapped[str]
 
-    @classmethod
-    def from_raw(cls, **data):
-        data["amount"] = data["amount"] / UNIT_IN_STROOPS
-        data["created_at"] = data["timestamp"]
-        return cls(**data)
+    funder: Mapped[str]
+    recipient: Mapped[str]
+    amount: Mapped[bigint]
+    project_id: Mapped[str]
+    memo_text: Mapped[str | None]
+    email: Mapped[str | None]
 
+    processed_at: Mapped[dt.datetime]
+    schema_name: Mapped[str]
+    successful: Mapped[bool]
+    created_at: Mapped[dt.datetime]
 
-def get_sink_invocations(cursor: int=settings.FIRST_SINK_CURSOR) -> list[SinkInvocation]:
+    @hybrid_property
+    def ton_amount(self) -> Decimal:
+        return (self.amount / UNIT_IN_STROOPS).quantize(KG, rounding=ROUND_DOWN)
+    
+
+def get_sink_invocations(cursor: int=settings.FIRST_SINK_CURSOR) -> Sequence[SinkInvocation]:
     if not settings.OBSRVR_FLOW_DB_URI:
         raise ObsrvrError(
              "Skip sink invocations: Obsrvr DB URI is not set in the configuration.",
@@ -55,21 +65,13 @@ def get_sink_invocations(cursor: int=settings.FIRST_SINK_CURSOR) -> list[SinkInv
             dsn_uri=str(settings.OBSRVR_FLOW_DB_URI)
         )
 
-    db_url = make_url(str(settings.OBSRVR_FLOW_DB_URI))
-    engine = create_engine(db_url)
+    query = select(SinkInvocation).where(SinkInvocation.toid > cursor)
     
-    with engine.begin() as conn:
-        metadata = MetaData()
-        sink_table = Table(
-            settings.OBSRVR_FLOW_TABLE,
-            metadata,
-            autoload_with=conn
-        )
-        result = conn.execute(
-            select(sink_table).where(sink_table.c.toid > cursor)
-        )    
+    with Session(engine, expire_on_commit=False) as session:
+        invokes = session.execute(query).scalars().all()
 
-    return [SinkInvocation.from_raw(**row._mapping) for row in result]
+    return invokes
+
 
 
 class ObsrvrError(Exception):
