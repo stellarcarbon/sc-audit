@@ -8,7 +8,7 @@ from sc_audit.db_schema.sink import SinkingTx
 from sc_audit.loader import impact_projects
 from sc_audit.loader import sink_invocations as invocation_loader
 from sc_audit.loader import sinking_txs as sink_loader
-from sc_audit.sources import sink_invocations as invocation_source
+from sc_audit.sources.sink_invocations import FlowBase, InvocationSource
 from tests.db_fixtures import engine, new_session
 from tests.data_fixtures import invocations
 from tests.test_settings import patch_settings
@@ -19,12 +19,12 @@ from tests.test_sink import mock_http
 def patch_flow_db_engine(monkeypatch, patch_settings):
     patch_settings.MERCURY_KEY = ""
     patch_settings.OBSRVR_FLOW_DB_URI = engine.url
-    monkeypatch.setattr(invocation_source, 'engine', engine)
+    monkeypatch.setattr(InvocationSource, 'engine', engine)
 
 
 @pytest.fixture
 def mock_invocations():
-    invocation_source.FlowBase.metadata.create_all(engine)
+    FlowBase.metadata.create_all(engine)
 
     with Session(engine) as session:
         session.add_all(invocations.get_items())
@@ -32,14 +32,14 @@ def mock_invocations():
 
     yield
 
-    invocation_source.FlowBase.metadata.drop_all(engine)
+    FlowBase.metadata.drop_all(engine)
 
 
 
 @pytest.mark.usefixtures("mock_invocations", "patch_flow_db_engine")
 class TestSinkInvocationSource:
     def test_invoke_list_full(self):
-        invokes = invocation_source.get_sink_invocations(cursor=0)
+        invokes = InvocationSource.get_sink_invocations(cursor=0)
         assert len(invokes) == 3
         one, two, tri = invokes
 
@@ -87,9 +87,9 @@ class TestSinkInvocationSource:
         assert tri.memo_text == "tri"
 
     def test_returns_the_same_when_repeated(self):
-        res_1 = invocation_source.get_sink_invocations(cursor=0)
-        res_2 = invocation_source.get_sink_invocations(cursor=0)
-        res_3 = invocation_source.get_sink_invocations(cursor=0)
+        res_1 = InvocationSource.get_sink_invocations(cursor=0)
+        res_2 = InvocationSource.get_sink_invocations(cursor=0)
+        res_3 = InvocationSource.get_sink_invocations(cursor=0)
 
         assert len(res_1) == len(res_2) == len(res_3) == 3
         assert res_1 == res_2 == res_3

@@ -8,7 +8,7 @@ import datetime as dt
 from decimal import ROUND_DOWN, Decimal
 from typing import Sequence
 
-from sqlalchemy import create_engine, make_url, select
+from sqlalchemy import URL, Engine, create_engine, make_url, select
 from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.orm import DeclarativeBase, Mapped, MappedAsDataclass, Session
 
@@ -17,10 +17,6 @@ from sc_audit.constants import KG, UNIT_IN_STROOPS
 from sc_audit.db_schema.base import bigint, intpk
 
 
-db_url = make_url(str(settings.OBSRVR_FLOW_DB_URI))
-engine = create_engine(db_url)
-
-    
 class FlowBase(MappedAsDataclass, DeclarativeBase): ...
 
 
@@ -53,33 +49,43 @@ class SinkInvocation(FlowBase):
         return (self.amount / UNIT_IN_STROOPS).quantize(KG, rounding=ROUND_DOWN)
     
 
-def get_sink_invocations(cursor: int=settings.FIRST_SINK_CURSOR) -> Sequence[SinkInvocation]:
+class ObsrvrError(Exception):
+    def __init__(self, msg, dsn_uri: str | None):
+        super().__init__(msg, dsn_uri)
+    
+
+class InvocationSource:
+    db_url: URL | None
+    engine: Engine | None
+
     if not settings.OBSRVR_FLOW_DB_URI:
-        raise ObsrvrError(
-             "Skip sink invocations: Obsrvr DB URI is not set in the configuration.",
-             dsn_uri=None
-        )
+        db_url = None
+        engine = None
     elif settings.MERCURY_KEY:
         raise ObsrvrError(
             "Only one of MERCURY_KEY and OBSRVR_FLOW_DB_URI may be provided.",
             dsn_uri=str(settings.OBSRVR_FLOW_DB_URI)
         )
+    else:
+        db_url = make_url(str(settings.OBSRVR_FLOW_DB_URI))
+        engine = create_engine(db_url)
 
-    query = select(SinkInvocation).where(SinkInvocation.toid > cursor)
-    
-    with Session(engine, expire_on_commit=False) as session:
-        invokes = session.scalars(query).all()
+    @classmethod
+    def get_sink_invocations(cls, cursor: int=settings.FIRST_SINK_CURSOR) -> Sequence[SinkInvocation]:
+        if not cls.engine:
+            raise ObsrvrError(
+                "Skip sink invocations: Obsrvr DB URI is not set in the configuration.",
+                dsn_uri=None
+            )
 
-    return invokes
+        query = select(SinkInvocation).where(SinkInvocation.toid > cursor)
+        
+        with Session(cls.engine, expire_on_commit=False) as session:
+            invokes = session.scalars(query).all()
 
-
-
-class ObsrvrError(Exception):
-    def __init__(self, msg, dsn_uri: str | None):
-        super().__init__(msg, dsn_uri)
-
+        return invokes
 
 
 if __name__ == "__main__":
-    sink_events = get_sink_invocations(cursor=0)
+    sink_events = InvocationSource.get_sink_invocations(cursor=0)
     pass
