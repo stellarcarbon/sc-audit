@@ -1,7 +1,7 @@
 from pathlib import Path
 from typing import Literal
 
-from pydantic import HttpUrl, computed_field
+from pydantic import HttpUrl, PostgresDsn, computed_field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 from stellar_sdk import Asset
 
@@ -53,6 +53,9 @@ class Settings(BaseSettings):
     RETROSHADES_URL: HttpUrl = HttpUrl("https://api.mercurydata.app/retroshadesv1")
     RETROSHADES_MD5: str = "3dd6e7b71adb9fda05a5b45a154611f3"
     MERCURY_KEY: str = ""
+
+    OBSRVR_FLOW_DB_URI: PostgresDsn | None = None
+    OBSRVR_FLOW_TABLE: str = "extracted_contract_invocations"
 
     @computed_field
     @property

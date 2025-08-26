@@ -5,15 +5,14 @@ Author: Alex Olieman <https://keybase.io/alioli>
 """
 
 import datetime as dt
-from decimal import Decimal
+from decimal import ROUND_DOWN, Decimal
 
 import httpx
 from pydantic import BaseModel
 from stellar_sdk.sep.toid import TOID
 
 from sc_audit.config import settings
-
-UNIT_IN_STROOPS = 10_000_000
+from sc_audit.constants import KG, UNIT_IN_STROOPS
 
 
 class SinkEvent(BaseModel):
@@ -30,7 +29,7 @@ class SinkEvent(BaseModel):
 
     @classmethod
     def from_raw(cls, **data):
-        data["amount"] = data["amount"] / UNIT_IN_STROOPS
+        data["amount"] = (data["amount"] / UNIT_IN_STROOPS).quantize(KG, rounding=ROUND_DOWN)
         data["created_at"] = dt.datetime.fromtimestamp(data["timestamp"], dt.UTC)
         return cls(**data)
 
@@ -39,6 +38,12 @@ def get_sink_events(cursor: int=settings.FIRST_SINK_CURSOR) -> list[SinkEvent]:
     if not settings.MERCURY_KEY:
         raise MercuryError(
             "Skip sink events: Mercury key is not set in the configuration.",
+            mercury_key=settings.MERCURY_KEY,
+            retroshades_md5=settings.RETROSHADES_MD5,
+        )
+    elif settings.OBSRVR_FLOW_DB_URI:
+        raise MercuryError(
+            "Only one of MERCURY_KEY and OBSRVR_FLOW_DB_URI may be provided.",
             mercury_key=settings.MERCURY_KEY,
             retroshades_md5=settings.RETROSHADES_MD5,
         )

@@ -112,7 +112,7 @@ query_response = """
   {
     "funder": "GAN4FQZL5P7B7OGW4KMYA6B2V34W7E6C7NL7K4P6ZNNWQ6UZD6I7GABC",
     "recipient": "GAN4FQZL5P7B7OGW4KMYA6B2V34W7E6C7NL7K4P6ZNNWQ6UZD6I7GABC",
-    "amount": 100000,
+    "amount": 109999,
     "project_id": "VCS1360",
     "memo_text": "testing",
     "email": "test@mock.dev",

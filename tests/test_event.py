@@ -45,6 +45,7 @@ def mock_client(monkeypatch):
 
 @pytest.fixture
 def patch_mercury_key(patch_settings):
+    patch_settings.OBSRVR_FLOW_DB_URI = None
     if not patch_settings.MERCURY_KEY:
         patch_settings.MERCURY_KEY = "123456789ABCDEFGHJKLMNPQRSTUVWXY"
 
@@ -75,11 +76,8 @@ def mock_session(monkeypatch, new_session):
 @pytest.mark.usefixtures("mock_client", "patch_mercury_key")
 class TestSinkEventLoader:
     def test_load_sink_events(self, mock_session):
-        num_loaded, emails = event_loader.load_sink_events(cursor=0)
+        num_loaded = event_loader.load_sink_events(cursor=0)
         assert num_loaded == 10
-        assert len(emails) == 7
-        assert emails[0] == ('GAN4FQZL5P7B7OGW4KMYA6B2V34W7E6C7NL7K4P6ZNNWQ6UZD6I7GABC', 'test@mock.dev')
-        assert emails[-1] == ('GBBXYZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ99', 'gift@giver.org')
 
         with mock_session.begin() as session:
             loaded_events = session.scalars(
