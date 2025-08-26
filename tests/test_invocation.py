@@ -24,15 +24,15 @@ def patch_flow_db_engine(monkeypatch, patch_settings):
 
 @pytest.fixture
 def mock_invocations():
-    invocation_source.SinkInvocation.metadata.create_all(engine)
+    invocation_source.FlowBase.metadata.create_all(engine)
 
     with Session(engine) as session:
-        session.add_all(invocations.items)
+        session.add_all(invocations.get_items())
         session.commit()
 
     yield
 
-    invocation_source.SinkInvocation.metadata.drop_all(engine)
+    invocation_source.FlowBase.metadata.drop_all(engine)
 
 
 
@@ -86,6 +86,14 @@ class TestSinkInvocationSource:
         assert tri.ton_amount == Decimal("0.444")
         assert tri.memo_text == "tri"
 
+    def test_returns_the_same_when_repeated(self):
+        res_1 = invocation_source.get_sink_invocations(cursor=0)
+        res_2 = invocation_source.get_sink_invocations(cursor=0)
+        res_3 = invocation_source.get_sink_invocations(cursor=0)
+
+        assert len(res_1) == len(res_2) == len(res_3) == 3
+        assert res_1 == res_2 == res_3
+
 
 
 @pytest.fixture
@@ -98,8 +106,8 @@ def mock_session(monkeypatch, new_session):
 
 
 @pytest.mark.usefixtures("mock_invocations", "patch_flow_db_engine")
-class TestSinkEventLoader:
-    def test_load_sink_events(self, mock_session):
+class TestSinkInvocationLoader:
+    def test_load_sink_invocations(self, mock_session):
         num_loaded = invocation_loader.load_sink_invocations(cursor=0)
         assert num_loaded == 3
 
@@ -129,7 +137,7 @@ class TestSinkEventLoader:
             memos = [tx.memo_value for tx in loaded_invocations]
             assert memos == ["one", "two", "tri"]
 
-    def test_load_sink_txs_and_events(self, mock_http, mock_session):
+    def test_load_sink_txs_and_invocations(self, mock_http, mock_session):
         sink_loader.load_sinking_txs(cursor=999)
         invocation_loader.load_sink_invocations(cursor=999)
 

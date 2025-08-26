@@ -68,7 +68,7 @@ def get_sink_invocations(cursor: int=settings.FIRST_SINK_CURSOR) -> Sequence[Sin
     query = select(SinkInvocation).where(SinkInvocation.toid > cursor)
     
     with Session(engine, expire_on_commit=False) as session:
-        invokes = session.execute(query).scalars().all()
+        invokes = session.scalars(query).all()
 
     return invokes
 

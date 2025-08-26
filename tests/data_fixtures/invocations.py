@@ -6,8 +6,9 @@ from sc_audit.sources.sink_invocations import SinkInvocation
 
 gmt_zoneinfo = zoneinfo.ZoneInfo(key='GMT')
 
-items = [
-    SinkInvocation(
+def get_items() -> list[SinkInvocation]:
+    return [
+        SinkInvocation(
         id=1,
         toid=188328285796925850,
         ledger=43848596,
