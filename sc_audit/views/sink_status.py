@@ -23,12 +23,13 @@ def view_sinking_txs(
         from_date: dt.date | None = None,
         before_date: dt.date | None = None,
         finalized: bool | None = None,
+        contract_call: bool | None = None,
         cursor: int | None = None,
         limit: int | None = None,
         order: Literal['asc', 'desc'] = 'desc',
 ) -> pd.DataFrame:
     base_query = construct_stx_query(
-        for_funder, for_recipient, from_date, before_date, finalized
+        for_funder, for_recipient, from_date, before_date, finalized, contract_call
     ).subquery()
     subq_paging_token = base_query.c.paging_token
     # Determine order and cursor filter
@@ -73,6 +74,7 @@ def construct_stx_query(
         from_date: dt.date | None,
         before_date: dt.date | None,
         finalized: bool | None,
+        contract_call: bool | None,
 ) -> Select[tuple[SinkingTx]]:
     # Only build the base query and filters
     q_txs = select(SinkingTx)
@@ -101,6 +103,11 @@ def construct_stx_query(
     elif finalized is True:
         # select sink txs that have at least one SinkStatus with finalized=True
         q_txs = q_txs.outerjoin(SinkStatus).where(SinkStatus.finalized == True)
+
+    if contract_call is True:
+        q_txs = q_txs.where(SinkingTx.contract_id.is_not(None))
+    elif contract_call is False:
+        q_txs = q_txs.where(SinkingTx.contract_id.is_(None))
     
     return q_txs
 

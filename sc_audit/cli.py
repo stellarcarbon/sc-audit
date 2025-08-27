@@ -126,12 +126,18 @@ def cli_view_retirements(
     help="Filter transactions that happened before the given date"
 )
 @click.option("--finalized", type=bool, help="Filter by retirement status")
+@click.option(
+    "--contract-call", 
+    type=bool, 
+    help="Only show transactions done through sorocarbon, or exclude them"
+)
 def cli_view_sink_status(
         funder: str | None,
         recipient: str | None, 
         from_date: dt.datetime | None,
         before_date: dt.datetime | None,
         finalized: bool | None,
+        contract_call: bool | None,
         format: str,
     ):
     """View sinking transactions and their retirement status"""
@@ -143,6 +149,7 @@ def cli_view_sink_status(
         from_date=from_dt_date,
         before_date=before_dt_date,
         finalized=finalized,
+        contract_call=contract_call,
     )
     click.echo(format_df(txdf, format=format))
 

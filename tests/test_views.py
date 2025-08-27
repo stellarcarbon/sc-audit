@@ -5,14 +5,17 @@ import re
 import pandas as pd
 import pytest
 
-from sc_audit.loader import impact_projects
-from sc_audit.loader import minted_blocks, retirement_from_block
+from sc_audit.loader import impact_projects, minted_blocks, retirement_from_block
 from sc_audit.loader import sinking_txs as sink_loader
+from sc_audit.loader import sink_events as event_loader
 from sc_audit.loader import sink_status as sink_status_loader
-from sc_audit.views import inventory, retirement, sink_status as sink_status_view, stats
+from sc_audit.views import inventory, retirement, stats
+from sc_audit.views import sink_status as sink_status_view
 from tests.data_fixtures.retirements import get_retirements_with_round_down_and_community
 from tests.db_fixtures import new_session
+from tests.test_event import mock_client, patch_mercury_key
 from tests.test_mint import mock_http as mock_mint_http
+from tests.test_settings import patch_settings
 from tests.test_sink import mock_http as mock_sink_http
 
 
@@ -63,7 +66,8 @@ class TestConstructStxQuery:
             for_recipient=None,
             from_date=None,
             before_date=None,
-            finalized=None
+            finalized=None,
+            contract_call=None,
         )
         assert "WHERE" not in str(stxq)
         assert re.fullmatch(r'SELECT (sinking_txs\.[_a-z]+,?\s*)+FROM sinking_txs', str(stxq))
@@ -74,7 +78,8 @@ class TestConstructStxQuery:
             for_recipient=None,
             from_date=None,
             before_date=None,
-            finalized=None
+            finalized=None,
+            contract_call=None,
         )
         assert "WHERE sinking_txs.funder" in str(stxq)
 
@@ -84,7 +89,8 @@ class TestConstructStxQuery:
             for_recipient="recipient-address",
             from_date=None,
             before_date=None,
-            finalized=None
+            finalized=None,
+            contract_call=None,
         )
         assert "WHERE sinking_txs.recipient" in str(stxq)
 
@@ -94,7 +100,8 @@ class TestConstructStxQuery:
             for_recipient=None,
             from_date=dt.date(2023, 1, 1),
             before_date=None,
-            finalized=None
+            finalized=None,
+            contract_call=None,
         )
         assert "WHERE sinking_txs.created_at >=" in str(stxq)
 
@@ -104,7 +111,8 @@ class TestConstructStxQuery:
             for_recipient=None,
             from_date=None,
             before_date=dt.date(2023, 1, 1),
-            finalized=None
+            finalized=None,
+            contract_call=None,
         )
         assert "WHERE sinking_txs.created_at <" in str(stxq)
 
@@ -114,7 +122,8 @@ class TestConstructStxQuery:
             for_recipient=None,
             from_date=None,
             before_date=None,
-            finalized=True
+            finalized=True,
+            contract_call=None,
         )
         assert "WHERE sink_status.finalized = true" in str(stxq)
 
@@ -123,18 +132,40 @@ class TestConstructStxQuery:
             for_recipient=None,
             from_date=None,
             before_date=None,
-            finalized=False
+            finalized=False,
+            contract_call=None,
         )
         assert str(stxq).replace(' \n', '').endswith(
             "WHERE NOT (EXISTS (SELECT *FROM sink_statusWHERE sink_status.sinking_tx_hash = sinking_txs.hash AND sink_status.finalized = true))"
         )
 
+    def test_construct_query_contract_call(self):
+        stxq = sink_status_view.construct_stx_query(
+            for_funder=None,
+            for_recipient=None,
+            from_date=None,
+            before_date=None,
+            finalized=None,
+            contract_call=True,
+        )
+        assert "WHERE sinking_txs.contract_id IS NOT NULL" in str(stxq)
+
+        stxq = sink_status_view.construct_stx_query(
+            for_funder=None,
+            for_recipient=None,
+            from_date=None,
+            before_date=None,
+            finalized=None,
+            contract_call=False,
+        )
+        assert "WHERE sinking_txs.contract_id IS NULL" in str(stxq)
+
 
 class TestSinkStatusView:
     def test_sink_status_full(self, mock_session_with_associations):
         txdf = sink_status_view.view_sinking_txs()
-        assert len(txdf) == 20
-        assert txdf.carbon_amount.sum() == Decimal('26.298')
+        assert len(txdf) == 30
+        assert txdf.carbon_amount.sum() == Decimal('27.614')
         assert txdf.vcs_project_id.min() == 1360
         assert txdf.vcs_project_id.max() == 1360
 
@@ -176,13 +207,30 @@ class TestSinkStatusView:
 
     def test_sink_status_finalized_false(self, mock_session_with_associations):
         txdf = sink_status_view.view_sinking_txs(finalized=False)
-        assert len(txdf) == 3
+        assert len(txdf) == 13
         assert txdf.statuses.map(add_amount_filled).sum() == Decimal('1.985')
-        assert txdf.carbon_amount.sum() == Decimal('5.283')
-        # expect the last tx to have a sink status with finalized=False
+        assert txdf.carbon_amount.sum() == Decimal('6.599')
+        # expect the 8th tx to have a sink status with finalized=False
         assert len(txdf[txdf.statuses.astype(bool) == True]) == 1
-        assert len(txdf.statuses.iloc[-1]) == 1
-        assert txdf.statuses.iloc[-1][0]['finalized'] == False
+        assert len(txdf.statuses.iloc[7]) == 1
+        assert txdf.statuses.iloc[7][0]['finalized'] == False
+
+    def test_sink_status_is_contract_call(self, mock_session_with_associations):
+        txdf = sink_status_view.view_sinking_txs(contract_call=True)
+        assert len(txdf) == 10
+        assert txdf.carbon_amount.sum() == Decimal('1.316')
+        assert (txdf.contract_id.unique() == [
+            'CBW45IZ3W5BBDIKTIXQEAOR3TAHPCFIAVQMD4NO2YPX2FA4LKGLJLWYL', 
+            'CAQWMP2EKO4SQ7VQTIYCNUXASDY7WI5EKEGJXMS7W6AICI6YXPNAB4J5'
+        ]).all()
+        assert not txdf.contract_id.isnull().any()
+
+    def test_sink_status_not_contract_call(self, mock_session_with_associations):
+        txdf = sink_status_view.view_sinking_txs(contract_call=False)
+        assert len(txdf) == 20
+        assert txdf.statuses.map(add_amount_filled).sum() == Decimal('23')
+        assert txdf.carbon_amount.sum() == Decimal('26.298')
+        assert txdf.contract_id.isnull().all()
 
     def test_sink_status_pagination_asc(self, mock_session_with_associations):
         txdf = sink_status_view.view_sinking_txs(limit=2, order='asc')
@@ -195,7 +243,7 @@ class TestSinkStatusView:
 
         combined_pages = pd.concat(pages)
         assert combined_pages.hash.is_unique
-        assert len(combined_pages) == 20
+        assert len(combined_pages) == 30
 
     def test_sink_status_pagination_desc(self, mock_session_with_associations):
         txdf = sink_status_view.view_sinking_txs(limit=3, order='desc')
@@ -208,7 +256,7 @@ class TestSinkStatusView:
 
         combined_pages = pd.concat(pages)
         assert combined_pages.hash.is_unique
-        assert len(combined_pages) == 20
+        assert len(combined_pages) == 30
 
 
 class TestGetByPk:
@@ -342,9 +390,9 @@ class TestRetirementView:
 class TestStatsView:
     def test_stats_global(self, mock_session_with_associations):
         carbon_stats = stats.get_carbon_stats()
-        assert carbon_stats["carbon_sunk"] == Decimal('26.298')
+        assert carbon_stats["carbon_sunk"] == Decimal('27.614')
         assert carbon_stats["carbon_retired"] == Decimal('23.000')
-        assert carbon_stats["carbon_pending"] == Decimal('3.298')
+        assert carbon_stats["carbon_pending"] == Decimal('4.614')
         assert carbon_stats["carbon_stored"] == Decimal('202.000')
 
     def test_stats_recipient(self, mock_session_with_associations):
@@ -378,6 +426,7 @@ def mock_session(monkeypatch, new_session):
     monkeypatch.setattr(impact_projects, 'Session', new_session)
     monkeypatch.setattr(minted_blocks, 'Session', new_session)
     monkeypatch.setattr(retirement_from_block, 'Session', new_session)
+    monkeypatch.setattr(event_loader, 'Session', new_session)
     monkeypatch.setattr(sink_loader, 'Session', new_session)
     monkeypatch.setattr(sink_status_loader, 'Session', new_session)
     monkeypatch.setattr(inventory, 'Session', new_session)
@@ -388,12 +437,15 @@ def mock_session(monkeypatch, new_session):
     return new_session
 
 @pytest.fixture
-def mock_session_with_associations(mock_mint_http, mock_sink_http, mock_session):
+def mock_session_with_associations(
+    mock_client, mock_mint_http, mock_sink_http, mock_session, patch_mercury_key
+):
     with mock_session.begin() as session:
         session.add_all(get_retirements_with_round_down_and_community())
 
     minted_blocks.load_minted_blocks()
     sink_loader.load_sinking_txs(cursor=999)
+    event_loader.load_sink_events(cursor=0)
     retirement_from_block.load_retirement_from_block()
     sink_status_loader.load_sink_statuses()
     return mock_session
