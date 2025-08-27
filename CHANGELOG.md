@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.12.0](https://github.com/stellarcarbon/sc-audit/compare/v0.11.0...v0.12.0) (2025-08-27)
+
+
+### Features
+
+* **view:** add contract call filter ([c8c6503](https://github.com/stellarcarbon/sc-audit/commit/c8c65037be6c57cfa158f9fc4ecc7223dab0771e))
+
 ## [0.11.0](https://github.com/stellarcarbon/sc-audit/compare/v0.10.6...v0.11.0) (2025-08-27)
 
 
