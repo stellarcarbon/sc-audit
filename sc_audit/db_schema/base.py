@@ -34,11 +34,13 @@ class HexBinary(types.TypeDecorator):
 
 
 intpk = Annotated[int, mapped_column(primary_key=True)]
+txhash = Annotated[str, mapped_column(HexBinary(length=32))]
 hashpk = Annotated[str, mapped_column(HexBinary(length=32), primary_key=True)]
 strkey = Annotated[str, mapped_column(String(56))]
 kgdecimal = Annotated[Decimal, mapped_column(types.DECIMAL(precision=21, scale=3))]
 stroopdecimal = Annotated[Decimal, mapped_column(types.DECIMAL(precision=21, scale=7))]
 bigint = Annotated[int, mapped_column(types.BigInteger())]
+bigintpk = Annotated[int, mapped_column(types.BigInteger(), primary_key=True)]
 
 
 class ScBase(MappedAsDataclass, DeclarativeBase):
