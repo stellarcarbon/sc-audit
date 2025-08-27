@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.11.0](https://github.com/stellarcarbon/sc-audit/compare/v0.10.6...v0.11.0) (2025-08-27)
+
+
+### Features
+
+* **Flow:** Provide an alternative for Mercury events using Obsrvr Flow extracted invocations ([#28](https://github.com/stellarcarbon/sc-audit/issues/28)) ([342fe54](https://github.com/stellarcarbon/sc-audit/commit/342fe5496d858c62e6a0cb617c577a9b2b2db6dc))
+* separate latest classic tx and SinkContract tx on the basis of contract_id ([64c41ff](https://github.com/stellarcarbon/sc-audit/commit/64c41ff86d97c6b792bf41ecc00307b010481057))
+
+
+### Bug Fixes
+
+* only bind event listener to sqlite backends ([837aed2](https://github.com/stellarcarbon/sc-audit/commit/837aed286f79f87cab036d07533592127a97e54a))
+
 ## [0.10.6](https://github.com/stellarcarbon/sc-audit/compare/v0.10.5...v0.10.6) (2025-08-15)
 
 
