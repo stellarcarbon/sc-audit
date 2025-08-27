@@ -19,11 +19,14 @@ connect_args = {}
 if db_url.get_backend_name() == "sqlite":
     connect_args["check_same_thread"] = False
 
-    @event.listens_for(Engine, "connect")
+engine = create_engine(settings.DBAPI_URL, connect_args=connect_args)
+
+if db_url.get_backend_name() == "sqlite":
+    # check foreign key constraints
+    @event.listens_for(engine, "connect")
     def set_sqlite_pragma(dbapi_connection, connection_record):
         cursor = dbapi_connection.cursor()
         cursor.execute("PRAGMA foreign_keys=ON")
         cursor.close()
 
-engine = create_engine(settings.DBAPI_URL, connect_args=connect_args)
 Session = sessionmaker(engine)

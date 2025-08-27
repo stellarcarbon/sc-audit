@@ -7,7 +7,7 @@ from sc_audit.db_schema.base import ScBase
 connect_args = {"check_same_thread": False}
 engine = create_engine("sqlite+pysqlite:///:memory:", echo=True, connect_args=connect_args)
 
-@event.listens_for(Engine, "connect")
+@event.listens_for(engine, "connect")
 def set_sqlite_pragma(dbapi_connection, connection_record):
     cursor = dbapi_connection.cursor()
     cursor.execute("PRAGMA foreign_keys=ON")
