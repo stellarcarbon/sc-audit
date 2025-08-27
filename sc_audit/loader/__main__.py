@@ -37,11 +37,13 @@ def catch_up_from_sources():
     """
     retirement_date: dt.date
     sink_cursor: int
+    contract_cursor: int
     mint_cursor: int
     dist_cursor: int
-    retirement_date, sink_cursor, mint_cursor, dist_cursor = get_latest_attr(
+    retirement_date, sink_cursor, contract_cursor, mint_cursor, dist_cursor = get_latest_attr(
         'retirement', 
         'sink_tx', 
+        'sink_call',
         'mint_tx',
         'dist_tx'
     ) # type: ignore[return-value]
@@ -56,13 +58,13 @@ def catch_up_from_sources():
     
     # attempt to load SinkContract txs from Obsrvr or Mercury
     try:
-        num_sink_invocations = load_sink_invocations(cursor=sink_cursor)
+        num_sink_invocations = load_sink_invocations(cursor=contract_cursor)
         print(f"Loaded {num_sink_invocations} sink invocations")
     except ObsrvrError as exc:
         print(f"Couldn't load sink invocations from Obsrvr")
         print(repr(exc), file=sys.stderr)
         try:
-            num_sink_events = load_sink_events(cursor=sink_cursor)
+            num_sink_events = load_sink_events(cursor=contract_cursor)
             print(f"Loaded {num_sink_events} sink events")
         except MercuryError as exc:
             print(f"Couldn't load sink events from Mercury")

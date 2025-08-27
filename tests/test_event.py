@@ -8,7 +8,8 @@ from sqlalchemy import select
 from sqlalchemy.orm import joinedload
 
 from sc_audit.db_schema.sink import SinkingTx
-from sc_audit.loader import impact_projects, sink_events as event_loader
+from sc_audit.config import settings
+from sc_audit.loader import get_latest, impact_projects, sink_events as event_loader
 from sc_audit.loader import sinking_txs as sink_loader
 from sc_audit.sources.sink_events import get_sink_events
 from tests.data_fixtures.events import query_response
@@ -66,6 +67,7 @@ class TestSinkEventSources:
 
 @pytest.fixture
 def mock_session(monkeypatch, new_session):
+    monkeypatch.setattr(get_latest, 'Session', new_session)
     monkeypatch.setattr(impact_projects, 'Session', new_session)
     monkeypatch.setattr(event_loader, 'Session', new_session)
     monkeypatch.setattr(sink_loader, 'Session', new_session)
@@ -144,3 +146,19 @@ class TestSinkEventLoader:
                 cumulative_amount += tx.carbon_amount
 
             assert cumulative_amount == Decimal("27.614")
+
+    def test_get_latest_attr(self, mock_http, mock_session):
+        initial_sink_cursor, initial_call_cursor = get_latest.get_latest_attr('sink_tx', 'sink_call')
+        num_events = event_loader.load_sink_events(cursor=999)
+        post_event_sink_cursor, post_event_call_cursor = get_latest.get_latest_attr('sink_tx', 'sink_call')
+        num_transactions = sink_loader.load_sinking_txs(cursor=999)
+        post_tx_sink_cursor, post_tx_call_cursor = get_latest.get_latest_attr('sink_tx', 'sink_call')
+
+        assert num_events == 10
+        assert num_transactions == 20
+
+        assert initial_sink_cursor == initial_call_cursor == settings.FIRST_SINK_CURSOR
+        assert post_event_sink_cursor == settings.FIRST_SINK_CURSOR
+        assert post_event_call_cursor == 215560191196803072
+        assert post_tx_sink_cursor == 209834166299873288
+        assert post_tx_call_cursor == post_event_call_cursor

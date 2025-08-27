@@ -17,8 +17,6 @@ def load_sink_invocations(cursor: int=settings.FIRST_SINK_CURSOR) -> int:
 
     To catch up with Flow, specify the cursor parameter to be the paging token
     of the latest sink invocation record present in the SinkingTx table.
-
-    TODO: separate latest classic tx and SinkContract tx on the basis of contract_id. 
     """
     number_loaded = 0
 

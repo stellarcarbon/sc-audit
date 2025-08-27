@@ -19,14 +19,8 @@ def load_sink_events(cursor: int=settings.FIRST_SINK_CURSOR) -> int:
     """
     Load (all) sink events from Mercury Retroshades into the DB.
 
-    To catch up with Retroshades, specify the cursor parameter to be the incremented
-    paging token of the latest record present in the DB. Always get the latest cursor
-    once, and then load both sinking transactions and sink events using that cursor.
-
-    There is a real risk of desync and missing SinkingTxs if the cursor is refreshed
-    between loading sinking transactions and sink events. The only reason to not load
-    from both SinkingTx sources in unison is when you want to analyze one of them
-    separately.
+    To catch up with Retroshades, specify the cursor parameter to be the paging token
+    of the latest sink event record present in the SinkingTx table.
     """
     number_loaded = 0
 

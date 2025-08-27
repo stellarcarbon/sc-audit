@@ -17,7 +17,7 @@ from sc_audit.db_schema.sink import SinkingTx
 from sc_audit.session_manager import Session
 
 
-CoreModelName = Literal['dist_tx', 'mint_tx', 'retirement', 'sink_tx']
+CoreModelName = Literal['dist_tx', 'mint_tx', 'retirement', 'sink_tx', 'sink_call']
 LatestAttr = Union[dt.date, int, None]
 
 
@@ -38,9 +38,18 @@ def get_latest_attr(*models: CoreModelName) -> LatestAttr | list[LatestAttr]:
                 latest_attrs[i] = latest_retirement_date
             elif model == 'sink_tx':
                 latest_sink_tx_cursor = session.scalar(
-                    select(SinkingTx.paging_token).order_by(SinkingTx.paging_token.desc())
+                    select(SinkingTx.paging_token)
+                    .where(SinkingTx.contract_id.is_(None))
+                    .order_by(SinkingTx.paging_token.desc())
                 )
                 latest_attrs[i] = increment_paging_token(latest_sink_tx_cursor) or settings.FIRST_SINK_CURSOR
+            elif model == 'sink_call':
+                latest_sink_call_cursor = session.scalar(
+                    select(SinkingTx.paging_token)
+                    .where(SinkingTx.contract_id.is_not(None))
+                    .order_by(SinkingTx.paging_token.desc())
+                )
+                latest_attrs[i] = latest_sink_call_cursor or settings.FIRST_SINK_CURSOR
             elif model == 'mint_tx':
                 latest_mint_tx_cursor = session.scalar(
                     select(MintedBlock.paging_token).order_by(MintedBlock.paging_token.desc())

@@ -184,8 +184,11 @@ def db_load_sinking_txs():
     num_sinking_txs = load_sinking_txs(cursor=sink_cursor)
     click.echo(f"Loaded {num_sinking_txs} sinking transactions")
 
-    # TODO: separate classic and SinkContract txs
-    # attempt to load SinkContract txs from Obsrvr or Mercury
+
+@load.command(name="sink-contract-calls")
+def db_load_sink_contract_calls():
+    """Attempt to load SinkContract txs from Obsrvr or Mercury into the DB"""
+    sink_cursor: int = get_latest_attr('sink_call') # type: ignore[return-value]
     try:
         num_sink_invocations = load_sink_invocations(cursor=sink_cursor)
         print(f"Loaded {num_sink_invocations} sink invocations")
