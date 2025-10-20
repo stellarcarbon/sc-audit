@@ -39,7 +39,7 @@ class Settings(BaseSettings):
     TABLE_PREFIX: DbTablePrefix = None
 
     VERRA_ASSET_SEARCH_URL: HttpUrl = HttpUrl("https://registry.verra.org/uiapi/asset/asset/search")
-    VERRA_ASSET_SEARCH_TIMEOUT: int = 10  # seconds
+    VERRA_ASSET_SEARCH_TIMEOUT: int = 12  # seconds
     VERRA_REPORT_URL: HttpUrl = HttpUrl("https://registry.verra.org/mymodule/rpt/myRpt.asp")
 
     HORIZON_URL: HttpUrl = HttpUrl("https://horizon.stellar.org")

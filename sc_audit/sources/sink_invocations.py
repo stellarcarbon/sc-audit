@@ -37,7 +37,6 @@ class SinkInvocation(FlowBase):
     amount: Mapped[bigint]
     project_id: Mapped[str]
     memo_text: Mapped[str | None]
-    email: Mapped[str | None]
 
     processed_at: Mapped[dt.datetime]
     schema_name: Mapped[str]

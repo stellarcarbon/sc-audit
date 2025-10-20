@@ -24,7 +24,6 @@ class SinkEvent(BaseModel):
     amount: Decimal
     project_id: str
     memo_text: str | None
-    email: str | None
     ledger: int
 
     @classmethod
