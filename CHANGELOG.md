@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.12.1](https://github.com/stellarcarbon/sc-audit/compare/v0.12.0...v0.12.1) (2025-11-04)
+
+
+### Dependencies
+
+* bump pygithub to v2.8.x ([1e4acd7](https://github.com/stellarcarbon/sc-audit/commit/1e4acd7bd7e4000a663b5a013151c629763c59c3))
+
 ## [0.12.0](https://github.com/stellarcarbon/sc-audit/compare/v0.11.0...v0.12.0) (2025-08-27)
 
 
