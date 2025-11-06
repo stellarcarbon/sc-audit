@@ -165,6 +165,8 @@ Options:
   --before-date [%Y-%m-%d]    Filter transactions that happened before the
                               given date
   --finalized BOOLEAN         Filter by retirement status
+  --contract-call BOOLEAN     Only show transactions done through sorocarbon,
+                              or exclude them
   --help                      Show this message and exit.
 ```
 
@@ -189,6 +191,7 @@ def view_sinking_txs(
     from_date: dt.date | None = None,
     before_date: dt.date | None = None,
     finalized: bool | None = None,
+    contract_call: bool | None = None,
     cursor: int | None = None,
     limit: int | None = None,
     order: Literal['asc', 'desc'] = 'desc',
@@ -236,8 +239,12 @@ There isn't much to configure in sc-audit. Several settings can be overriden by 
 |----------------------|---------------------------|
 | `SC_DBAPI_URL`       | default: `sqlite+pysqlite:///{get_default_db_path()}`<br>The default value places an SQLite DB file in the working dir or in a subdir of the home dir. |
 | `SC_HORIZON_URL`     | default: `https://horizon.stellar.org`<br>Set this value to a Horizon instance with full history to be able to do a fresh load. |
-| `SC_MERCURY_KEY`     | Provide a Mercury key generated from your own account (persistent; not the JWT) |
+| `SC_MERCURY_KEY`     | Provide a Mercury key generated from your own account (persistent; not the JWT). |
 | `SC_RETROSHADES_MD5` | default: latest `SinkContract`<br>You'll need to do your own Mercury deployment, and check if the WASM MD5 hash is the same as the default value here. |
+| `SC_OBSRVR_FLOW_DB_URI` | The PostgreSQL DSN of your own Obsrvr Flow pipeline consumer. |
+| `SC_OBSRVR_FLOW_TABLE` | default: `extracted_contract_invocations` |
+
+To load [sorocarbon](https://github.com/stellarcarbon/sorocarbon) contract calls, you'll have to provide either `SC_MERCURY_KEY` or `SC_OBSRVR_FLOW_DB_URI`. The initial bootstrapping (with the `catch-up` command) may include sinking transactions derived from Soroban contract calls, but to keep up with them it's necessary to create your own account with one of the two data providers. It's ambiguous to set both environment variables, and you'll get an error message if you do so. If you need any help setting this up, please reach out to <support@stellarcarbon.io>.
 
 ## Development
 
