@@ -97,9 +97,9 @@ class TestMintSources:
         assert len(mint_txs) == 1
 
     def test_filter_dist_txs(self):
-        assert len(outflows_fix) == 6
+        assert len(outflows_fix) == 7
         dist_payments = list(filter_distribution_txs(outflows_fix))
-        assert len(dist_payments) == 4
+        assert len(dist_payments) == 5
 
 
 @pytest.fixture
@@ -176,7 +176,7 @@ class TestMintLoader:
             loaded_outflows = session.scalars(
                 select(DistributionTx).order_by(DistributionTx.paging_token.asc())
             ).all()
-            assert len(loaded_outflows) == 4
+            assert len(loaded_outflows) == 5
             total_outflow = sum(
                 (
                     outflow.carbon_amount
@@ -184,7 +184,7 @@ class TestMintLoader:
                 ),
                 start=Decimal(),
             )
-            assert total_outflow == Decimal("8.283")
+            assert total_outflow == Decimal("8.616")
 
 
 @pytest.fixture
