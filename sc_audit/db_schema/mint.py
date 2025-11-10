@@ -12,7 +12,7 @@ from sqlalchemy import ForeignKey, Index, SQLColumnExpression, String, func, sel
 from sqlalchemy.ext.hybrid import hybrid_method, hybrid_property
 from sqlalchemy.orm import Mapped, MappedAsDataclass, mapped_column, relationship
 
-from sc_audit.db_schema.base import ScBase, bigint, hashpk, txhash
+from sc_audit.db_schema.base import HexBinary, ScBase, bigint, hashpk
 from sc_audit.db_schema.impact_project import VcsProject
 
 if typing.TYPE_CHECKING:
@@ -36,7 +36,7 @@ verra_carbon_sink = VerraSubAccount(11274, "CARBON Sink | stellarcarbon.io")
 class MintedBlockBase(MappedAsDataclass, kw_only=True):
 
     serial_hash: Mapped[hashpk]
-    transaction_hash: Mapped[txhash]
+    transaction_hash: Mapped[str] = mapped_column(HexBinary(length=32))
     created_at: Mapped[dt.datetime]
     vcs_project_id: Mapped[int] = mapped_column(ForeignKey('vcs_projects.id'))
     serial_number: Mapped[str] = mapped_column(String(128))

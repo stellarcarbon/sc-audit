@@ -9,7 +9,7 @@ import typing
 from sqlalchemy import ForeignKey, Index
 from sqlalchemy.orm import Mapped, MappedAsDataclass, mapped_column, relationship
 
-from sc_audit.db_schema.base import ScBase, bigintpk, intpk, hashpk, kgdecimal, txhash
+from sc_audit.db_schema.base import ScBase, intpk, hashpk, kgdecimal
 
 if typing.TYPE_CHECKING:
     from sc_audit.db_schema import MintedBlock, Retirement, SinkingTx
@@ -43,9 +43,8 @@ class RetirementFromBlock(RetirementFromBlockBase, ScBase):
 
 class SinkStatusBase(MappedAsDataclass, kw_only=True):
 
-    sinking_tx_toid: Mapped[bigintpk] = mapped_column(ForeignKey('sinking_txs.paging_token'))
+    sinking_tx_hash: Mapped[hashpk] = mapped_column(ForeignKey('sinking_txs.hash'))
     certificate_id: Mapped[intpk] = mapped_column(ForeignKey('retirements.certificate_id'))
-    # sinking_tx_hash: Mapped[txhash] = mapped_column(ForeignKey('sinking_txs.hash'))
     amount_filled: Mapped[kgdecimal]
     finalized: Mapped[bool]
 

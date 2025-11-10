@@ -12,7 +12,7 @@ from sqlalchemy import ForeignKey, Index, String
 from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.orm import Mapped, MappedAsDataclass, mapped_column, relationship
 
-from sc_audit.db_schema.base import ScBase, bigintpk, kgdecimal, strkey, stroopdecimal, txhash
+from sc_audit.db_schema.base import ScBase, bigint, hashpk, kgdecimal, strkey, stroopdecimal
 from sc_audit.db_schema.impact_project import VcsProject
 
 if typing.TYPE_CHECKING:
@@ -24,7 +24,7 @@ MemoType = typing.Literal['text', 'hash', 'none']
 
 class SinkingTxBase(MappedAsDataclass, kw_only=True):
 
-    hash: Mapped[txhash]
+    hash: Mapped[hashpk]
     created_at: Mapped[dt.datetime]
     contract_id: Mapped[strkey | None]
     funder: Mapped[strkey]
@@ -39,7 +39,7 @@ class SinkingTxBase(MappedAsDataclass, kw_only=True):
     vcs_project_id: Mapped[int] = mapped_column(ForeignKey("vcs_projects.id"))
     memo_type: Mapped[MemoType]
     memo_value: Mapped[str | None] = mapped_column(String(64))
-    paging_token: Mapped[bigintpk]
+    paging_token: Mapped[bigint]
 
 
 class SinkingTx(SinkingTxBase, ScBase):
@@ -72,7 +72,7 @@ class SinkingTx(SinkingTxBase, ScBase):
         return data
     
 
-idx_hash = Index("idx_stx_hash", SinkingTx.hash)
 idx_created_at = Index("idx_stx_created_at", SinkingTx.created_at.desc())
+idx_toid = Index("idx_stx_toid", SinkingTx.paging_token.desc(), unique=True)
 idx_funder = Index("idx_stx_funder", SinkingTx.funder)
 idx_recipient = Index("idx_stx_recipient", SinkingTx.recipient)
