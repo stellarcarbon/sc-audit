@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.12.2](https://github.com/stellarcarbon/sc-audit/compare/v0.12.1...v0.12.2) (2025-11-10)
+
+
+### Bug Fixes
+
+* switch DistributionTx PK to paging_token ([d09d8e9](https://github.com/stellarcarbon/sc-audit/commit/d09d8e91f2dc03426fed494fe95d7a769fbad606))
+
+
+### Documentation
+
+* add instructions for Obsrvr Flow ([4f27567](https://github.com/stellarcarbon/sc-audit/commit/4f27567198644e64011731accb7ec580f12ce085))
+
 ## [0.12.1](https://github.com/stellarcarbon/sc-audit/compare/v0.12.0...v0.12.1) (2025-11-04)
 
 
