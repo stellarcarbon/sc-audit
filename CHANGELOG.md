@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.13.0](https://github.com/stellarcarbon/sc-audit/compare/v0.12.3...v0.13.0) (2025-11-11)
+
+
+### Features
+
+* **schema:** rename paging_token columns to TOID ([3793f41](https://github.com/stellarcarbon/sc-audit/commit/3793f417056db743cdc827848f3ba81f760ea45d))
+
+
+### Bug Fixes
+
+* expect `_pkey` constraint name on postgres ([4563718](https://github.com/stellarcarbon/sc-audit/commit/4563718ff5221f60244a129650a5fe19f3afa685))
+
 ## [0.12.3](https://github.com/stellarcarbon/sc-audit/compare/v0.12.2...v0.12.3) (2025-11-11)
 
 
