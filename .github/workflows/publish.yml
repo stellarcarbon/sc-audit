@@ -31,7 +31,7 @@ jobs:
         run: poetry build
 
       - name: Publish package
-        uses: pypa/gh-action-pypi-publish@87b624f8716b1150d93f45fa364e49eceebf3ffd
+        uses: pypa/gh-action-pypi-publish@ed0c53931b1dc9bd32cbe73a98c7f6766f8a527e
 
   docker-ghcr:
     runs-on: ubuntu-latest
