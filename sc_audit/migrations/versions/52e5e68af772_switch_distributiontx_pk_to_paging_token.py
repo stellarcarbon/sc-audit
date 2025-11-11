@@ -28,19 +28,25 @@ def get_naming_convention():
 
 def upgrade() -> None:
     naming_convention = get_naming_convention()
+    dialect_name = context.get_context().dialect.name
 
     with op.batch_alter_table('distribution_txs', schema=None, naming_convention=naming_convention) as batch_op:
-        batch_op.drop_constraint(None, type_='primary') # type: ignore
+        constraint_name = 'distribution_txs_pkey' if dialect_name == 'postgresql' else None
+        batch_op.drop_constraint(constraint_name, type_='primary') # type: ignore
         batch_op.create_primary_key(batch_op.f('pk_distribution_txs'), ['paging_token'])
         batch_op.drop_index(batch_op.f('idx_dtx_toid'))
         batch_op.create_index('idx_dtx_hash', ['hash'], unique=False)
 
     with op.batch_alter_table('test_distribution_txs', schema=None, naming_convention=naming_convention) as batch_op:
-        batch_op.drop_constraint(None, type_='primary') # type: ignore
+        constraint_name = 'test_distribution_txs_pkey' if dialect_name == 'postgresql' else None
+        batch_op.drop_constraint(constraint_name, type_='primary') # type: ignore
         batch_op.create_primary_key(batch_op.f('pk_test_distribution_txs'), ['paging_token'])
 
 
 def downgrade() -> None:
+    """
+    Downgrade will fail if there are multiple outflows with the same tx hash.
+    """
     naming_convention = get_naming_convention()
 
     with op.batch_alter_table('distribution_txs', schema=None, naming_convention=naming_convention) as batch_op:
