@@ -46,7 +46,7 @@ class MintedBlockBase(MappedAsDataclass, kw_only=True):
     sub_account_name: Mapped[VerraSubAccountName]
     vintage_start: Mapped[dt.date]
     vintage_end: Mapped[dt.date]
-    paging_token: Mapped[bigint]
+    toid: Mapped[bigint]
 
 
 class MintedBlock(MintedBlockBase, ScBase):
@@ -102,4 +102,4 @@ class MintedBlock(MintedBlockBase, ScBase):
 
 
 idx_created_at = Index("idx_block_created_at", MintedBlock.created_at)
-idx_toid = Index("idx_block_toid", MintedBlock.paging_token.desc(), unique=True)
+idx_toid = Index("idx_block_toid", MintedBlock.toid.desc(), unique=True)

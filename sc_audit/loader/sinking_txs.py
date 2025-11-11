@@ -60,7 +60,7 @@ def load_sinking_txs(cursor: int=settings.FIRST_SINK_CURSOR) -> int:
                     vcs_project_id=vcs_project_id,
                     memo_type=memo_type,
                     memo_value=memo_value,
-                    paging_token=sink_tx['paging_token'],
+                    toid=sink_tx['paging_token'],
                 )
             )
         

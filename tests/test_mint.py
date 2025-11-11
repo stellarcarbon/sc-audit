@@ -162,7 +162,7 @@ class TestMintLoader:
 
         with mock_session.begin() as session:
             loaded_blocks = session.scalars(
-                select(MintedBlock).order_by(MintedBlock.paging_token.asc())
+                select(MintedBlock).order_by(MintedBlock.toid.asc())
             ).all()
             assert len(loaded_blocks) == 9
             for block in loaded_blocks:
@@ -174,7 +174,7 @@ class TestMintLoader:
 
         with mock_session.begin() as session:
             loaded_outflows = session.scalars(
-                select(DistributionTx).order_by(DistributionTx.paging_token.asc())
+                select(DistributionTx).order_by(DistributionTx.toid.asc())
             ).all()
             assert len(loaded_outflows) == 5
             total_outflow = sum(
@@ -212,7 +212,7 @@ def first_block(first_block_data) -> MintedBlock:
         sub_account_name=verra_carbon_pool.name, 
         vintage_start=serial_number.vintage_start_date, 
         vintage_end=serial_number.vintage_end_date,
-        paging_token=first_block_data['paging_token']
+        toid=first_block_data['paging_token']
     )
 
 @pytest.fixture

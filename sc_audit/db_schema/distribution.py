@@ -18,7 +18,7 @@ class DistributionTxBase(MappedAsDataclass):
     sender: Mapped[strkey]
     recipient: Mapped[strkey]
     carbon_amount: Mapped[kgdecimal]
-    paging_token: Mapped[bigintpk]
+    toid: Mapped[bigintpk]
 
 
 class DistributionTx(DistributionTxBase, ScBase):

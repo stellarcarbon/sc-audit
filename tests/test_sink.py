@@ -88,7 +88,7 @@ class TestSinkLoader:
 
         with mock_session.begin() as session:
             loaded_transactions = session.scalars(
-                select(SinkingTx).order_by(SinkingTx.paging_token.asc())
+                select(SinkingTx).order_by(SinkingTx.toid.asc())
             ).all()
             assert len(loaded_transactions) == 20
 

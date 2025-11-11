@@ -40,7 +40,7 @@ def view_inventory(omit_empty: bool = False, until_date: dt.date | None = None) 
         VcsProject.category,
     ]    
     columns = block_columns + vcs_project_columns
-    q_blocks = select(*columns).join(MintedBlock.vcs_project).order_by(MintedBlock.paging_token)
+    q_blocks = select(*columns).join(MintedBlock.vcs_project).order_by(MintedBlock.toid)
     if omit_empty:
         q_blocks = q_blocks.where(credits_remaining_col > 0)
 

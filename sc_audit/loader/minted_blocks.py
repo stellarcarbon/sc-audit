@@ -62,7 +62,7 @@ def load_minted_blocks(cursor: int=settings.FIRST_MINT_CURSOR) -> int:
                     sub_account_name=carbon_pool[serial_hash]['sub_account_name'], # type: ignore
                     vintage_start=serial_number.vintage_start_date,
                     vintage_end=serial_number.vintage_end_date,
-                    paging_token=mint_tx['paging_token']
+                    toid=mint_tx['paging_token']
                 )
                 pristine_blocks.append(block)
             else:
@@ -70,7 +70,7 @@ def load_minted_blocks(cursor: int=settings.FIRST_MINT_CURSOR) -> int:
 
         if retired_blocks:
             latest_loaded_block: MintedBlock | None = session.scalars(
-                select(MintedBlock).order_by(MintedBlock.paging_token.desc())
+                select(MintedBlock).order_by(MintedBlock.toid.desc())
             ).first()
             # select only retirements without retired_from_block relations
             retirements: Sequence[Retirement] = session.scalars(
@@ -150,7 +150,7 @@ def reconstruct_blocks(
             sub_account_name=sub_account_name,
             vintage_start=reconstructed_serial.vintage_start_date,
             vintage_end=reconstructed_serial.vintage_end_date,
-            paging_token=mint_tx['paging_token']
+            toid=mint_tx['paging_token']
         )
         latest_block = block
         reconstructed_blocks.append(block)

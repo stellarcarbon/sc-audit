@@ -237,7 +237,7 @@ class TestSinkStatusView:
         assert len(txdf) == 2
         pages = [txdf]
         while len(txdf) == 2:
-            cursor = int(txdf.paging_token.iloc[-1])
+            cursor = int(txdf.toid.iloc[-1])
             txdf = sink_status_view.view_sinking_txs(cursor=cursor, limit=2, order='asc')
             pages.append(txdf)
 
@@ -250,7 +250,7 @@ class TestSinkStatusView:
         assert len(txdf) == 3
         pages = [txdf]
         while len(txdf) == 3:
-            cursor = int(txdf.paging_token.iloc[-1])
+            cursor = int(txdf.toid.iloc[-1])
             txdf = sink_status_view.view_sinking_txs(cursor=cursor, limit=3, order='desc')
             pages.append(txdf)
 
@@ -264,7 +264,7 @@ class TestGetByPk:
         stx = sink_status_view.get_sinking_tx(
             "61d4ff5516b7098bbc2219d244e7f29a039c32735e1c16d1c05d66a0739727d9"
         )
-        assert stx and stx['paging_token'] == 164821723627237383
+        assert stx and stx['toid'] == 164821723627237383
 
     def test_get_retirement(self, mock_session_with_associations):
         ret = retirement.get_retirement(143471)

@@ -39,7 +39,7 @@ class SinkingTxBase(MappedAsDataclass, kw_only=True):
     vcs_project_id: Mapped[int] = mapped_column(ForeignKey("vcs_projects.id"))
     memo_type: Mapped[MemoType]
     memo_value: Mapped[str | None] = mapped_column(String(64))
-    paging_token: Mapped[bigint]
+    toid: Mapped[bigint]
 
 
 class SinkingTx(SinkingTxBase, ScBase):
@@ -73,6 +73,6 @@ class SinkingTx(SinkingTxBase, ScBase):
     
 
 idx_created_at = Index("idx_stx_created_at", SinkingTx.created_at.desc())
-idx_toid = Index("idx_stx_toid", SinkingTx.paging_token.desc(), unique=True)
+idx_toid = Index("idx_stx_toid", SinkingTx.toid.desc(), unique=True)
 idx_funder = Index("idx_stx_funder", SinkingTx.funder)
 idx_recipient = Index("idx_stx_recipient", SinkingTx.recipient)

@@ -38,28 +38,28 @@ def get_latest_attr(*models: CoreModelName) -> LatestAttr | list[LatestAttr]:
                 latest_attrs[i] = latest_retirement_date
             elif model == 'sink_tx':
                 latest_sink_tx_cursor = session.scalar(
-                    select(SinkingTx.paging_token)
+                    select(SinkingTx.toid)
                     .where(SinkingTx.contract_id.is_(None))
-                    .order_by(SinkingTx.paging_token.desc())
+                    .order_by(SinkingTx.toid.desc())
                 )
-                latest_attrs[i] = increment_paging_token(latest_sink_tx_cursor) or settings.FIRST_SINK_CURSOR
+                latest_attrs[i] = increment_toid(latest_sink_tx_cursor) or settings.FIRST_SINK_CURSOR
             elif model == 'sink_call':
                 latest_sink_call_cursor = session.scalar(
-                    select(SinkingTx.paging_token)
+                    select(SinkingTx.toid)
                     .where(SinkingTx.contract_id.is_not(None))
-                    .order_by(SinkingTx.paging_token.desc())
+                    .order_by(SinkingTx.toid.desc())
                 )
                 latest_attrs[i] = latest_sink_call_cursor or settings.FIRST_SINK_CURSOR
             elif model == 'mint_tx':
                 latest_mint_tx_cursor = session.scalar(
-                    select(MintedBlock.paging_token).order_by(MintedBlock.paging_token.desc())
+                    select(MintedBlock.toid).order_by(MintedBlock.toid.desc())
                 )
-                latest_attrs[i] = increment_paging_token(latest_mint_tx_cursor) or settings.FIRST_MINT_CURSOR
+                latest_attrs[i] = increment_toid(latest_mint_tx_cursor) or settings.FIRST_MINT_CURSOR
             elif model == 'dist_tx':
                 latest_dist_tx_cursor = session.scalar(
-                    select(DistributionTx.paging_token).order_by(DistributionTx.paging_token.desc())
+                    select(DistributionTx.toid).order_by(DistributionTx.toid.desc())
                 )
-                latest_attrs[i] = increment_paging_token(latest_dist_tx_cursor) or settings.FIRST_DIST_CURSOR
+                latest_attrs[i] = increment_toid(latest_dist_tx_cursor) or settings.FIRST_DIST_CURSOR
 
     if len(latest_attrs) == 1:
         return latest_attrs[0]
@@ -67,7 +67,7 @@ def get_latest_attr(*models: CoreModelName) -> LatestAttr | list[LatestAttr]:
         return latest_attrs
 
 
-def increment_paging_token(cursor: int | None) -> int | None:
+def increment_toid(cursor: int | None) -> int | None:
     if cursor:
         toid = TOID.from_int64(cursor)
         toid.increment_operation_order()

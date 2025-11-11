@@ -41,7 +41,7 @@ def load_sink_invocations(cursor: int=settings.FIRST_SINK_CURSOR) -> int:
                     vcs_project_id=vcs_project_id,
                     memo_type='text' if memo else 'none',
                     memo_value=memo,
-                    paging_token=sink_invoke.toid,
+                    toid=sink_invoke.toid,
                 )
             )
         

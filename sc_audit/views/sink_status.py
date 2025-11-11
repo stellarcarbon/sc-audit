@@ -31,35 +31,35 @@ def view_sinking_txs(
     base_query = construct_stx_query(
         for_funder, for_recipient, from_date, before_date, finalized, contract_call
     ).subquery()
-    subq_paging_token = base_query.c.paging_token
+    subq_toid = base_query.c.toid
     # Determine order and cursor filter
     if order == 'asc':
-        subq_order = subq_paging_token.asc()
-        stx_order = SinkingTx.paging_token.asc()
-        cursor_filter = subq_paging_token > (cursor or 0)
+        subq_order = subq_toid.asc()
+        stx_order = SinkingTx.toid.asc()
+        cursor_filter = subq_toid > (cursor or 0)
     elif order == 'desc':
-        subq_order = subq_paging_token.desc()
-        stx_order = SinkingTx.paging_token.desc()
-        cursor_filter = subq_paging_token < (cursor or 0)
+        subq_order = subq_toid.desc()
+        stx_order = SinkingTx.toid.desc()
+        cursor_filter = subq_toid < (cursor or 0)
 
     with Session.begin() as session:
-        # Step 1: Get unique paging_tokens for the page
-        token_query = select(subq_paging_token).select_from(base_query)
+        # Step 1: Get unique TOIDs for the page
+        token_query = select(subq_toid).select_from(base_query)
         if cursor and cursor > 0:
             token_query = token_query.where(cursor_filter)
         
         token_query = token_query.order_by(subq_order).distinct().limit(limit)
-        paging_tokens = session.scalars(token_query).all()
+        toids = session.scalars(token_query).all()
 
-        if not paging_tokens:
+        if not toids:
             return pd.DataFrame()
 
-        # Step 2: Fetch SinkingTxs for those paging_tokens, eager load statuses
+        # Step 2: Fetch SinkingTxs for those TOIDs, eager load statuses
         stx_query = (
             select(SinkingTx)
             .outerjoin(SinkStatus)
             .options(contains_eager(SinkingTx.statuses))
-            .where(SinkingTx.paging_token.in_(paging_tokens))
+            .where(SinkingTx.toid.in_(toids))
             .order_by(stx_order)
         )
         stx_records = session.scalars(stx_query).unique().all()

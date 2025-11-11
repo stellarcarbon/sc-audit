@@ -62,7 +62,7 @@ def load_sink_events(cursor: int=settings.FIRST_SINK_CURSOR) -> int:
                     vcs_project_id=vcs_project_id,
                     memo_type='text' if memo else 'none',
                     memo_value=memo,
-                    paging_token=event_toid.to_int64(),
+                    toid=event_toid.to_int64(),
                 )
             )
         

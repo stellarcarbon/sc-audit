@@ -116,7 +116,7 @@ class TestSinkInvocationLoader:
 
         with mock_session.begin() as session:
             loaded_invocations = session.scalars(
-                select(SinkingTx).order_by(SinkingTx.paging_token.asc())
+                select(SinkingTx).order_by(SinkingTx.toid.asc())
                 .options(joinedload(SinkingTx.vcs_project))
             ).all()
 
@@ -146,7 +146,7 @@ class TestSinkInvocationLoader:
 
         with mock_session.begin() as session:
             loaded_transactions = session.scalars(
-                select(SinkingTx).order_by(SinkingTx.paging_token.asc())
+                select(SinkingTx).order_by(SinkingTx.toid.asc())
             ).all()
             assert len(loaded_transactions) == 23
             
@@ -158,7 +158,7 @@ class TestSinkInvocationLoader:
                     # is the created_at time in accordance with the paging token?
                     assert tx.created_at >= prev_tx.created_at
                     # is each paging token unique?
-                    assert tx.paging_token != prev_tx.paging_token
+                    assert tx.toid != prev_tx.toid
 
                 prev_tx = tx
                 cumulative_amount += tx.carbon_amount

@@ -31,7 +31,7 @@ def load_distribution_txs(cursor: int=settings.FIRST_DIST_CURSOR) -> int:
                     sender=payment['from'],
                     recipient=payment['to'],
                     carbon_amount=Decimal(payment['amount']),
-                    paging_token=payment['paging_token'],
+                    toid=payment['paging_token'],
                 )
             )
         
