@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.12.3](https://github.com/stellarcarbon/sc-audit/compare/v0.12.2...v0.12.3) (2025-11-11)
+
+
+### Dependencies
+
+* bump pypa/gh-action-pypi-publish ([dc39f13](https://github.com/stellarcarbon/sc-audit/commit/dc39f13adc9c5ead0a33e19dae69159b9cbac8c4))
+
 ## [0.12.2](https://github.com/stellarcarbon/sc-audit/compare/v0.12.1...v0.12.2) (2025-11-10)
 
 
