@@ -216,17 +216,17 @@ class TestSinkStatusView:
         assert txdf.statuses.iloc[7][0]['finalized'] == False
 
     def test_sink_status_is_contract_call(self, mock_session_with_associations):
-        txdf = sink_status_view.view_sinking_txs(contract_call=True)
+        txdf = sink_status_view.view_sinking_txs(cursor=1, contract_call=True, order='asc')
         assert len(txdf) == 10
         assert txdf.carbon_amount.sum() == Decimal('1.316')
         assert (txdf.contract_id.unique() == [
+            'CAQWMP2EKO4SQ7VQTIYCNUXASDY7WI5EKEGJXMS7W6AICI6YXPNAB4J5',
             'CBW45IZ3W5BBDIKTIXQEAOR3TAHPCFIAVQMD4NO2YPX2FA4LKGLJLWYL', 
-            'CAQWMP2EKO4SQ7VQTIYCNUXASDY7WI5EKEGJXMS7W6AICI6YXPNAB4J5'
         ]).all()
         assert not txdf.contract_id.isnull().any()
 
     def test_sink_status_not_contract_call(self, mock_session_with_associations):
-        txdf = sink_status_view.view_sinking_txs(contract_call=False)
+        txdf = sink_status_view.view_sinking_txs(cursor=1, contract_call=False, order='asc')
         assert len(txdf) == 20
         assert txdf.statuses.map(add_amount_filled).sum() == Decimal('23')
         assert txdf.carbon_amount.sum() == Decimal('26.298')
