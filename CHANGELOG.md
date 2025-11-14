@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.13.1](https://github.com/stellarcarbon/sc-audit/compare/v0.13.0...v0.13.1) (2025-11-14)
+
+
+### Bug Fixes
+
+* gracefully handle sorocarbon memos longer than 64 bytes ([8f71904](https://github.com/stellarcarbon/sc-audit/commit/8f71904fa0b3e9ba922d42c65fcd598a757f9258))
+
 ## [0.13.0](https://github.com/stellarcarbon/sc-audit/compare/v0.12.3...v0.13.0) (2025-11-11)
 
 

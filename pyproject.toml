@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "sc-audit"
-version = "0.13.0"
+version = "0.13.1"
 description = "Stellarcarbon database with monitoring and audit functionality"
 authors = ["Alex Olieman <alex@olieman.net>"]
 license = "MIT"
