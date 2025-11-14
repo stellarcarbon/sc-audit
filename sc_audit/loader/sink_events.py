@@ -11,6 +11,7 @@ from stellar_sdk.sep.toid import TOID
 from sc_audit.config import settings
 from sc_audit.db_schema.impact_project import get_vcs_project
 from sc_audit.db_schema.sink import SinkingTx
+from sc_audit.loader.utils import truncate_sorocarbon_memo
 from sc_audit.session_manager import Session
 from sc_audit.sources.sink_events import get_sink_events
 
@@ -45,6 +46,9 @@ def load_sink_events(cursor: int=settings.FIRST_SINK_CURSOR) -> int:
             # with the TOID (paging_token). Not done yet, because it requires a data migration.
 
             memo = sink_event.memo_text or None
+            if memo:
+                memo = truncate_sorocarbon_memo(memo)
+                
             session.add(
                 SinkingTx(
                     hash=sink_event.transaction,

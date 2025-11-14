@@ -59,7 +59,7 @@ def get_items() -> list[SinkInvocation]:
         recipient='GC53JCXZHW3SVNRE4CT6XFP46WX4ACFQU32P4PR3CU43OB7AKKMFXZ6Y',
         amount=4444444,
         project_id='VCS1360',
-        memo_text='tri',
+        memo_text='tri testing a memo that is longer than 64 bytes 🏠 truncated | this will be sliced off',
         processed_at=dt.datetime(2025, 8, 24, 12, 30, 34, 920249, tzinfo=gmt_zoneinfo),
         schema_name='carbon_sink_v1',
         successful=True,

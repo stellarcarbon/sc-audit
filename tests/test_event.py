@@ -119,7 +119,7 @@ class TestSinkEventLoader:
                 'early support',
                 'offset tokens',
                 'gift',
-                'testing'
+                'testing a memo that is longer than 64 bytes 🏠🏠 truncated |'
             ]
 
     def test_load_sink_txs_and_events(self, mock_http, mock_session):

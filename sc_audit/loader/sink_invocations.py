@@ -7,6 +7,7 @@ Author: Alex Olieman <https://keybase.io/alioli>
 from sc_audit.config import settings
 from sc_audit.db_schema.sink import SinkingTx
 from sc_audit.loader.sink_events import try_project_id
+from sc_audit.loader.utils import truncate_sorocarbon_memo
 from sc_audit.session_manager import Session
 from sc_audit.sources.sink_invocations import InvocationSource
 
@@ -24,6 +25,9 @@ def load_sink_invocations(cursor: int=settings.FIRST_SINK_CURSOR) -> int:
         for sink_invoke in InvocationSource.get_sink_invocations(cursor):
             vcs_project_id = try_project_id(sink_invoke.project_id)
             memo = sink_invoke.memo_text or None
+            if memo:
+                memo = truncate_sorocarbon_memo(memo)
+                
             session.add(
                 SinkingTx(
                     hash=sink_invoke.tx_hash,

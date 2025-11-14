@@ -86,7 +86,7 @@ class TestSinkInvocationSource:
         assert tri.tx_hash == "e7d68ab7c57e38e2e103b81926db97731eb9ca861de5282eaf1bcc97e1605deb"
         assert tri.amount == 4444444
         assert tri.ton_amount == Decimal("0.444")
-        assert tri.memo_text == "tri"
+        assert tri.memo_text == "tri testing a memo that is longer than 64 bytes 🏠 truncated | this will be sliced off"
 
     def test_returns_the_same_when_repeated(self):
         res_1 = InvocationSource.get_sink_invocations(cursor=0)
@@ -138,7 +138,9 @@ class TestSinkInvocationLoader:
             )
 
             memos = [tx.memo_value for tx in loaded_invocations]
-            assert memos == ["one", "two", "tri"]
+            assert memos == [
+                "one", "two", "tri testing a memo that is longer than 64 bytes 🏠 truncated |"
+            ]
 
     def test_load_sink_txs_and_invocations(self, mock_http, mock_session):
         sink_loader.load_sinking_txs(cursor=999)

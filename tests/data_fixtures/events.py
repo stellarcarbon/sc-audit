@@ -105,7 +105,7 @@ query_response = """
     "recipient": "GAN4FQZL5P7B7OGW4KMYA6B2V34W7E6C7NL7K4P6ZNNWQ6UZD6I7GABC",
     "amount": 109999,
     "project_id": "VCS1360",
-    "memo_text": "testing",
+    "memo_text": "testing a memo that is longer than 64 bytes 🏠🏠 truncated | this will be sliced off",
     "ledger": 50189018,
     "timestamp": 1717875054,
     "contract_id": "CBW45IZ3W5BBDIKTIXQEAOR3TAHPCFIAVQMD4NO2YPX2FA4LKGLJLWYL",

@@ -13,6 +13,9 @@ def parse_iso_datetime(iso_datetime: str) -> datetime.datetime:
 def decode_hash_memo(b64_hash_memo: str) -> str:
     return base64.b64decode(b64_hash_memo).hex()
 
+def truncate_sorocarbon_memo(text_memo: str) -> str:
+    return text_memo.encode()[:64].decode()
+
 
 class VcsSerialNumber(BaseModel):
     batch_number: int
