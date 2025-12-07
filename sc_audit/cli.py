@@ -29,6 +29,7 @@ from sc_audit.sources.sink_invocations import ObsrvrError
 from sc_audit.views.inventory import view_inventory
 from sc_audit.views.retirement import view_retirements
 from sc_audit.views.sink_status import view_sinking_txs
+from sc_audit.views.stats import view_yoy_analytics
 from sc_audit.views.utils import format_df
 
 
@@ -152,6 +153,13 @@ def cli_view_sink_status(
         contract_call=contract_call,
     )
     click.echo(format_df(txdf, format=format))
+
+
+@view.command(name="analytics", params=[view_format])
+def cli_view_yoy_analytics(format: str):
+    """View year-over-year analytics for sinking transactions"""
+    df = view_yoy_analytics()
+    click.echo(format_df(df, format=format))
 
 # LOADING
 
