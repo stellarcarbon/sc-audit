@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.14.0](https://github.com/stellarcarbon/sc-audit/compare/v0.13.1...v0.14.0) (2025-12-07)
+
+
+### Features
+
+* **cli:** add view analytics command ([3b9496e](https://github.com/stellarcarbon/sc-audit/commit/3b9496ef980acc105a1efbfb581964258dd644e8))
+* **stats:** add view for YoY metrics ([b2b1d54](https://github.com/stellarcarbon/sc-audit/commit/b2b1d54e5ffebc329cfc2684f36d752f2b551dea))
+
 ## [0.13.1](https://github.com/stellarcarbon/sc-audit/compare/v0.13.0...v0.13.1) (2025-11-14)
 
 
