@@ -231,6 +231,24 @@ def view_retirements(
 ) -> pd.DataFrame
 ```
 
+The `analytics` view provides year-over-year analytics for sinking transactions, aggregating metrics like monthly active users, transaction counts, volume in USD, and carbon sunk, with percentage changes.
+
+```text
+Usage: sc-audit view analytics [OPTIONS]
+
+  View year-over-year analytics for sinking transactions
+
+Options:
+  -f, --format [df|csv|json]  The output format for this view  [default: df]
+  --help                      Show this message and exit.
+```
+
+The Python API is located at `sc_audit.views.stats` and returns the analytics table as a Pandas DataFrame:
+
+```python
+def view_yoy_analytics() -> pd.DataFrame
+```
+
 ### Configuration
 
 There isn't much to configure in sc-audit. Several settings can be overriden by environment variables.
