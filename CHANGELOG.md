@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.14.1](https://github.com/stellarcarbon/sc-audit/compare/v0.14.0...v0.14.1) (2026-01-28)
+
+
+### Dependencies
+
+* bump to latest compatible ([3a5c2d5](https://github.com/stellarcarbon/sc-audit/commit/3a5c2d5021c962aa0871470d7224d77472178ed2))
+
 ## [0.14.0](https://github.com/stellarcarbon/sc-audit/compare/v0.13.1...v0.14.0) (2025-12-07)
 
 
