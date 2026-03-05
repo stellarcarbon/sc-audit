@@ -1,18 +1,24 @@
 on:
   push:
-    branches:
-      - main
-
-permissions:
-  contents: write
-  pull-requests: write
+    branches: [ "main" ]
 
 name: release-please
 
 jobs:
   release-please:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
     steps:
       - uses: googleapis/release-please-action@v4
         with:
           release-type: python
+
+  sbom:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read # for GitHub Dependency Graph API
+      id-token: write # for OIDC authentication to PG Atlas
+    steps:
+      - uses: SCF-Public-Goods-Maintenance/pg-atlas-sbom-action@0981ee36e88e3f973b01aa7f0ab9231116e4ab28
