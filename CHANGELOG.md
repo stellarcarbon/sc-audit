@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.14.2](https://github.com/stellarcarbon/sc-audit/compare/v0.14.1...v0.14.2) (2026-04-14)
+
+
+### Dependencies
+
+* **CI:** upgrade github actions ([665ec95](https://github.com/stellarcarbon/sc-audit/commit/665ec959c7267f692b9def9ffd9252edcadffdd1))
+
 ## [0.14.1](https://github.com/stellarcarbon/sc-audit/compare/v0.14.0...v0.14.1) (2026-01-28)
 
 
